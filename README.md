@@ -12,12 +12,14 @@ local submission is an official submission.
 ## Current status
 
 The source tree is the `0.1.0a3` source-only alpha release candidate; `0.1.0a1`
-remains the latest published alpha. On the current Apple Silicon Mac, both
-current course images have passed fresh offline VS Code preparation and attach
-checks plus companion, autotest, submission, finish, judge, and report
-workflows. COMP1521 uses the separately released `csetty-mips` dependency; no
-upstream mipsy binary or source is included in its course image. The alpha
-includes:
+remains the latest published alpha. Both current course images have passed
+fresh offline VS Code preparation and attach checks plus companion, autotest,
+submission, finish, judge, and report workflows on the current Apple Silicon
+Mac. Exact commit `bc9d47bb65ee246e488d3a14156c0965e530c754` also passed the
+complete native-Windows acceptance run on Windows 11 Pro for Workstations build
+26200 with Docker Desktop 4.85.0, WSL2, and VS Code 1.132.0. COMP1521 uses the
+separately released `csetty-mips` dependency; no upstream mipsy binary or source
+is included in its course image. The alpha includes:
 
 - COMP1511: 11 original questions, 100 points, DCC/GCC/Clang, arrays, linked
   lists, debugging, functions, and whole programs;
@@ -50,10 +52,13 @@ Compose/Dockerfile definitions, and integrity locks only. `prepare` builds
 separate interactive/judge images locally and records their exact IDs. Neither
 the project nor its CI publishes course images, registry layers, BuildKit
 caches, DCC binaries, Debian package archives, VS Code Server, or VSIX caches.
-This alpha is locally accepted on Apple Silicon; the checked-in CI matrix is the
-release evidence for host Python compatibility and runner-local multi-architecture
-source builds. A future stable release still requires broader native desktop,
-Docker Desktop/WSL2, and offline VS Code acceptance.
+This alpha is locally accepted on Apple Silicon and on the exact native-Windows
+host recorded in
+[`docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md`](docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md);
+the checked-in CI matrix is the release evidence for host Python compatibility
+and runner-local multi-architecture source builds. A future stable release still
+requires broader native desktop, Docker Desktop/WSL2, and offline VS Code
+acceptance across additional hosts.
 
 ## Install the alpha
 

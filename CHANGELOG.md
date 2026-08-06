@@ -48,6 +48,10 @@
   retains its loopback origin without exposing tokenized paths to external sites.
 - Rejects report publication while an attempt is still `CREATED`, closing the
   pre-reading report path, and bounds the interactive report-lock wait.
+- Records a complete exact-commit Windows 11 Pro for Workstations acceptance
+  pass with Docker Desktop/WSL2 and VS Code, including both full 75-question
+  banks, true read-only reading pages, explicit-finish and timed-expiry reports,
+  Windows process probes, and zero-delta cleanup.
 
 ## 0.1.0a1 — 2026-08-06
 
@@ -67,6 +71,7 @@ First source-only public alpha.
   file-level licence map.
 
 Known alpha limitation: full offline VS Code and Docker Desktop/WSL2 acceptance
-has only been completed locally on Apple Silicon. Public CI covers the host
-contract across Windows/Linux/macOS plus native Linux amd64/arm64 container
-acceptance; broader desktop acceptance remains a stable-release gate.
+has been completed locally on Apple Silicon and on one recorded Windows 11 Pro
+for Workstations build 26200 host. Public CI covers the host contract across
+Windows/Linux/macOS plus native Linux amd64/arm64 container acceptance; broader
+desktop acceptance across additional hosts remains a stable-release gate.
