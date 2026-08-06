@@ -644,6 +644,7 @@ class AttemptService:
         report = self.grade()
         attempt = self.store.get_attempt(self.attempt_id)
         _json_report, html_report = self._write_report_files(attempt, report)
+        self.store.mark_report_finalized(attempt.id, at=self.clock.now())
         opened = None if self.report_opener is None else self.report_opener(html_report)
         return report, html_report, opened
 

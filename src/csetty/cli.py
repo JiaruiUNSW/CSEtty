@@ -387,7 +387,7 @@ def _launch_working(
     ensure_supervisor(paths, attempt)
     companion = launch_companion(paths, attempt, open_browser=open_companion_browser)
     if open_companion_browser:
-        print(f"Opened exam companion page: {companion.url}")
+        print(f"Exam companion page is ready (browser launch requested): {companion.url}")
     else:
         print(f"Exam companion page is ready: {companion.url}")
     if attempt.editor == "code":
@@ -471,13 +471,14 @@ def _start(args: argparse.Namespace) -> int:
             network=network,
             editor=args.editor,
             candidate_id=candidate_id,
+            skip_reading=bool(args.skip_reading),
             attempt_id=attempt_id,
         )
     except Exception:
         shutil.rmtree(attempt_root, ignore_errors=True)
         raise
     print(f"Attempt created: {attempt.id}")
-    should_read = pack.reading_time_seconds > 0 and not args.skip_reading
+    should_read = pack.reading_time_seconds > 0 and not attempt.skip_reading
     reading_page_open = False
     if should_read:
         def begin_reading() -> None:
@@ -517,13 +518,13 @@ def _resume(args: argparse.Namespace) -> int:
         if clock.now() < reading_end:
             companion = launch_companion(paths, attempt)
             reading_page_open = True
-            print(f"Opened read-only exam paper: {companion.url}")
+            print(f"Read-only exam paper is ready: {companion.url}")
             _reading(pack, ends_at=reading_end, clock=clock)
         else:
             reading_page_open = False
         attempt = _enter_working(attempt=attempt, pack=pack, store=store, anchor=reading_end)
     elif attempt.state is AttemptState.CREATED:
-        if pack.reading_time_seconds > 0:
+        if pack.reading_time_seconds > 0 and not attempt.skip_reading:
             def begin_reading() -> None:
                 nonlocal attempt
                 attempt = store.transition(attempt.id, AttemptState.READING, at=clock.now())
@@ -587,7 +588,7 @@ def _page(args: argparse.Namespace) -> int:
     paths, store, _runtime, _vscode = _components()
     attempt = store.resolve_attempt(args.attempt_id)
     companion = launch_companion(paths, attempt)
-    print(f"Opened exam companion page: {companion.url}")
+    print(f"Exam companion page is ready (browser launch requested): {companion.url}")
     return 0
 
 
@@ -641,6 +642,8 @@ def _report(args: argparse.Namespace) -> int:
         object_reader=store.object_bytes,
     )
     json_path, html_path = write_reports(paths.reports, attempt.id, document)
+    if attempt.state in {AttemptState.FINISHED, AttemptState.EXPIRED}:
+        store.mark_report_finalized(attempt.id, at=clock.now())
     if args.json:
         print(json.dumps(document, indent=2, sort_keys=True))
     else:

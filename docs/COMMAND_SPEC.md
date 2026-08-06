@@ -55,7 +55,9 @@ refused rather than overwriting content in a non-empty new bind directory.
 
 `resume`, `code`, and `page` accept a full attempt UUID or an unambiguous prefix.
 With no argument, they select the most recent active attempt. `page` starts or
-reuses the loopback-only exam companion; it does not restart the attempt.
+reuses the loopback-only exam companion; it does not restart the attempt. A
+browser-launch failure is fatal only when it gates the initial reading
+transition. Otherwise the command continues and prints the ready loopback URL.
 `report` also accepts a full UUID or unambiguous prefix; with no argument, it
 selects the newest attempt, including a finished or expired attempt.
 
@@ -109,7 +111,9 @@ check
   local HTML path plus the matching host `csetty report` command. Browser launch
   failure never invalidates the completed attempt or generated reports. The
   HTML report uses the same packaged COMP1511/COMP1521 course theme as the live
-  paper; it does not depend on remote CSS or JavaScript.
+  paper; it does not depend on remote CSS or JavaScript. The companion declares
+  the report ready only after the grade and both atomic report writes have been
+  recorded as finalized.
 
 Closing Bash or VS Code is not finish. A timed deadline continues.
 
@@ -237,7 +241,10 @@ bundled resources. There is no workspace or editable container on which to run
 a command. The reading anchor is recorded only after the companion is healthy
 and the host browser-launch call succeeds. If that call raises or explicitly
 reports failure, the attempt remains `CREATED`, consumes no reading time, and
-can be retried with `csetty resume ATTEMPT_ID`. The live countdown uses a
+can be retried with `csetty resume ATTEMPT_ID`. While `CREATED`, the companion
+serves a waiting page and rejects question and resource routes. A practice
+attempt's explicit `--skip-reading` choice is stored with the attempt and remains
+in force if that `CREATED` attempt is resumed. The live countdown uses a
 monotonic clock. The reading anchor and
 working deadline are persisted as UTC timestamps so a restart cannot grant more
 time. The open page detects the transition to working state and refreshes

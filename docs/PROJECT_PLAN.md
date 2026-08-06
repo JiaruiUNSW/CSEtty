@@ -80,7 +80,8 @@ The complete container command contract is maintained in `COMMAND_SPEC.md`.
   plus `ABORTED` for controlled test cleanup.
 - Persisted UTC deadlines and monotonic live reading countdown.
 - Content-addressed objects, atomic writes, submission sequence history, test
-  runs, grades, events, leases, and deadline-warning records.
+  runs, grades, report-finalization markers, events, leases, and deadline-warning
+  records.
 - Weighted all-or-nothing groups, question pass points, cross-question hurdles,
   and explicit not-automatically-assessed remainder.
 
@@ -187,6 +188,8 @@ warning. Only `yes` proceeds. The simulation password is never retained.
 After acceptance, the companion opens every complete prompt as a read-only
 long-form paper. The workspace, interactive container, and VS Code are created
 only after reading ends; the existing page then refreshes to working state.
+Before the reading anchor is recorded, `CREATED` exposes only a waiting page and
+the persisted practice skip-reading flag governs recovery.
 Live paper and final report share the same packaged CSE course-exam theme, with
 the COMP1511 green or COMP1521 teal profile variant selected from attempt
 metadata. Exam mode is always timed and offline. Practice is untimed by default

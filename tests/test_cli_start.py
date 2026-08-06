@@ -57,6 +57,7 @@ def test_start_records_an_attempt_owned_pack_snapshot(
     assert cli._start(args) == 0
 
     (attempt,) = store.list_attempts()
+    assert attempt.skip_reading is True
     frozen_root = paths.attempts / attempt.id / "pack"
     assert Path(attempt.pack_path) == frozen_root
     assert frozen_root.is_dir()
@@ -207,6 +208,66 @@ def test_resume_created_attempt_runs_reading_before_working(
     ]
 
 
+def test_resume_created_attempt_preserves_skip_reading_choice(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source_root = make_pack(tmp_path / "source-pack")
+    manifest = source_root / "pack.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            "reading_time_seconds = 0", "reading_time_seconds = 600"
+        ),
+        encoding="utf-8",
+    )
+    pack = load_pack(source_root)
+    paths = AppPaths.discover(tmp_path / "state")
+    store = Store(paths)
+    attempt = store.create_attempt(
+        pack_id=pack.id,
+        pack_version=pack.version,
+        pack_path=pack.root,
+        pack_digest=pack.digest,
+        course=pack.course,
+        profile=pack.profile,
+        mode=AttemptMode.PRACTICE,
+        timed=False,
+        created_at=datetime.now(UTC),
+        workspace_kind=WorkspaceKind.VOLUME,
+        workspace_ref="skip-reading-resume-volume",
+        image=pack.environment.image,
+        editor="terminal",
+        skip_reading=True,
+    )
+    events: list[tuple[AttemptState, bool]] = []
+
+    monkeypatch.setattr(cli, "_components", lambda: (paths, store, RuntimeStub(), object()))
+    monkeypatch.setattr(
+        cli,
+        "_reading",
+        lambda *_args, **_kwargs: pytest.fail("reading must remain skipped"),
+    )
+    monkeypatch.setattr(
+        cli,
+        "launch_companion",
+        lambda *_args, **_kwargs: pytest.fail("the reading page must not launch"),
+    )
+
+    def launch_working(**kwargs: object) -> int:
+        current = kwargs["attempt"]
+        events.append(
+            (
+                current.state,  # type: ignore[union-attr]
+                bool(kwargs["open_companion_browser"]),
+            )
+        )
+        return 0
+
+    monkeypatch.setattr(cli, "_launch_working", launch_working)
+
+    assert cli._resume(cli._parser().parse_args(["resume", attempt.id])) == 0
+    assert events == [(AttemptState.WORKING, True)]
+
+
 def test_report_command_defaults_to_the_latest_attempt() -> None:
     args = cli._parser().parse_args(["report"])
     assert args.attempt_id is None
@@ -259,6 +320,9 @@ def test_report_without_id_renders_the_newest_finished_attempt(
     output = capsys.readouterr().out
     assert attempt.id in output
     assert (paths.reports / f"{attempt.id}.html").is_file()
+    grade = store.get_grade(attempt.id)
+    assert grade is not None
+    assert grade["report_finalized_at"] is not None
 
 
 def test_working_launch_opens_isolated_code_and_companion(

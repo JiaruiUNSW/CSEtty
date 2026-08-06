@@ -76,9 +76,53 @@ def test_attempt_provenance_round_trip(tmp_path: Path) -> None:
         workspace_ref="csetty-provenance-volume",
         image="csetty/comp1511:dev",
         provenance={"image": {"id": "sha256:abc"}, "tools": {"dcc": {"version": "2.37"}}},
+        skip_reading=True,
     )
     assert attempt.provenance["image"]["id"] == "sha256:abc"
+    assert attempt.skip_reading is True
     assert store.get_attempt(attempt.id).provenance["tools"]["dcc"]["version"] == "2.37"
+    assert store.get_attempt(attempt.id).skip_reading is True
+
+
+def test_recording_a_new_grade_invalidates_report_finalization(tmp_path: Path) -> None:
+    store = make_store(tmp_path)
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    attempt = create_working_attempt(store, now)
+    attempt = store.transition(
+        attempt.id,
+        AttemptState.FINISHED,
+        at=now,
+        finish_reason="student",
+    )
+    grade = {
+        "score": {"earned": 0, "automatically_available": 0, "total": 0},
+        "questions": [],
+        "hurdles": [],
+    }
+    store.record_grade(
+        attempt_id=attempt.id,
+        created_at=now,
+        earned="0",
+        available="0",
+        total="0",
+        report=grade,
+    )
+    store.mark_report_finalized(attempt.id, at=now)
+    finalized = store.get_grade(attempt.id)
+    assert finalized is not None
+    assert finalized["report_finalized_at"] is not None
+
+    store.record_grade(
+        attempt_id=attempt.id,
+        created_at=now + timedelta(seconds=1),
+        earned="0",
+        available="0",
+        total="0",
+        report=grade,
+    )
+    invalidated = store.get_grade(attempt.id)
+    assert invalidated is not None
+    assert invalidated["report_finalized_at"] is None
 
 
 def test_attempt_can_use_a_preallocated_canonical_id(tmp_path: Path) -> None:

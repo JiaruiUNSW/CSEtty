@@ -48,7 +48,7 @@ def _application(
         'kind = "c_program"\nprompt = "paper/q1.md"\n'
         'difficulty = 2\ntrack = "normal"\ntags = ["arrays-1d"]',
     )
-    if state is AttemptState.READING:
+    if state in {AttemptState.CREATED, AttemptState.READING}:
         manifest_text = manifest_text.replace(
             "reading_time_seconds = 0", "reading_time_seconds = 600"
         )
@@ -81,7 +81,7 @@ def _application(
     )
     if state is AttemptState.READING:
         attempt = store.transition(attempt.id, AttemptState.READING, at=now)
-    else:
+    elif state is not AttemptState.CREATED:
         attempt = store.transition(
             attempt.id,
             AttemptState.WORKING,
@@ -98,6 +98,27 @@ def _application(
         reopen_callback=lambda: "VS Code reopen requested.",
     )
     return application, store, attempt.id
+
+
+def _mark_report_finalized(store: Store, attempt_id: str) -> None:
+    now = datetime.now(UTC)
+    store.record_grade(
+        attempt_id=attempt_id,
+        created_at=now,
+        earned="0",
+        available="0",
+        total="0",
+        report={},
+    )
+    store.mark_report_finalized(attempt_id, at=now)
+
+
+def _write_report_pair(store: Store, attempt_id: str, *, title: str) -> Path:
+    report = store.paths.reports / f"{attempt_id}.html"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(f"<!doctype html><title>{title}</title>", encoding="utf-8")
+    (store.paths.reports / f"{attempt_id}.json").write_text("{}\n", encoding="utf-8")
+    return report
 
 
 def test_companion_overview_and_question_are_pack_driven(tmp_path: Path) -> None:
@@ -212,6 +233,31 @@ def test_companion_does_not_start_reading_when_browser_open_fails(
     assert events == []
 
 
+def test_companion_browser_failure_is_nonfatal_without_reading_callback(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _application_instance, store, attempt_id = _application(tmp_path)
+    attempt = store.get_attempt(attempt_id)
+    expected = CompanionInfo(
+        attempt_id=attempt_id,
+        pid=os.getpid(),
+        port=32123,
+        token="t" * 43,
+        started_at=datetime.now(UTC).isoformat(),
+    )
+    monkeypatch.setattr(companion_module, "_read_info", lambda *_args: expected)
+    monkeypatch.setattr(companion_module, "_healthy", lambda _info: True)
+
+    assert (
+        launch_companion(
+            store.paths,
+            attempt,
+            browser_open=lambda _url: False,
+        )
+        == expected
+    )
+
+
 def test_companion_process_creation_failure_removes_startup_lock(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -271,6 +317,21 @@ def test_reading_companion_shows_full_prompt_without_editor_or_external_resource
     assert 0 <= status["remaining_seconds"] <= 600
 
 
+def test_created_companion_withholds_paper_and_resource_routes(tmp_path: Path) -> None:
+    application, _store, _attempt_id = _application(tmp_path, state=AttemptState.CREATED)
+    overview = application.render_overview()
+
+    assert "paper remains hidden" in overview
+    assert "reading clock has not started" in overview
+    assert "Detailed question" not in overview
+    assert "Course home and complete index" not in overview
+    assert "Questions</summary>" not in overview
+    with pytest.raises(StateError, match="paper is not available yet"):
+        application.render_question("q1")
+    with pytest.raises(StateError, match="paper is not available yet"):
+        application.render_resource(0)
+
+
 def test_comp1521_companion_uses_the_teal_course_variant(tmp_path: Path) -> None:
     application, _store, _attempt_id = _application(tmp_path, profile="comp1521")
     overview = application.render_overview()
@@ -320,9 +381,8 @@ def test_finished_companion_serves_and_advertises_the_durable_report(tmp_path: P
         at=datetime.now(UTC),
         finish_reason="student",
     )
-    report = store.paths.reports / f"{attempt_id}.html"
-    report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text("<!doctype html><title>Final report</title>", encoding="utf-8")
+    _write_report_pair(store, attempt_id, title="Final report")
+    _mark_report_finalized(store, attempt_id)
 
     assert application.status_document()["report_ready"] is True
     assert application.render_report() == "<!doctype html><title>Final report</title>"
@@ -339,9 +399,8 @@ def test_report_opener_uses_the_live_companion_http_route(tmp_path: Path) -> Non
         at=datetime.now(UTC),
         finish_reason="student",
     )
-    report = store.paths.reports / f"{attempt_id}.html"
-    report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text("<!doctype html><title>Final report</title>", encoding="utf-8")
+    report = _write_report_pair(store, attempt_id, title="Final report")
+    _mark_report_finalized(store, attempt_id)
 
     try:
         server = CompanionHTTPServer(("127.0.0.1", 0), CompanionHandler)
@@ -380,6 +439,33 @@ def test_report_opener_uses_the_live_companion_http_route(tmp_path: Path) -> Non
         server.shutdown()
         server.server_close()
         worker.join(timeout=2)
+
+
+def test_stale_working_report_is_not_ready_until_finalization_completes(
+    tmp_path: Path,
+) -> None:
+    application, store, attempt_id = _application(tmp_path)
+    _write_report_pair(store, attempt_id, title="Working report")
+    store.transition(
+        attempt_id,
+        AttemptState.FINISHED,
+        at=datetime.now(UTC),
+        finish_reason="student",
+    )
+
+    assert application.report_ready() is False
+    now = datetime.now(UTC)
+    store.record_grade(
+        attempt_id=attempt_id,
+        created_at=now,
+        earned="0",
+        available="0",
+        total="0",
+        report={},
+    )
+    assert application.report_ready() is False
+    store.mark_report_finalized(attempt_id, at=now)
+    assert application.report_ready() is True
 
 
 def test_finished_companion_rejects_reopen_before_callback(tmp_path: Path) -> None:

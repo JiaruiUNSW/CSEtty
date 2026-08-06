@@ -27,6 +27,12 @@
   select the newest attempt when no attempt ID is supplied.
 - Uses DCC's supported Valgrind runtime automatically on Docker Desktop WSL2,
   where independently compiled ASan binaries can terminate nondeterministically.
+- Keeps a browser-launch failure nonfatal after reading has already started,
+  persists the practice `--skip-reading` choice across `CREATED` recovery, and
+  withholds every question and resource while a launch is still `CREATED`.
+- Publishes companion report readiness only after the final grade and both
+  durable report files have completed, preventing a pre-finish report from
+  being redirected as the final result.
 
 ## 0.1.0a1 — 2026-08-06
 

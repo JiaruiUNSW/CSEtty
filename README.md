@@ -188,12 +188,15 @@ During reading time, the companion page opens in the host browser with every
 complete question prompt and only the resources explicitly permitted by the
 pack. The persisted reading clock begins only after the companion is healthy
 and the browser-launch call succeeds; a reported launch failure leaves the
-attempt resumable in `CREATED` state without consuming reading time. No editable
-container, workspace, or VS Code window exists yet. When
+attempt resumable in `CREATED` state without consuming reading time. That state
+serves only a waiting page: complete questions and resources remain unavailable
+until a successful `resume` starts the reading clock. No editable container,
+workspace, or VS Code window exists yet. When
 reading time ends, the same page updates to working state and the starter
 workspace, supervised container, and VS Code are opened. A practice attempt,
 including one started with `--skip-reading`, deliberately does not show the exam
-sign-in gate.
+sign-in gate; the skip choice is persisted if a `CREATED` attempt must be
+resumed.
 
 The live paper is a single navigable long-form exam page rather than a
 question-name dashboard. Its offline visual shell follows the public CSE course
@@ -268,10 +271,14 @@ English warning to every open exam terminal, including VS Code integrated
 terminals. Every report is prominently labelled as a local estimate.
 After `exam finish` or automatic timed expiry, the supervisor grades the latest
 accepted submissions, writes both report formats, and opens the HTML report in
-the host's default browser. If the browser cannot be launched, the absolute
-report path remains in the terminal or supervisor log and `csetty report
+the host's default browser. The companion redirects only after the grade and
+both atomic report writes are durably marked complete, so an earlier working
+report cannot be mistaken for the final result. If the browser cannot be
+launched, the absolute report path remains in the terminal or supervisor log and `csetty report
 [ATTEMPT_ID]` remains available. Without an ID, `report` selects the newest
 attempt; every successful `start` also prints the full ID before reading begins.
+Outside the initial reading transition, a browser-launch failure is nonfatal and
+the ready loopback URL is printed so the timed workspace can still open.
 
 ## Original question banks
 

@@ -121,11 +121,13 @@ def launch_companion(
             try:
                 opened = browser_open(info.url)
             except Exception as exc:
-                raise ToolUnavailableError(
-                    "exam paper is ready, but the browser failed to open; "
-                    f"reading time has not started: {info.url}"
-                ) from exc
-            if opened is False:
+                if ready_callback is not None:
+                    raise ToolUnavailableError(
+                        "exam paper is ready, but the browser failed to open; "
+                        f"reading time has not started: {info.url}"
+                    ) from exc
+                opened = False
+            if opened is False and ready_callback is not None:
                 raise ToolUnavailableError(
                     "exam paper is ready, but the browser could not be opened "
                     f"automatically; reading time has not started: {info.url}"
@@ -290,7 +292,17 @@ class CompanionApplication:
     def report_ready(self, attempt: Attempt | None = None) -> bool:
         current = attempt or self.store.get_attempt(self.attempt_id)
         report = self.paths.reports / f"{self.attempt_id}.html"
-        return current.state.terminal and report.is_file() and not report.is_symlink()
+        json_report = self.paths.reports / f"{self.attempt_id}.json"
+        grade = self.store.get_grade(self.attempt_id)
+        return (
+            current.state.terminal
+            and grade is not None
+            and grade.get("report_finalized_at") is not None
+            and json_report.is_file()
+            and not json_report.is_symlink()
+            and report.is_file()
+            and not report.is_symlink()
+        )
 
     def render_report(self) -> str:
         attempt = self.store.get_attempt(self.attempt_id)
@@ -337,6 +349,13 @@ class CompanionApplication:
             "</details>"
         )
 
+    @staticmethod
+    def _require_paper_available(attempt: Attempt) -> None:
+        if attempt.state is AttemptState.CREATED:
+            raise StateError(
+                "reading time has not started; the exam paper is not available yet"
+            )
+
     def _layout(
         self,
         *,
@@ -358,13 +377,18 @@ class CompanionApplication:
             )
         countdown_end = self._countdown_end(attempt, pack)
         deadline = "" if countdown_end is None else countdown_end.isoformat()
+        created = attempt.state is AttemptState.CREATED
         reading = attempt.state is AttemptState.READING
-        timer_label = "Reading time remaining" if reading else "Remaining"
-        surface_label = (
-            "Local CSEExamTTY read-only exam paper"
-            if reading
-            else "Local CSEExamTTY practice examination"
-        )
+        if created:
+            timer = "Waiting"
+            timer_label = "Reading not started"
+            surface_label = "Local CSEExamTTY exam launch"
+        elif reading:
+            timer_label = "Reading time remaining"
+            surface_label = "Local CSEExamTTY read-only exam paper"
+        else:
+            timer_label = "Remaining"
+            surface_label = "Local CSEExamTTY practice examination"
         status_url = f"{self.base_path}/status.json"
         report_url = f"{self.base_path}/report"
         theme_class = course_theme_class(pack.profile, pack.course)
@@ -372,11 +396,19 @@ class CompanionApplication:
         navbar = course_navbar(
             course=pack.course,
             home_url=f"{self.base_path}/",
-            links=self._navigation(pack, active),
+            links="" if created else self._navigation(pack, active),
             status=(
                 f'<span class="phase-badge">{html.escape(attempt.state.value)}</span>'
                 f'<span>{timer_label}: <span class="timer" data-countdown>{timer}</span></span>'
             ),
+        )
+        hero_summary = (
+            '<p class="lead">The paper remains hidden until reading time starts.</p>'
+            if created
+            else (
+                f'<p class="lead">{len(pack.questions)} questions — {total_marks} marks<br>'
+                f'{html.escape(timer_label)}: <span data-countdown>{timer}</span></p>'
+            )
         )
         return f"""<!doctype html>
 <html lang="en">
@@ -403,7 +435,7 @@ class CompanionApplication:
 <header class="exam-hero">
 <p class="text-muted text-uppercase"><strong>{surface_label}</strong></p>
 <h1>{html.escape(pack.title)}</h1>
-<p class="lead">{len(pack.questions)} questions — {total_marks} marks<br>{html.escape(timer_label)}: <span data-countdown>{timer}</span></p>
+{hero_summary}
 <p class="text-muted">Candidate {html.escape(attempt.candidate_id or 'practice user')} · not made or managed by UNSW</p>
 </header>
 {message_html}{content}
@@ -477,6 +509,23 @@ class CompanionApplication:
 
     def render_overview(self, *, message: str | None = None, error: bool = False) -> str:
         attempt, pack = self.attempt_and_pack()
+        if attempt.state is AttemptState.CREATED:
+            content = """
+<section class="exam-section">
+<header class="section-heading"><h2>Waiting to start reading time</h2></header>
+<div class="alert alert-course">
+<p>The browser page is ready, but the paper remains hidden and the reading clock has not started.</p>
+<p>Return to the terminal and run <code>csetty resume</code> to retry the browser launch and begin reading.</p>
+</div>
+</section>"""
+            return self._layout(
+                attempt=attempt,
+                pack=pack,
+                title="Exam launch",
+                content=content,
+                message=message,
+                error=error,
+            )
         latest = {
             submission["question_id"]: submission
             for submission in self.store.list_submissions(attempt.id)
@@ -612,6 +661,7 @@ class CompanionApplication:
 
     def render_question(self, question_id: str) -> str:
         attempt, pack = self.attempt_and_pack()
+        self._require_paper_available(attempt)
         question = pack.question(question_id)
         metadata = (
             f'<span class="badge">{html.escape(question.kind)}</span>'
@@ -644,6 +694,7 @@ class CompanionApplication:
 
     def render_resource(self, index: int) -> str:
         attempt, pack = self.attempt_and_pack()
+        self._require_paper_available(attempt)
         if index < 0 or index >= len(pack.resources):
             raise ValidationError("unknown local resource")
         resource = pack.resources[index]

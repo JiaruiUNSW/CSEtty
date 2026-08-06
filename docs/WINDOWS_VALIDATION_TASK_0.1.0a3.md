@@ -20,7 +20,12 @@ The validation must exercise the visible defects addressed by the candidate:
 3. the attempt ID is printed and recoverable;
 4. COMP1511 and COMP1521 live/report pages use their consistent course themes;
 5. explicit finish automatically generates and opens the report; and
-6. timed expiry automatically generates and opens the report.
+6. timed expiry automatically generates and opens the report;
+7. a `CREATED` recovery URL reveals neither questions nor resources;
+8. a non-reading browser-launch failure does not strand a running attempt;
+9. a practice `--skip-reading` attempt preserves that choice across recovery;
+   and
+10. a report created while working cannot trigger the final-report redirect.
 
 ## 2. Target and boundaries
 

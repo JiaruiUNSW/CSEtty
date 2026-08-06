@@ -11,7 +11,9 @@ and the pack's explicitly permitted local resources, but it does not create an
 editable workspace or container and does not offer an editor control. The
 reading clock is anchored only after the companion is healthy and the browser
 launch succeeds; a failed launch leaves the attempt in resumable `CREATED`
-state without deducting reading time. When the
+state without deducting reading time. In `CREATED`, the companion exposes only a
+waiting page and rejects all question and resource routes, so its recovery URL
+cannot reveal the paper before the clock starts. When the
 working period begins, the page automatically refreshes to working state while
 CSEExamTTY starts the supervised interactive container and opens the isolated
 VS Code profile. On explicit finish or timed expiry, the supervisor generates
@@ -19,6 +21,9 @@ the final reports, keeps the companion service alive as an authenticated report
 viewer, and redirects the existing browser page to the final report. CSEExamTTY
 also asks the host to open that HTTP report URL, with the generated local HTML
 file retained as a fallback when the companion is unavailable.
+The redirect and **Open final report** control remain pending until a persisted
+finalization marker confirms the grade plus JSON and HTML writes completed; an
+HTML report generated while working is never treated as final.
 
 The page can be reopened without changing the attempt:
 

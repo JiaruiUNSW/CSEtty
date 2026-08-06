@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS attempts (
     container_name TEXT NOT NULL UNIQUE,
     session_token TEXT NOT NULL,
     network TEXT NOT NULL DEFAULT 'none',
-    editor TEXT NOT NULL DEFAULT 'code'
+    editor TEXT NOT NULL DEFAULT 'code',
+    skip_reading INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS submissions (
@@ -100,7 +101,8 @@ CREATE TABLE IF NOT EXISTS grades (
     earned TEXT NOT NULL,
     available TEXT NOT NULL,
     total TEXT NOT NULL,
-    report_json TEXT NOT NULL
+    report_json TEXT NOT NULL,
+    report_finalized_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS events (
@@ -186,6 +188,16 @@ class Store:
                 )
             if "candidate_id" not in columns:
                 connection.execute("ALTER TABLE attempts ADD COLUMN candidate_id TEXT")
+            if "skip_reading" not in columns:
+                connection.execute(
+                    "ALTER TABLE attempts ADD COLUMN skip_reading INTEGER NOT NULL DEFAULT 0"
+                )
+            grade_columns = {
+                row["name"]
+                for row in connection.execute("PRAGMA table_info(grades)").fetchall()
+            }
+            if "report_finalized_at" not in grade_columns:
+                connection.execute("ALTER TABLE grades ADD COLUMN report_finalized_at TEXT")
             connection.execute(
                 "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(1, ?)",
                 (to_iso(datetime.now().astimezone()),),
@@ -200,6 +212,10 @@ class Store:
             )
             connection.execute(
                 "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(4, ?)",
+                (to_iso(datetime.now().astimezone()),),
+            )
+            connection.execute(
+                "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(5, ?)",
                 (to_iso(datetime.now().astimezone()),),
             )
 
@@ -245,6 +261,7 @@ class Store:
         network: str = "none",
         editor: str = "code",
         candidate_id: str | None = None,
+        skip_reading: bool = False,
         attempt_id: str | None = None,
     ) -> Attempt:
         if attempt_id is None:
@@ -277,8 +294,9 @@ class Store:
                 INSERT INTO attempts(
                     id, pack_id, pack_version, pack_path, pack_digest, course, profile,
                     candidate_id, mode, state, timed, created_at, workspace_kind, workspace_ref,
-                    image, provenance_json, container_name, session_token, network, editor
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    image, provenance_json, container_name, session_token, network, editor,
+                    skip_reading
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     attempt_id,
@@ -301,6 +319,7 @@ class Store:
                     session_token,
                     network,
                     editor,
+                    int(skip_reading),
                 ),
             )
             self._insert_event(
@@ -312,6 +331,7 @@ class Store:
                     "mode": mode.value,
                     "pack_digest": pack_digest,
                     "candidate_id": candidate_id,
+                    "skip_reading": skip_reading,
                 },
             )
         return self.get_attempt(attempt_id)
@@ -347,6 +367,7 @@ class Store:
             network=row["network"],
             editor=row["editor"],
             candidate_id=row["candidate_id"],
+            skip_reading=bool(row["skip_reading"]),
         )
 
     def get_attempt(self, attempt_id: str) -> Attempt:
@@ -647,7 +668,8 @@ class Store:
                     earned = excluded.earned,
                     available = excluded.available,
                     total = excluded.total,
-                    report_json = excluded.report_json
+                    report_json = excluded.report_json,
+                    report_finalized_at = NULL
                 """,
                 (
                     attempt_id,
@@ -658,6 +680,16 @@ class Store:
                     canonical_json(report).decode(),
                 ),
             )
+
+    def mark_report_finalized(self, attempt_id: str, *, at: datetime) -> None:
+        """Publish report readiness only after both durable report files exist."""
+        with self.transaction(immediate=True) as connection:
+            cursor = connection.execute(
+                "UPDATE grades SET report_finalized_at = ? WHERE attempt_id = ?",
+                (to_iso(at), attempt_id),
+            )
+            if cursor.rowcount != 1:
+                raise StateError("a report cannot be finalized before its grade is recorded")
 
     def get_grade(self, attempt_id: str) -> dict[str, Any] | None:
         with self._connect() as connection:

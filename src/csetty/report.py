@@ -314,6 +314,7 @@ def report_document(
             "workspace_kind": attempt.workspace_kind.value,
             "image": attempt.image,
             "timed": attempt.timed,
+            "skip_reading": attempt.skip_reading,
             "network": "on" if attempt.network == "bridge" else attempt.network,
             "editor": attempt.editor,
             "toolchain": dict(attempt.provenance),
