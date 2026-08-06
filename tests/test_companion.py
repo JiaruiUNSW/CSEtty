@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import threading
+import urllib.error
 import urllib.request
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -480,6 +481,49 @@ def test_report_opener_uses_the_live_companion_http_route(tmp_path: Path) -> Non
         assert opened == [expected]
         with urllib.request.urlopen(expected, timeout=2) as response:
             assert response.read().decode() == "<!doctype html><title>Final report</title>"
+    finally:
+        server.shutdown()
+        server.server_close()
+        worker.join(timeout=2)
+
+
+def test_browser_form_post_preserves_same_origin_and_reopens_code(tmp_path: Path) -> None:
+    application, _store, _attempt_id = _application(tmp_path)
+    try:
+        server = CompanionHTTPServer(("127.0.0.1", 0), CompanionHandler)
+    except PermissionError:
+        pytest.skip("loopback sockets are unavailable in this test sandbox")
+    server.daemon_threads = True
+    server.application = application
+    worker = threading.Thread(target=server.serve_forever, daemon=True)
+    worker.start()
+    port = int(server.server_address[1])
+    base_url = f"http://127.0.0.1:{port}/{application.token}"
+    try:
+        with urllib.request.urlopen(f"{base_url}/", timeout=2) as response:
+            overview = response.read().decode()
+            assert response.headers["Referrer-Policy"] == "same-origin"
+        assert '<meta name="referrer" content="same-origin">' in overview
+
+        rejected = urllib.request.Request(
+            f"{base_url}/reopen-code",
+            data=b"",
+            headers={"Origin": "null"},
+            method="POST",
+        )
+        with pytest.raises(urllib.error.HTTPError) as caught:
+            urllib.request.urlopen(rejected, timeout=2)
+        assert caught.value.code == 404
+
+        accepted = urllib.request.Request(
+            f"{base_url}/reopen-code",
+            data=b"",
+            headers={"Origin": f"http://127.0.0.1:{port}"},
+            method="POST",
+        )
+        with urllib.request.urlopen(accepted, timeout=2) as response:
+            assert response.status == 200
+            assert "VS Code reopen requested." in response.read().decode()
     finally:
         server.shutdown()
         server.server_close()

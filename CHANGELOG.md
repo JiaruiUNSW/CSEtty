@@ -44,6 +44,8 @@
   on Windows.
 - Accepts the live supervisor interpreter PID published by a Windows virtual
   environment instead of requiring it to match the redirector wrapper PID.
+- Keeps companion referrers same-origin so the browser's **Open VSC** form POST
+  retains its loopback origin without exposing tokenized paths to external sites.
 
 ## 0.1.0a1 — 2026-08-06
 

@@ -274,6 +274,7 @@ $regressionTests = @(
     'tests/test_companion.py::test_stale_working_report_is_not_ready_until_finalization_completes',
     'tests/test_storage.py::test_report_lock_serializes_another_process',
     'tests/test_storage.py::test_windows_process_liveness_probe_does_not_terminate_process',
+    'tests/test_companion.py::test_browser_form_post_preserves_same_origin_and_reopens_code',
     'tests/test_cli_start.py::test_working_report_cannot_overwrite_a_concurrent_final_report',
     'tests/test_attempt_service.py::test_failed_report_rewrite_hides_the_previous_final_report',
     'tests/test_attempt_service.py::test_aborted_attempt_report_remains_ungraded_and_nonfinal',
@@ -303,6 +304,8 @@ The log must prove these exact states:
   `FINISHED`; and
 - the native-Windows liveness probe observes a running process without
   terminating it and reports it dead only after normal termination; and
+- the browser document keeps referrers same-origin so **Open VSC** submits an
+  accepted same-origin POST while an opaque `Origin: null` remains rejected; and
 - a failed rewrite clears the old finalization marker instead of continuing to
   advertise stale report files; and
 - an `ABORTED` attempt remains ungraded and is never published as a final
