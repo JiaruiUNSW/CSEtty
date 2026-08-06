@@ -28,7 +28,7 @@ def _enable_windows_virtual_terminal(output: TextIO) -> None:
 
         msvcrt = importlib.import_module("msvcrt")
         handle = msvcrt.get_osfhandle(output.fileno())
-        kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
+        kernel32 = getattr(ctypes, "windll").kernel32  # noqa: B009
         mode = ctypes.c_uint32()
         if kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
             kernel32.SetConsoleMode(
