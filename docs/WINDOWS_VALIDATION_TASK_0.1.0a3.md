@@ -276,7 +276,8 @@ $regressionTests = @(
     'tests/test_storage.py::test_windows_process_liveness_probe_does_not_terminate_process',
     'tests/test_cli_start.py::test_working_report_cannot_overwrite_a_concurrent_final_report',
     'tests/test_attempt_service.py::test_failed_report_rewrite_hides_the_previous_final_report',
-    'tests/test_attempt_service.py::test_aborted_attempt_report_remains_ungraded_and_nonfinal'
+    'tests/test_attempt_service.py::test_aborted_attempt_report_remains_ungraded_and_nonfinal',
+    'tests/test_attempt_service.py::test_supervisor_accepts_live_lease_from_windows_venv_redirector'
 )
 & .\.venv\Scripts\pytest.exe -vv @regressionTests *> $regressionLog
 $regressionExit = $LASTEXITCODE
@@ -305,7 +306,9 @@ The log must prove these exact states:
 - a failed rewrite clears the old finalization marker instead of continuing to
   advertise stale report files; and
 - an `ABORTED` attempt remains ungraded and is never published as a final
-  `FINISHED`/`EXPIRED` report.
+  `FINISHED`/`EXPIRED` report; and
+- a live supervisor lease published by the interpreter behind a Windows venv
+  redirector is accepted even when its PID differs from the wrapper PID.
 
 ## 7. Create validation-only short packs
 

@@ -789,11 +789,19 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
         store.remove_lease(attempt.id, pid=pid)
 
 
+def _live_supervisor_pid(store: Store, attempt_id: str) -> int | None:
+    lease = store.lease(attempt_id)
+    if lease is None:
+        return None
+    pid = int(lease["pid"])
+    return pid if process_is_alive(pid) else None
+
+
 def ensure_supervisor(paths: AppPaths, attempt: Attempt) -> int:
     store = Store(paths)
-    lease = store.lease(attempt.id)
-    if lease is not None and process_is_alive(int(lease["pid"])):
-        return int(lease["pid"])
+    live_pid = _live_supervisor_pid(store, attempt.id)
+    if live_pid is not None:
+        return live_pid
     log_path = paths.attempts / attempt.id / "supervisor.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log = log_path.open("ab", buffering=0)
@@ -832,18 +840,18 @@ def ensure_supervisor(paths: AppPaths, attempt: Attempt) -> int:
     log.close()
     deadline = time.monotonic() + _SUPERVISOR_START_TIMEOUT_SECONDS
     while time.monotonic() < deadline:
-        lease = store.lease(attempt.id)
-        if lease is not None and int(lease["pid"]) == process.pid:
-            return process.pid
+        live_pid = _live_supervisor_pid(store, attempt.id)
+        if live_pid is not None:
+            return live_pid
         if process.poll() is not None:
             detail = log_path.read_text(encoding="utf-8", errors="replace")
             raise CSETTYError(f"supervisor failed to start: {detail.strip()}")
         time.sleep(0.05)
     # Check once more at the boundary before terminating a process that became
     # healthy during the final scheduler interval.
-    lease = store.lease(attempt.id)
-    if lease is not None and int(lease["pid"]) == process.pid:
-        return process.pid
+    live_pid = _live_supervisor_pid(store, attempt.id)
+    if live_pid is not None:
+        return live_pid
     if process.poll() is None:
         process.terminate()
         try:

@@ -42,6 +42,8 @@
 - Uses a non-signalling Windows process-handle probe for companion and
   supervisor liveness, avoiding the terminating semantics of `os.kill(pid, 0)`
   on Windows.
+- Accepts the live supervisor interpreter PID published by a Windows virtual
+  environment instead of requiring it to match the redirector wrapper PID.
 
 ## 0.1.0a1 — 2026-08-06
 

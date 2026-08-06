@@ -435,9 +435,60 @@ def test_supervisor_cold_start_can_publish_its_lease_after_five_seconds(
         supervisor_module.time, "monotonic", lambda: elapsed["seconds"]
     )
     monkeypatch.setattr(supervisor_module.time, "sleep", sleep)
+    monkeypatch.setattr(
+        supervisor_module,
+        "process_is_alive",
+        lambda pid: pid == ProcessFake.pid,
+    )
 
     assert supervisor_module.ensure_supervisor(store.paths, attempt) == ProcessFake.pid
     assert elapsed["seconds"] == 12
+    assert terminated == []
+
+
+def test_supervisor_accepts_live_lease_from_windows_venv_redirector(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    attempt = store.get_attempt(service.attempt_id)
+    wrapper_pid = 43210
+    supervisor_pid = 43211
+    terminated: list[bool] = []
+
+    class ProcessFake:
+        pid = wrapper_pid
+
+        @staticmethod
+        def poll() -> None:
+            return None
+
+        @staticmethod
+        def terminate() -> None:
+            terminated.append(True)
+
+        @staticmethod
+        def wait(*, timeout: int) -> None:
+            assert timeout == 5
+
+    monkeypatch.setattr(
+        supervisor_module.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: ProcessFake(),
+    )
+    monkeypatch.setattr(
+        supervisor_module,
+        "process_is_alive",
+        lambda pid: pid == supervisor_pid,
+    )
+    monkeypatch.setattr(supervisor_module, "_SUPERVISOR_START_TIMEOUT_SECONDS", 0.1)
+
+    def publish_redirected_lease(_seconds: float) -> None:
+        store.update_lease(attempt_id=attempt.id, pid=supervisor_pid, at=now)
+
+    monkeypatch.setattr(supervisor_module.time, "sleep", publish_redirected_lease)
+
+    assert supervisor_module.ensure_supervisor(store.paths, attempt) == supervisor_pid
     assert terminated == []
 
 
