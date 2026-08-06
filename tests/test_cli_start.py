@@ -94,9 +94,10 @@ def test_exam_start_opens_read_only_page_before_reading_and_reuses_it_for_workin
         events.append(("page-ready", attempt.state))  # type: ignore[union-attr]
         callback = kwargs["ready_callback"]
         assert callable(callback)
+        events.append(("page-open", attempt.state, kwargs.get("open_browser", True)))  # type: ignore[union-attr]
         callback()
         current = store.get_attempt(attempt.id)  # type: ignore[union-attr]
-        events.append(("page-open", current.state, kwargs.get("open_browser", True)))
+        events.append(("clock-started", current.state))
         return SimpleNamespace(url="http://127.0.0.1/reading/")
 
     monkeypatch.setattr(cli, "launch_companion", launch_reading_page)
@@ -125,7 +126,82 @@ def test_exam_start_opens_read_only_page_before_reading_and_reuses_it_for_workin
     assert cli._start(args) == 0
     assert events == [
         ("page-ready", AttemptState.CREATED),
-        ("page-open", AttemptState.READING, True),
+        ("page-open", AttemptState.CREATED, True),
+        ("clock-started", AttemptState.READING),
+        ("countdown",),
+        ("working", AttemptState.WORKING, False),
+    ]
+
+
+def test_resume_created_attempt_runs_reading_before_working(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source_root = make_pack(tmp_path / "source-pack")
+    manifest = source_root / "pack.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            "reading_time_seconds = 0", "reading_time_seconds = 600"
+        ),
+        encoding="utf-8",
+    )
+    pack = load_pack(source_root)
+    paths = AppPaths.discover(tmp_path / "state")
+    store = Store(paths)
+    now = datetime.now(UTC)
+    attempt = store.create_attempt(
+        pack_id=pack.id,
+        pack_version=pack.version,
+        pack_path=pack.root,
+        pack_digest=pack.digest,
+        course=pack.course,
+        profile=pack.profile,
+        mode=AttemptMode.EXAM,
+        timed=True,
+        created_at=now,
+        workspace_kind=WorkspaceKind.VOLUME,
+        workspace_ref="resume-volume",
+        image=pack.environment.image,
+        editor="terminal",
+        candidate_id="z1234567",
+    )
+    events: list[tuple[object, ...]] = []
+
+    def launch_reading_page(
+        _paths: object, pending: object, **kwargs: object
+    ) -> SimpleNamespace:
+        events.append(("page-open", pending.state))  # type: ignore[union-attr]
+        callback = kwargs["ready_callback"]
+        assert callable(callback)
+        callback()
+        current = store.get_attempt(pending.id)  # type: ignore[union-attr]
+        events.append(("clock-started", current.state))
+        return SimpleNamespace(url="http://127.0.0.1/reading/")
+
+    monkeypatch.setattr(cli, "_components", lambda: (paths, store, RuntimeStub(), object()))
+    monkeypatch.setattr(cli, "launch_companion", launch_reading_page)
+    monkeypatch.setattr(
+        cli,
+        "_reading",
+        lambda _pack, **_kwargs: events.append(("countdown",)),
+    )
+
+    def launch_working(**kwargs: object) -> int:
+        current = kwargs["attempt"]
+        events.append(
+            (
+                "working",
+                current.state,  # type: ignore[union-attr]
+                kwargs["open_companion_browser"],
+            )
+        )
+        return 0
+
+    monkeypatch.setattr(cli, "_launch_working", launch_working)
+
+    assert cli._resume(cli._parser().parse_args(["resume", attempt.id])) == 0
+    assert events == [
+        ("page-open", AttemptState.CREATED),
+        ("clock-started", AttemptState.READING),
         ("countdown",),
         ("working", AttemptState.WORKING, False),
     ]

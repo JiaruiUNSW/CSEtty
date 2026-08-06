@@ -20,7 +20,8 @@
   companion/supervisor cold starts, and serves final reports through the
   authenticated loopback companion instead of Windows HTML file associations.
 - Enables Windows virtual-terminal processing before clearing the exam shell,
-  starts reading time only after the companion is healthy, and lets `report`
+  starts reading time only after the companion is healthy and the browser launch
+  succeeds, preserves resumable reading after launch failure, and lets `report`
   select the newest attempt when no attempt ID is supplied.
 - Uses DCC's supported Valgrind runtime automatically on Docker Desktop WSL2,
   where independently compiled ASan binaries can terminate nondeterministically.

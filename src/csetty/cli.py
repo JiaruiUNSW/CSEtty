@@ -523,8 +523,33 @@ def _resume(args: argparse.Namespace) -> int:
             reading_page_open = False
         attempt = _enter_working(attempt=attempt, pack=pack, store=store, anchor=reading_end)
     elif attempt.state is AttemptState.CREATED:
-        reading_page_open = False
-        attempt = _enter_working(attempt=attempt, pack=pack, store=store, anchor=clock.now())
+        if pack.reading_time_seconds > 0:
+            def begin_reading() -> None:
+                nonlocal attempt
+                attempt = store.transition(attempt.id, AttemptState.READING, at=clock.now())
+
+            companion = launch_companion(paths, attempt, ready_callback=begin_reading)
+            reading_page_open = True
+            print(f"Opened read-only exam paper: {companion.url}")
+            assert attempt.reading_started_at is not None
+            reading_end = attempt.reading_started_at + timedelta(
+                seconds=pack.reading_time_seconds
+            )
+            _reading(pack, ends_at=reading_end, clock=clock)
+            attempt = _enter_working(
+                attempt=attempt,
+                pack=pack,
+                store=store,
+                anchor=reading_end,
+            )
+        else:
+            reading_page_open = False
+            attempt = _enter_working(
+                attempt=attempt,
+                pack=pack,
+                store=store,
+                anchor=clock.now(),
+            )
     else:
         reading_page_open = False
     return _launch_working(

@@ -117,10 +117,21 @@ def launch_companion(
     """Start or reuse the loopback-only page for an attempt."""
 
     def publish(info: CompanionInfo) -> CompanionInfo:
+        if open_browser:
+            try:
+                opened = browser_open(info.url)
+            except Exception as exc:
+                raise ToolUnavailableError(
+                    "exam paper is ready, but the browser failed to open; "
+                    f"reading time has not started: {info.url}"
+                ) from exc
+            if opened is False:
+                raise ToolUnavailableError(
+                    "exam paper is ready, but the browser could not be opened "
+                    f"automatically; reading time has not started: {info.url}"
+                )
         if ready_callback is not None:
             ready_callback()
-        if open_browser:
-            browser_open(info.url)
         return info
 
     existing = _read_info(paths, attempt.id)

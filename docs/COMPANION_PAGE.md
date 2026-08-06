@@ -8,7 +8,10 @@ During formal exam mode, sign-in and acknowledgement remain in the host
 terminal. Once reading time begins, CSEExamTTY opens the companion page as a
 full read-only paper in the default browser. It exposes every question prompt
 and the pack's explicitly permitted local resources, but it does not create an
-editable workspace or container and does not offer an editor control. When the
+editable workspace or container and does not offer an editor control. The
+reading clock is anchored only after the companion is healthy and the browser
+launch succeeds; a failed launch leaves the attempt in resumable `CREATED`
+state without deducting reading time. When the
 working period begins, the page automatically refreshes to working state while
 CSEExamTTY starts the supervised interactive container and opens the isolated
 VS Code profile. On explicit finish or timed expiry, the supervisor generates

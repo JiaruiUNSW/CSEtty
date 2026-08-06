@@ -1,8 +1,8 @@
-# Windows 11 validation task for CSEExamTTY 0.1.0a2
+# Windows 11 validation task for CSEExamTTY 0.1.0a3
 
 ## 1. Objective
 
-Run a real native-Windows acceptance pass for the `0.1.0a2` release candidate on
+Run a real native-Windows acceptance pass for the `0.1.0a3` release candidate on
 `LAPTOP-Q77UG2SK`. This is not a source review and must not be replaced by the
 GitHub Actions `windows-latest` host-contract job. The acceptance target is the
 actual Windows 11 desktop combination of:
@@ -26,14 +26,15 @@ The validation must exercise the visible defects addressed by the candidate:
 
 - Repository: `https://github.com/JiaruiUNSW/CSEtty.git`
 - Pull request: `https://github.com/JiaruiUNSW/CSEtty/pull/2`
-- Branch: `codex/exam-flow-report-theme-a2`
-- Implementation commit that must be an ancestor of the checkout:
-  `71087b122b56fad132a3fb4d895887648dbb8ef4`
-- Expected package/CLI version: `0.1.0a2`
+- Branch: `codex/exam-flow-report-theme-a2` (the legacy branch suffix is not the
+  package version)
+- Exact validation commit: the full 40-character SHA supplied by the originating
+  task immediately before validation; do not validate a moving branch tip
+- Expected package/CLI version: `0.1.0a3`
 - Expected dependency: `csetty-mips==0.1.1`
 
 Use a fresh checkout under a new directory such as
-`$env:USERPROFILE\Documents\CSEExamTTY-Windows-Validation-a2`. Do not overwrite,
+`$env:USERPROFILE\Documents\CSEExamTTY-Windows-Validation-a3`. Do not overwrite,
 reset, clean, or delete an existing checkout. Do not modify product source,
 tests, manifests, release approval, tags, releases, PyPI, the user's normal VS
 Code profile, or unrelated Docker resources.
@@ -56,14 +57,13 @@ wait for the user instead.
 
 ## 3. Required evidence and final output
 
-Create `docs/WINDOWS_VALIDATION_RESULTS_0.1.0a2.md` in the checkout. It must
+Create `docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md` in the checkout. It must
 contain:
 
 - start/end timestamps and elapsed time;
 - Windows edition/build/architecture and hardware architecture;
 - PowerShell, Python, Git, Docker Desktop/Engine, WSL and VS Code versions;
-- exact checkout HEAD and proof that implementation commit `71087b1...` is an
-  ancestor;
+- the expected validation SHA and proof that checkout HEAD equals it exactly;
 - every acceptance item below marked `PASS`, `FAIL`, `BLOCKED`, or `SKIPPED`;
 - command, exit code, duration and a concise output excerpt for every automated
   check;
@@ -79,7 +79,7 @@ example:
 
 ```powershell
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$validationRoot = Join-Path $env:LOCALAPPDATA "CSEExamTTY\validation-0.1.0a2-$stamp"
+$validationRoot = Join-Path $env:LOCALAPPDATA "CSEExamTTY\validation-0.1.0a3-$stamp"
 $stateRoot = Join-Path $validationRoot 'state'
 $evidenceRoot = Join-Path $validationRoot 'evidence'
 New-Item -ItemType Directory -Force $stateRoot, $evidenceRoot | Out-Null
@@ -108,17 +108,23 @@ alone.
 Run from native PowerShell, not from inside a WSL shell. Record all output.
 
 ```powershell
-$checkout = Join-Path $env:USERPROFILE 'Documents\CSEExamTTY-Windows-Validation-a2'
+$checkout = Join-Path $env:USERPROFILE 'Documents\CSEExamTTY-Windows-Validation-a3'
+$expectedHead = '<40-character commit SHA supplied by the originating task>'
+if ($expectedHead -notmatch '^[0-9a-f]{40}$') {
+    throw 'Set expectedHead to the exact lowercase commit SHA supplied for this run'
+}
 if (Test-Path $checkout) {
     throw "Validation checkout already exists; choose a new directory: $checkout"
 }
 git clone --branch codex/exam-flow-report-theme-a2 --single-branch `
     https://github.com/JiaruiUNSW/CSEtty.git $checkout
 Set-Location $checkout
+git checkout --detach $expectedHead
 git status --short --branch
-git rev-parse HEAD
-git merge-base --is-ancestor 71087b122b56fad132a3fb4d895887648dbb8ef4 HEAD
-if ($LASTEXITCODE -ne 0) { throw 'Required implementation commit is not an ancestor' }
+$actualHead = git rev-parse HEAD
+if ($LASTEXITCODE -ne 0 -or $actualHead -ne $expectedHead) {
+    throw "Checkout mismatch: expected $expectedHead, got $actualHead"
+}
 ```
 
 Inventory commands:
@@ -164,7 +170,7 @@ py -3.11 -m venv .venv
 .\.venv\Scripts\pytest.exe -q
 ```
 
-Expected version: `csetty 0.1.0a2`. All lint, type and test commands must exit
+Expected version: `csetty 0.1.0a3`. All lint, type and test commands must exit
 zero. Record the exact pytest count; do not copy the macOS count into the result.
 
 Build and smoke-test the Windows-produced wheel from a clean output directory:
@@ -175,13 +181,13 @@ New-Item -ItemType Directory -Force $wheelDir | Out-Null
 .\.venv\Scripts\python.exe -m pip wheel --no-deps --wheel-dir $wheelDir .
 .\.venv\Scripts\python.exe scripts\smoke_wheel.py $wheelDir
 Get-ChildItem $wheelDir
-Get-FileHash (Join-Path $wheelDir 'cseexamtty-0.1.0a2-py3-none-any.whl') -Algorithm SHA256
+Get-FileHash (Join-Path $wheelDir 'cseexamtty-0.1.0a3-py3-none-any.whl') -Algorithm SHA256
 ```
 
 The smoke must prove it imported from its temporary installed wheel, exposed
 both built-in papers, retained author/student-pack isolation, and staged the
 wheel-installed Docker build context. Confirm the wheel contains
-`csetty/web_theme.py` and declares `Version: 0.1.0a2`.
+`csetty/web_theme.py` and declares `Version: 0.1.0a3`.
 
 ## 6. Docker Desktop and fixed-content acceptance
 
@@ -241,8 +247,8 @@ Create these two copies:
 
 | Copy | New ID | Reading | Working | Purpose |
 |---|---|---:|---:|---|
-| COMP1511 | `comp1511-windows-a2-smoke` | 90 s | 300 s | explicit finish |
-| COMP1521 | `comp1521-windows-a2-smoke` | 90 s | 75 s | timed expiry |
+| COMP1511 | `comp1511-windows-a3-smoke` | 90 s | 300 s | explicit finish |
+| COMP1521 | `comp1521-windows-a3-smoke` | 90 s | 75 s | timed expiry |
 
 Use a PowerShell routine equivalent to:
 
@@ -293,20 +299,20 @@ function New-ShortPack {
     )
 }
 
-$comp1511ShortPack = Join-Path $validationPacks 'comp1511-windows-a2-smoke'
-$comp1521ShortPack = Join-Path $validationPacks 'comp1521-windows-a2-smoke'
+$comp1511ShortPack = Join-Path $validationPacks 'comp1511-windows-a3-smoke'
+$comp1521ShortPack = Join-Path $validationPacks 'comp1521-windows-a3-smoke'
 New-ShortPack `
     -Source (Join-Path $checkout 'packs\comp1511-original-a') `
     -Destination $comp1511ShortPack `
     -OldId 'comp1511-original-a' `
-    -NewId 'comp1511-windows-a2-smoke' `
+    -NewId 'comp1511-windows-a3-smoke' `
     -ReadingSeconds 90 `
     -WorkingSeconds 300
 New-ShortPack `
     -Source (Join-Path $checkout 'packs\comp1521-original-a') `
     -Destination $comp1521ShortPack `
     -OldId 'comp1521-original-a' `
-    -NewId 'comp1521-windows-a2-smoke' `
+    -NewId 'comp1521-windows-a3-smoke' `
     -ReadingSeconds 90 `
     -WorkingSeconds 75
 ```
@@ -321,12 +327,12 @@ with the absolute paths selected earlier, then use `$csetty` in that tab:
 
 ```powershell
 $checkout = 'C:\absolute\path\to\CSEtty'
-$validationRoot = 'C:\absolute\path\to\csetty-windows-a2-validation'
+$validationRoot = 'C:\absolute\path\to\csetty-windows-a3-validation'
 $stateRoot = Join-Path $validationRoot 'state'
 $env:CSETTY_STATE_DIR = $stateRoot
 $csetty = Join-Path $checkout '.venv\Scripts\csetty.exe'
-$comp1511ShortPack = Join-Path $validationRoot 'packs\comp1511-windows-a2-smoke'
-$comp1521ShortPack = Join-Path $validationRoot 'packs\comp1521-windows-a2-smoke'
+$comp1511ShortPack = Join-Path $validationRoot 'packs\comp1511-windows-a3-smoke'
+$comp1521ShortPack = Join-Path $validationRoot 'packs\comp1521-windows-a3-smoke'
 & $csetty --version
 ```
 
@@ -449,7 +455,7 @@ git status --short --branch
 Stop-Transcript
 ```
 
-Only `docs/WINDOWS_VALIDATION_RESULTS_0.1.0a2.md` may be a new/modified tracked
+Only `docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md` may be a new/modified tracked
 file. Do not commit or push the result unless the originating task explicitly
 asks after reviewing it. Send the complete result summary and screenshot
 attachments back to the originating Codex task.

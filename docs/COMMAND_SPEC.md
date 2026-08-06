@@ -234,7 +234,11 @@ An `INTERNAL_ERROR` is a simulator/pack failure, not a student failure.
 During reading time, the host terminal shows the paper index/countdown and the
 loopback-only companion shows every complete prompt plus explicitly permitted
 bundled resources. There is no workspace or editable container on which to run
-a command. The live countdown uses a monotonic clock. The reading anchor and
+a command. The reading anchor is recorded only after the companion is healthy
+and the host browser-launch call succeeds. If that call raises or explicitly
+reports failure, the attempt remains `CREATED`, consumes no reading time, and
+can be retried with `csetty resume ATTEMPT_ID`. The live countdown uses a
+monotonic clock. The reading anchor and
 working deadline are persisted as UTC timestamps so a restart cannot grant more
 time. The open page detects the transition to working state and refreshes
 without opening a duplicate browser tab.

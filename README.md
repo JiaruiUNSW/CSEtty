@@ -186,7 +186,10 @@ The exam entry sequence happens in the **host terminal before reading time**:
 
 During reading time, the companion page opens in the host browser with every
 complete question prompt and only the resources explicitly permitted by the
-pack. No editable container, workspace, or VS Code window exists yet. When
+pack. The persisted reading clock begins only after the companion is healthy
+and the browser-launch call succeeds; a reported launch failure leaves the
+attempt resumable in `CREATED` state without consuming reading time. No editable
+container, workspace, or VS Code window exists yet. When
 reading time ends, the same page updates to working state and the starter
 workspace, supervised container, and VS Code are opened. A practice attempt,
 including one started with `--skip-reading`, deliberately does not show the exam

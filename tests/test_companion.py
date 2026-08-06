@@ -157,7 +157,7 @@ def test_companion_cold_start_can_become_healthy_after_ten_seconds(
     assert elapsed["seconds"] == 12
 
 
-def test_companion_runs_ready_callback_before_opening_existing_page(
+def test_companion_runs_ready_callback_after_opening_existing_page(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     _application_instance, store, attempt_id = _application(tmp_path)
@@ -182,7 +182,34 @@ def test_companion_runs_ready_callback_before_opening_existing_page(
         )
         == expected
     )
-    assert events == ["ready", "open"]
+    assert events == ["open", "ready"]
+
+
+def test_companion_does_not_start_reading_when_browser_open_fails(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _application_instance, store, attempt_id = _application(tmp_path)
+    attempt = store.get_attempt(attempt_id)
+    expected = CompanionInfo(
+        attempt_id=attempt_id,
+        pid=os.getpid(),
+        port=32123,
+        token="t" * 43,
+        started_at=datetime.now(UTC).isoformat(),
+    )
+    events: list[str] = []
+    monkeypatch.setattr(companion_module, "_read_info", lambda *_args: expected)
+    monkeypatch.setattr(companion_module, "_healthy", lambda _info: True)
+
+    with pytest.raises(ToolUnavailableError, match="reading time has not started"):
+        launch_companion(
+            store.paths,
+            attempt,
+            ready_callback=lambda: events.append("ready"),
+            browser_open=lambda _url: False,
+        )
+
+    assert events == []
 
 
 def test_companion_process_creation_failure_removes_startup_lock(
