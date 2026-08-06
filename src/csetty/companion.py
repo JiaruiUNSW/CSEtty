@@ -36,7 +36,7 @@ from .web_render import markdown_to_html
 from .web_theme import course_navbar, course_theme_class, theme_style
 
 _MAX_REQUEST_BYTES = 4096
-_START_TIMEOUT_SECONDS = 10.0
+_START_TIMEOUT_SECONDS = 30.0
 
 
 @dataclass(frozen=True)
@@ -131,6 +131,7 @@ def launch_companion(
     except FileExistsError:
         pass
 
+    process: subprocess.Popen[bytes] | None = None
     if owns_lock:
         log_path = root / "companion.log"
         with log_path.open("ab", buffering=0) as log:
@@ -146,7 +147,7 @@ def launch_companion(
                 kwargs["creationflags"] = detached | new_group
             else:
                 kwargs["start_new_session"] = True
-            subprocess.Popen(
+            process = subprocess.Popen(
                 [
                     sys.executable,
                     "-m",
@@ -168,6 +169,12 @@ def launch_companion(
                 if open_browser:
                     browser_open(info.url)
                 return info
+            if process is not None and process.poll() is not None:
+                detail = (root / "companion.log").read_text(
+                    encoding="utf-8", errors="replace"
+                ).strip()
+                suffix = f": {detail}" if detail else ""
+                raise ToolUnavailableError(f"exam companion page failed to start{suffix}")
             time.sleep(0.05)
     finally:
         if owns_lock:
@@ -244,6 +251,7 @@ class CompanionApplication:
             "deadline_at": (
                 None if attempt.deadline_at is None else attempt.deadline_at.isoformat()
             ),
+            "report_ready": self.report_ready(attempt),
             "questions": [
                 {
                     "id": question.id,
@@ -257,6 +265,17 @@ class CompanionApplication:
                 for question in pack.questions
             ],
         }
+
+    def report_ready(self, attempt: Attempt | None = None) -> bool:
+        current = attempt or self.store.get_attempt(self.attempt_id)
+        report = self.paths.reports / f"{self.attempt_id}.html"
+        return current.state.terminal and report.is_file() and not report.is_symlink()
+
+    def render_report(self) -> str:
+        attempt = self.store.get_attempt(self.attempt_id)
+        if not self.report_ready(attempt):
+            raise StateError("the final report is not ready yet")
+        return (self.paths.reports / f"{self.attempt_id}.html").read_text(encoding="utf-8")
 
     def reopen_code(self) -> str:
         with self._reopen_lock:
@@ -326,6 +345,7 @@ class CompanionApplication:
             else "Local CSEExamTTY practice examination"
         )
         status_url = f"{self.base_path}/status.json"
+        report_url = f"{self.base_path}/report"
         theme_class = course_theme_class(pack.profile, pack.course)
         total_marks = sum(question.points for question in pack.questions)
         navbar = course_navbar(
@@ -356,7 +376,7 @@ class CompanionApplication:
 @media (max-width:760px) {{ .navbar-status {{ font-size:.78rem; }} }}
 </style>
 </head>
-<body class="{theme_class}" data-deadline="{html.escape(deadline, quote=True)}" data-state="{html.escape(attempt.state.value, quote=True)}" data-status-url="{html.escape(status_url, quote=True)}">
+<body class="{theme_class}" data-deadline="{html.escape(deadline, quote=True)}" data-state="{html.escape(attempt.state.value, quote=True)}" data-status-url="{html.escape(status_url, quote=True)}" data-report-url="{html.escape(report_url, quote=True)}">
 {navbar}
 <main class="container" aria-label="Content">
 <header class="exam-hero">
@@ -372,6 +392,7 @@ class CompanionApplication:
   const deadline = document.body.dataset.deadline;
   const initialState = document.body.dataset.state;
   const statusUrl = document.body.dataset.statusUrl;
+  const reportUrl = document.body.dataset.reportUrl;
   const timer = document.getElementById('timer');
   const update = () => {{
     if (!deadline || !timer) return;
@@ -388,6 +409,10 @@ class CompanionApplication:
       const response = await fetch(statusUrl, {{ cache: 'no-store' }});
       if (!response.ok) return;
       const status = await response.json();
+      if (status.report_ready && reportUrl) {{
+        window.location.assign(reportUrl);
+        return;
+      }}
       if (status.state !== initialState) window.location.reload();
     }} catch (_error) {{
       // A transient local-page failure is retried on the next poll.
@@ -500,6 +525,9 @@ class CompanionApplication:
             editor_text = "This attempt uses terminal mode. Run csetty resume to reopen its terminal."
             controls_heading = "Exam controls"
             controls_text = f"Closing the editor does not stop the clock. {editor_text}"
+        if attempt.state.terminal:
+            editor_control = f'<a class="btn" href="{self.base_path}/report">Open final report</a>'
+            controls_text += " The final report opens here as soon as local grading is complete."
         if attempt.state is AttemptState.READING:
             resources_text = (
                 "Only the bundled resources explicitly permitted by this paper are available "
@@ -676,6 +704,13 @@ class CompanionHandler(BaseHTTPRequestHandler):
                     HTTPStatus.OK,
                     json.dumps(self.application.status_document(), sort_keys=True),
                     content_type="application/json; charset=utf-8",
+                )
+                return
+            if segments == ["report"]:
+                self._send(
+                    HTTPStatus.OK,
+                    self.application.render_report(),
+                    content_type="text/html; charset=utf-8",
                 )
                 return
             if len(segments) == 2 and segments[0] == "question":

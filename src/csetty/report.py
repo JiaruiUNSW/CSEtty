@@ -4,6 +4,8 @@ from __future__ import annotations
 import hashlib
 import html
 import json
+import urllib.error
+import urllib.request
 import webbrowser
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
@@ -19,6 +21,37 @@ from .web_theme import course_navbar, course_theme_class, theme_style
 _MAX_EMBEDDED_SOURCE_BYTES = 256 * 1024
 
 
+def _companion_report_url(html_path: Path) -> str | None:
+    """Return the authenticated loopback report URL when its companion is healthy."""
+    attempt_id = html_path.stem
+    manifest = html_path.parent.parent / "attempts" / attempt_id / "companion.json"
+    try:
+        raw = json.loads(manifest.read_text(encoding="utf-8"))
+        if not isinstance(raw, dict) or str(raw["attempt_id"]) != attempt_id:
+            return None
+        port = int(raw["port"])
+        token = str(raw["token"])
+    except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+        return None
+    if not 1 <= port <= 65535 or len(token) < 32:
+        return None
+    base_url = f"http://127.0.0.1:{port}/{token}"
+    request = urllib.request.Request(
+        f"{base_url}/health",
+        headers={"Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=0.5) as response:
+            payload = json.load(response)
+            if int(response.status) != 200 or not isinstance(payload, dict):
+                return None
+            if payload.get("ok") is not True or str(payload.get("attempt_id")) != attempt_id:
+                return None
+    except (OSError, urllib.error.URLError, UnicodeError, json.JSONDecodeError, ValueError):
+        return None
+    return f"{base_url}/report"
+
+
 def open_report_in_browser(
     html_path: Path,
     *,
@@ -28,7 +61,8 @@ def open_report_in_browser(
     if not html_path.is_file():
         return False
     try:
-        return bool(browser_open(html_path.resolve().as_uri()))
+        target = _companion_report_url(html_path) or html_path.resolve().as_uri()
+        return bool(browser_open(target))
     except (OSError, webbrowser.Error):
         return False
 

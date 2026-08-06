@@ -32,6 +32,7 @@ _GREEN = "\x1b[32m"
 _RED = "\x1b[31m"
 _RESET = "\x1b[0m"
 _DEADLINE_WARNING_THRESHOLDS = (3600, 1800, 900, 300)
+_SUPERVISOR_START_TIMEOUT_SECONDS = 30.0
 
 
 def _question_alias(pack: Pack, question: Question) -> str:
@@ -811,7 +812,7 @@ def ensure_supervisor(paths: AppPaths, attempt: Attempt) -> int:
         **kwargs,
     )
     log.close()
-    deadline = time.monotonic() + 5
+    deadline = time.monotonic() + _SUPERVISOR_START_TIMEOUT_SECONDS
     while time.monotonic() < deadline:
         lease = store.lease(attempt.id)
         if lease is not None and int(lease["pid"]) == process.pid:
@@ -820,8 +821,24 @@ def ensure_supervisor(paths: AppPaths, attempt: Attempt) -> int:
             detail = log_path.read_text(encoding="utf-8", errors="replace")
             raise CSETTYError(f"supervisor failed to start: {detail.strip()}")
         time.sleep(0.05)
-    process.terminate()
-    raise CSETTYError("supervisor did not publish a lease within five seconds")
+    # Check once more at the boundary before terminating a process that became
+    # healthy during the final scheduler interval.
+    lease = store.lease(attempt.id)
+    if lease is not None and int(lease["pid"]) == process.pid:
+        return process.pid
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+    detail = log_path.read_text(encoding="utf-8", errors="replace").strip()
+    suffix = f"; inspect {log_path}: {detail}" if detail else f"; inspect {log_path}"
+    raise CSETTYError(
+        "supervisor did not publish a lease within "
+        f"{_SUPERVISOR_START_TIMEOUT_SECONDS:g} seconds{suffix}"
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:

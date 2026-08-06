@@ -7,7 +7,7 @@ set -eu
 : "${DCC_SOURCE_COMMIT:?DCC_SOURCE_COMMIT is required}"
 
 echo "${DCC_SOURCE_SHA256}  /tmp/dcc-source.tar.gz" | sha256sum --check --strict
-mkdir -p /tmp/dcc-source /out/usr/local/bin /out/usr/share/doc/dcc
+mkdir -p /tmp/dcc-source /out/usr/local/lib/csetty /out/usr/share/doc/dcc
 tar --extract --gzip --file /tmp/dcc-source.tar.gz \
     --directory /tmp/dcc-source --strip-components 1
 
@@ -27,7 +27,7 @@ git tag "${DCC_VERSION}"
 
 make dcc
 ./dcc --version | grep -F "dcc version ${DCC_VERSION}"
-install -m 0755 dcc /out/usr/local/bin/dcc
+install -m 0755 dcc /out/usr/local/lib/csetty/dcc-upstream
 install -m 0644 LICENSE /out/usr/share/doc/dcc/LICENSE
 printf '%s\n' \
     "DCC version: ${DCC_VERSION}" \

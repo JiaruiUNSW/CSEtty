@@ -7,7 +7,7 @@ current course images passed fresh Stage 4 prepare/offline-attach checks on
 2026-08-06. COMP1511 passed its full end-to-end workflow; COMP1521 passed a live
 MIPS/autotest/submission/finish/report workflow using the repository's
 independent `csetty-mips` runtime. Stage 6 source-only `0.1.0a1` was published;
-the source tree now prepares the fail-closed `0.1.0a2` release candidate, and
+the source tree now prepares the fail-closed `0.1.0a3` release candidate, and
 subsequent releases use the protected GitHub Actions/PyPI OIDC path. Stable
 `0.1.0` desktop acceptance remains open.
 

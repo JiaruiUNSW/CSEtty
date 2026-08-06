@@ -12,8 +12,10 @@ editable workspace or container and does not offer an editor control. When the
 working period begins, the page automatically refreshes to working state while
 CSEExamTTY starts the supervised interactive container and opens the isolated
 VS Code profile. On explicit finish or timed expiry, the supervisor generates
-the final reports and opens the HTML report separately in the host's default
-browser.
+the final reports, keeps the companion service alive as an authenticated report
+viewer, and redirects the existing browser page to the final report. CSEExamTTY
+also asks the host to open that HTTP report URL, with the generated local HTML
+file retained as a fallback when the companion is unavailable.
 
 The page can be reopened without changing the attempt:
 
@@ -35,7 +37,8 @@ The overview contains:
 - every complete question prompt in one long-form paper plus focused links;
 - bundled offline resources declared by the pack;
 - an index of relevant official public course pages outside reading time; and
-- an **Open VSC** recovery control while the attempt is working.
+- an **Open VSC** recovery control while the attempt is working; and
+- an **Open final report** control after the report has been generated.
 
 Each question page renders the pack's original Markdown prompt, including
 background, exact requirements, examples, implementation notes, required
@@ -69,11 +72,12 @@ shows only resources explicitly permitted by the paper.
 
 ## Open VSC recovery
 
-The button issues a same-origin POST to the local service. The service verifies
-that the attempt is still working and that the isolated profile is fully cached,
-starts the existing container only if it is stopped, ensures the same
-supervisor is running, and attaches VS Code to the existing container URI. It
-does not create a new attempt, replace the workspace, or extend the deadline.
+The **Open VSC** button issues a same-origin POST to the local service. The
+service verifies that the attempt is still working and that the isolated profile
+is fully cached, starts the existing container only if it is stopped, ensures
+the same supervisor is running, and attaches VS Code to the existing container
+URI. It does not create a new attempt, replace the workspace, or extend the
+deadline.
 
 Requests are rate-limited. Errors are returned on the page rather than silently
 falling back to a normal VS Code profile or terminal.

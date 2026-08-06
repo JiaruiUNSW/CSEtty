@@ -1,6 +1,6 @@
 # Release process and fail-closed gates
 
-CSEExamTTY `0.1.0a2` is the current source-only public-alpha release candidate;
+CSEExamTTY `0.1.0a3` is the current source-only public-alpha release candidate;
 `0.1.0a1` remains the latest published release. A release may publish the Git
 repository plus the `cseexamtty` wheel/sdist, checksums, and an SBOM. It must not
 publish a course image, registry layer, BuildKit cache, OCI archive, DCC binary,
@@ -170,5 +170,5 @@ first Trusted Publisher release succeeds, revoke any remaining long-lived PyPI
 account token used for the bootstrap release.
 
 The public package name is `cseexamtty`; the installed command remains
-`csetty`. Candidate version `0.1.0a2` is intentionally pre-release and does not
+`csetty`. Candidate version `0.1.0a3` is intentionally pre-release and does not
 claim the stable cross-platform desktop/VS Code acceptance planned for `0.1.0`.

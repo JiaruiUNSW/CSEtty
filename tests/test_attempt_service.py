@@ -282,6 +282,46 @@ def test_supervisor_expiry_generates_and_opens_report(
     assert stopped == [service.attempt_id]
 
 
+def test_supervisor_cold_start_can_publish_its_lease_after_five_seconds(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    attempt = store.get_attempt(service.attempt_id)
+    elapsed = {"seconds": 0.0}
+    terminated: list[bool] = []
+
+    class ProcessFake:
+        pid = 43210
+
+        @staticmethod
+        def poll() -> None:
+            return None
+
+        @staticmethod
+        def terminate() -> None:
+            terminated.append(True)
+
+    def sleep(_seconds: float) -> None:
+        elapsed["seconds"] += 1
+        if elapsed["seconds"] == 12:
+            store.update_lease(attempt_id=attempt.id, pid=ProcessFake.pid, at=now)
+
+    monkeypatch.setattr(
+        supervisor_module.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: ProcessFake(),
+    )
+    monkeypatch.setattr(
+        supervisor_module.time, "monotonic", lambda: elapsed["seconds"]
+    )
+    monkeypatch.setattr(supervisor_module.time, "sleep", sleep)
+
+    assert supervisor_module.ensure_supervisor(store.paths, attempt) == ProcessFake.pid
+    assert elapsed["seconds"] == 12
+    assert terminated == []
+
+
 def test_q_number_alias_resolves_prefixed_pack_activity(tmp_path: Path) -> None:
     pack = load_pack(make_pack(tmp_path / "pack"))
     prefixed = replace(pack, questions=(replace(pack.questions[0], id="prac_q1"),))

@@ -154,6 +154,7 @@ def test_staged_image_context_contains_only_required_runtime_inputs(tmp_path: Pa
         assert (context / "docker" / "Dockerfile.interactive").is_file()
         assert (context / "docker" / "Dockerfile.judge").is_file()
         assert (context / "docker" / "build-dcc.sh").is_file()
+        assert (context / "docker" / "dcc-command").is_file()
         assert (context / "docker" / "exam-command").is_file()
         assert (context / "docker" / "mipsy-command").is_file()
         assert (context / "THIRD_PARTY_NOTICES.md").is_file()

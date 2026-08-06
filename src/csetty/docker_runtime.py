@@ -215,6 +215,7 @@ print(json.dumps(tools, sort_keys=True))
                 "Dockerfile.interactive",
                 "Dockerfile.judge",
                 "build-dcc.sh",
+                "dcc-command",
                 "exam-command",
                 "mipsy-command",
             ):

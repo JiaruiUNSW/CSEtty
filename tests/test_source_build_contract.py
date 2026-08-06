@@ -34,6 +34,31 @@ def test_source_build_locks_match_both_dockerfiles() -> None:
     builder = (ROOT / "docker" / "build-dcc.sh").read_text(encoding="utf-8")
     assert "make dcc" in builder
     assert "Built locally from verified source" in builder
+    assert "/out/usr/local/lib/csetty/dcc-upstream" in builder
+
+    wrapper = (ROOT / "docker" / "dcc-command").read_text(encoding="utf-8")
+    assert "wsl2" in wrapper.lower()
+    assert "mode=valgrind" in wrapper
+    assert 'exec "$upstream" --valgrind "$@"' in wrapper
+
+
+def test_windows_checkout_keeps_linux_build_entrypoints_lf_only() -> None:
+    attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
+    assert "*.sh text eol=lf" in attributes
+    assert "docker/Dockerfile.* text eol=lf" in attributes
+    assert "docker/dcc-command text eol=lf" in attributes
+    assert "docker/exam-command text eol=lf" in attributes
+    assert "docker/mipsy-command text eol=lf" in attributes
+
+    for relative in (
+        "docker/build-dcc.sh",
+        "docker/Dockerfile.interactive",
+        "docker/Dockerfile.judge",
+        "docker/dcc-command",
+        "docker/exam-command",
+        "docker/mipsy-command",
+    ):
+        assert b"\r\n" not in (ROOT / relative).read_bytes()
 
 
 def test_compose_declares_only_local_interactive_and_judge_builds() -> None:

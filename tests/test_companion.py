@@ -1,17 +1,30 @@
 from __future__ import annotations
 
+import json
+import os
+import threading
+import urllib.request
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from test_pack import make_pack
 
-from csetty.companion import CompanionApplication
+import csetty.companion as companion_module
+from csetty.companion import (
+    CompanionApplication,
+    CompanionHandler,
+    CompanionHTTPServer,
+    CompanionInfo,
+    launch_companion,
+)
 from csetty.course_resources import course_resource_links
 from csetty.errors import StateError
 from csetty.models import AttemptMode, AttemptState, WorkspaceKind
 from csetty.pack import load_pack
 from csetty.paths import AppPaths
+from csetty.report import open_report_in_browser
 from csetty.storage import Store
 from csetty.web_render import markdown_to_html
 from csetty.web_theme import THEME_NAME, theme_style
@@ -107,6 +120,43 @@ def test_companion_overview_and_question_are_pack_driven(tmp_path: Path) -> None
     assert 'class="course-comp1511"' in overview
 
 
+def test_companion_cold_start_can_become_healthy_after_ten_seconds(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _application_instance, store, attempt_id = _application(tmp_path)
+    attempt = store.get_attempt(attempt_id)
+    elapsed = {"seconds": 0.0}
+    expected = CompanionInfo(
+        attempt_id=attempt_id,
+        pid=43210,
+        port=32123,
+        token="t" * 43,
+        started_at=datetime.now(UTC).isoformat(),
+    )
+    monkeypatch.setattr(
+        companion_module,
+        "_read_info",
+        lambda _paths, _attempt_id: expected if elapsed["seconds"] >= 12 else None,
+    )
+    monkeypatch.setattr(companion_module, "_healthy", lambda _info: True)
+    monkeypatch.setattr(
+        companion_module.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: SimpleNamespace(poll=lambda: None),
+    )
+    monkeypatch.setattr(
+        companion_module.time, "monotonic", lambda: elapsed["seconds"]
+    )
+    monkeypatch.setattr(
+        companion_module.time,
+        "sleep",
+        lambda _seconds: elapsed.__setitem__("seconds", elapsed["seconds"] + 1),
+    )
+
+    assert launch_companion(store.paths, attempt, open_browser=False) == expected
+    assert elapsed["seconds"] == 12
+
+
 def test_companion_status_tracks_latest_submission(tmp_path: Path) -> None:
     application, store, attempt_id = _application(tmp_path)
     store.record_submission(
@@ -183,6 +233,75 @@ def test_finished_companion_does_not_offer_unusable_vscode_recovery(tmp_path: Pa
     assert "Open VSC" not in overview
     assert "Open VSC" not in question
     assert "recovery is unavailable because this attempt is FINISHED" in overview
+    assert "Open final report" in overview
+
+
+def test_finished_companion_serves_and_advertises_the_durable_report(tmp_path: Path) -> None:
+    application, store, attempt_id = _application(tmp_path)
+    store.transition(
+        attempt_id,
+        AttemptState.FINISHED,
+        at=datetime.now(UTC),
+        finish_reason="student",
+    )
+    report = store.paths.reports / f"{attempt_id}.html"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text("<!doctype html><title>Final report</title>", encoding="utf-8")
+
+    assert application.status_document()["report_ready"] is True
+    assert application.render_report() == "<!doctype html><title>Final report</title>"
+    assert 'data-report-url="/' in application.render_overview()
+
+
+def test_report_opener_uses_the_live_companion_http_route(tmp_path: Path) -> None:
+    application, store, attempt_id = _application(tmp_path)
+    store.transition(
+        attempt_id,
+        AttemptState.FINISHED,
+        at=datetime.now(UTC),
+        finish_reason="student",
+    )
+    report = store.paths.reports / f"{attempt_id}.html"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text("<!doctype html><title>Final report</title>", encoding="utf-8")
+
+    try:
+        server = CompanionHTTPServer(("127.0.0.1", 0), CompanionHandler)
+    except PermissionError:
+        pytest.skip("loopback sockets are unavailable in this test sandbox")
+    server.daemon_threads = True
+    server.application = application
+    worker = threading.Thread(target=server.serve_forever, daemon=True)
+    worker.start()
+    port = int(server.server_address[1])
+    manifest = store.paths.attempts / attempt_id / "companion.json"
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    manifest.write_text(
+        json.dumps(
+            {
+                "attempt_id": attempt_id,
+                "pid": os.getpid(),
+                "port": port,
+                "token": application.token,
+                "started_at": datetime.now(UTC).isoformat(),
+            }
+        ),
+        encoding="utf-8",
+    )
+    opened: list[str] = []
+    expected = f"http://127.0.0.1:{port}/{application.token}/report"
+    try:
+        assert open_report_in_browser(
+            report,
+            browser_open=lambda url: opened.append(url) is None,
+        )
+        assert opened == [expected]
+        with urllib.request.urlopen(expected, timeout=2) as response:
+            assert response.read().decode() == "<!doctype html><title>Final report</title>"
+    finally:
+        server.shutdown()
+        server.server_close()
+        worker.join(timeout=2)
 
 
 def test_finished_companion_rejects_reopen_before_callback(tmp_path: Path) -> None:

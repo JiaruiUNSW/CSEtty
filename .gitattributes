@@ -1,0 +1,9 @@
+* text=auto
+
+# These files are copied into Linux Docker build contexts. A Windows checkout
+# must not rewrite their interpreters or shell syntax to CRLF.
+*.sh text eol=lf
+docker/Dockerfile.* text eol=lf
+docker/dcc-command text eol=lf
+docker/exam-command text eol=lf
+docker/mipsy-command text eol=lf

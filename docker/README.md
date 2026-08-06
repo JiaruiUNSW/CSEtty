@@ -7,6 +7,12 @@ COMP1521 targets additionally stage the source files of the pinned, separately
 released MPL-2.0 `csetty-mips` dependency and install a small
 `/usr/local/bin/mipsy` compatibility launcher. They do not use upstream mipsy.
 
+The source-built DCC launcher keeps upstream's normal ASan + Valgrind mode on
+Linux and macOS Docker engines. On a Docker Desktop WSL2 kernel it selects
+DCC's supported Valgrind-only mode because ASan binaries can otherwise crash
+nondeterministically in that environment. An explicit caller sanitizer option
+is always preserved.
+
 Normal local builds are driven through:
 
 ```text

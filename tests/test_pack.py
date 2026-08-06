@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 
@@ -9,6 +10,15 @@ from csetty.docker_runtime import DockerRuntime
 from csetty.errors import ValidationError
 from csetty.pack import PackRepository, load_pack, snapshot_author_materials, snapshot_pack
 from csetty.paths import AppPaths
+
+
+def _symlink_or_skip(link: Path, target: str | Path) -> None:
+    try:
+        link.symlink_to(target)
+    except OSError as exc:
+        if os.name == "nt" and getattr(exc, "winerror", None) == 1314:
+            pytest.skip("Windows symlink creation requires Developer Mode or elevation")
+        raise
 
 
 def make_pack(root: Path, *, extra: str = "") -> Path:
@@ -168,7 +178,7 @@ def test_bundled_packs_have_detailed_prompts_and_author_solutions() -> None:
 
 def test_pack_snapshot_materializes_safe_file_symlinks(tmp_path: Path) -> None:
     root = make_pack(tmp_path / "pack")
-    (root / "paper-copy.md").symlink_to("paper/index.md")
+    _symlink_or_skip(root / "paper-copy.md", "paper/index.md")
     source = load_pack(root)
     frozen = snapshot_pack(source, tmp_path / "attempt" / "pack")
     copied = frozen.root / "paper-copy.md"
@@ -182,7 +192,7 @@ def test_pack_rejects_escaping_symlink(tmp_path: Path) -> None:
     root = make_pack(tmp_path / "pack")
     outside = tmp_path / "outside.txt"
     outside.write_text("outside", encoding="utf-8")
-    (root / "escape.txt").symlink_to(outside)
+    _symlink_or_skip(root / "escape.txt", outside)
     with pytest.raises(ValidationError, match="symlink escapes"):
         load_pack(root)
 

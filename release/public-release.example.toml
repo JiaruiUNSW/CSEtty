@@ -1,5 +1,5 @@
 [release]
-version = "0.1.0a2"
+version = "0.1.0a3"
 channel = "alpha"
 artifact_policy = "source-only-no-prebuilt-images"
 owner_approved = false

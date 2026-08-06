@@ -5,7 +5,7 @@ import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_VERSION = "0.1.0a2"
+EXPECTED_VERSION = "0.1.0a3"
 EXPECTED_LICENSE_EXPRESSION = "Apache-2.0 AND CC-BY-NC-ND-4.0"
 EXPECTED_ASSESSMENT_LICENSE = "CC BY-NC-ND 4.0"
 
@@ -58,7 +58,7 @@ def test_public_release_candidate_is_versioned_and_fails_closed() -> None:
     run_url = re.compile(r"https://github\.com/JiaruiUNSW/CSEtty/actions/runs/[0-9]+")
     for gate in ("cross_platform_acceptance", "multiarch_acceptance"):
         value = approval["gates"][gate]
-        assert value == "PENDING_0.1.0a2_CI_RUN" or run_url.fullmatch(value)
+        assert value == "PENDING_0.1.0a3_CI_RUN" or run_url.fullmatch(value)
 
 
 def test_ci_has_native_arm64_live_acceptance_and_no_artifact_upload() -> None:

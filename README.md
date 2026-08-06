@@ -11,7 +11,7 @@ local submission is an official submission.
 
 ## Current status
 
-The source tree is the `0.1.0a2` source-only alpha release candidate; `0.1.0a1`
+The source tree is the `0.1.0a3` source-only alpha release candidate; `0.1.0a1`
 remains the latest published alpha. On the current Apple Silicon Mac, both
 current course images have passed fresh offline VS Code preparation and attach
 checks plus companion, autotest, submission, finish, judge, and report

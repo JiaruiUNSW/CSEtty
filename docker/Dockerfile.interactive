@@ -54,12 +54,14 @@ RUN apt-get update \
 
 COPY --from=dcc-builder /out/ /
 COPY src/csetty /opt/csetty/csetty
+COPY docker/dcc-command /usr/local/bin/dcc
 COPY docker/exam-command /usr/local/lib/csetty/exam-command
 COPY THIRD_PARTY_NOTICES.md /usr/share/doc/csetty/THIRD_PARTY_NOTICES.md
 COPY LICENSE /usr/share/doc/csetty/LICENSE
 COPY NOTICE /usr/share/doc/csetty/NOTICE
 
-RUN chmod 0755 /usr/local/lib/csetty/exam-command \
+RUN chmod 0755 /usr/local/bin/dcc /usr/local/lib/csetty/dcc-upstream \
+        /usr/local/lib/csetty/exam-command \
     && mkdir -p /run/csetty-bridge/requests /run/csetty-bridge/responses \
     && chmod 0755 /run/csetty-bridge /run/csetty-bridge/requests /run/csetty-bridge/responses \
     && for command in exam 1511 1521 autotest submit check; do \
@@ -72,6 +74,7 @@ LABEL org.opencontainers.image.title="CSEExamTTY local interactive environment" 
       io.csetty.image.role="interactive" \
       io.csetty.dcc.version="2.37" \
       io.csetty.dcc.build="verified-source" \
+      io.csetty.dcc.wsl2-runtime="valgrind" \
       io.csetty.dcc.license="GPL-3.0-only" \
       io.csetty.dcc.source="https://github.com/COMP1511UNSW/dcc/tree/0a888fdb2bfe130c611fb84514fdbf52d3efe149"
 

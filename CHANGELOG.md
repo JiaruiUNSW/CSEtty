@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Prepares the `0.1.0a2` source-only alpha release candidate while leaving its
+- Prepares the `0.1.0a3` source-only alpha release candidate while leaving its
   owner approval and new CI evidence fail-closed until they are completed.
 - Clears the invoking terminal and scrollback before the simulated exam sign-in,
   then opens the full read-only paper in the browser during reading time.
@@ -16,6 +16,11 @@
 - Restricts release checksums to the public wheel, sdist, and Python SBOM so the
   local DCC corresponding-source verification copy cannot become a release
   asset accidentally.
+- Keeps Linux build entrypoints LF-only in Windows Git checkouts, tolerates slow
+  companion/supervisor cold starts, and serves final reports through the
+  authenticated loopback companion instead of Windows HTML file associations.
+- Uses DCC's supported Valgrind runtime automatically on Docker Desktop WSL2,
+  where independently compiled ASan binaries can terminate nondeterministically.
 
 ## 0.1.0a1 — 2026-08-06
 

@@ -4,8 +4,10 @@ from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
 from test_pack import make_pack
 
+import csetty.report as report_module
 from csetty.models import Attempt, AttemptMode, AttemptState, WorkspaceKind
 from csetty.pack import load_pack, snapshot_author_materials
 from csetty.report import (
@@ -105,6 +107,26 @@ def test_completed_html_report_opens_as_a_local_file_url(tmp_path: Path) -> None
         browser_open=lambda url: opened.append(url) is None,
     )
     assert opened == [html_path.resolve().as_uri()]
+
+
+def test_completed_html_report_prefers_the_healthy_companion_url(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    html_path = tmp_path / "reports" / "attempt-id.html"
+    html_path.parent.mkdir()
+    html_path.write_text("<html></html>", encoding="utf-8")
+    opened: list[str] = []
+    monkeypatch.setattr(
+        report_module,
+        "_companion_report_url",
+        lambda _path: "http://127.0.0.1:43210/token/report",
+    )
+
+    assert open_report_in_browser(
+        html_path,
+        browser_open=lambda url: opened.append(url) is None,
+    )
+    assert opened == ["http://127.0.0.1:43210/token/report"]
 
 
 def test_missing_html_report_is_not_sent_to_the_browser(tmp_path: Path) -> None:
