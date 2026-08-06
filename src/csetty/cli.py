@@ -30,6 +30,8 @@ from .supervisor import AttemptService, ensure_supervisor
 from .util import atomic_write
 from .vscode import VSCodeManager
 
+_REPORT_LOCK_TIMEOUT_SECONDS = 5.0
+
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="csetty", description="Local CSE exam workflow simulator")
@@ -632,7 +634,9 @@ def _report(args: argparse.Namespace) -> int:
     service = AttemptService(
         store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock
     )
-    document, json_path, html_path, _finalized = service.publish_report()
+    document, json_path, html_path, _finalized = service.publish_report(
+        lock_timeout=_REPORT_LOCK_TIMEOUT_SECONDS
+    )
     if args.json:
         print(json.dumps(document, indent=2, sort_keys=True))
     else:

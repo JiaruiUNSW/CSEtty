@@ -270,6 +270,8 @@ $regressionLog = Join-Path $evidenceRoot 'targeted-regressions.txt'
 $regressionTests = @(
     'tests/test_companion.py::test_companion_browser_failure_is_nonfatal_without_reading_callback',
     'tests/test_companion.py::test_created_companion_withholds_paper_and_resource_routes',
+    'tests/test_attempt_service.py::test_created_attempt_report_is_rejected_before_rendering',
+    'tests/test_cli_start.py::test_report_command_rejects_created_attempt_without_exposing_paper',
     'tests/test_cli_start.py::test_resume_created_attempt_preserves_skip_reading_choice',
     'tests/test_companion.py::test_stale_working_report_is_not_ready_until_finalization_completes',
     'tests/test_storage.py::test_report_lock_serializes_another_process',
@@ -294,14 +296,17 @@ The log must prove these exact states:
 - an explicit `browser_open` false result without a reading callback returns a
   healthy companion instead of raising;
 - `CREATED` renders only the waiting page and rejects question/resource access;
+- a `CREATED` attempt also rejects text, JSON, and HTML report publication so
+  the complete paper cannot be recovered before reading time starts;
 - a persisted practice `--skip-reading` attempt resumes directly into working;
   and
 - a working-time HTML/JSON pair plus a terminal state and even a grade are not
   sufficient for `report_ready`; only the later finalization marker publishes
   the report;
 - native-Windows processes serialize on the same per-attempt report lock, and a
-  forced working-report/finalization race leaves the durable report graded and
-  `FINISHED`; and
+  bounded interactive wait reports a clear busy error instead of hanging; a
+  forced working-report/finalization race still leaves the durable report graded
+  and `FINISHED`; and
 - the native-Windows liveness probe observes a running process without
   terminating it and reports it dead only after normal termination; and
 - the browser document keeps referrers same-origin so **Open VSC** submits an

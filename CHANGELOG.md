@@ -46,6 +46,8 @@
   environment instead of requiring it to match the redirector wrapper PID.
 - Keeps companion referrers same-origin so the browser's **Open VSC** form POST
   retains its loopback origin without exposing tokenized paths to external sites.
+- Rejects report publication while an attempt is still `CREATED`, closing the
+  pre-reading report path, and bounds the interactive report-lock wait.
 
 ## 0.1.0a1 — 2026-08-06
 

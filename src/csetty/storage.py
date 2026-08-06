@@ -179,8 +179,12 @@ class Store:
             connection.close()
 
     @contextmanager
-    def report_lock(self, attempt_id: str) -> Iterator[None]:
+    def report_lock(
+        self, attempt_id: str, *, timeout: float | None = None
+    ) -> Iterator[None]:
         """Serialize report publication for one attempt across threads and processes."""
+        if timeout is not None and timeout < 0:
+            raise ValidationError("report lock timeout must be non-negative")
         try:
             parsed_id = uuid.UUID(attempt_id)
         except ValueError as exc:
@@ -194,39 +198,73 @@ class Store:
         with _REPORT_THREAD_LOCKS_GUARD:
             thread_lock = _REPORT_THREAD_LOCKS.setdefault(resolved_path, threading.Lock())
 
-        with thread_lock, path.open("a+b") as stream:
-            stream.seek(0, os.SEEK_END)
-            if stream.tell() == 0:
-                stream.write(b"\0")
-                stream.flush()
-            stream.seek(0)
-            if os.name == "nt":
-                lock_api: Any = importlib.import_module("msvcrt")
+        deadline = None if timeout is None else time.monotonic() + timeout
+        if deadline is None:
+            thread_acquired = thread_lock.acquire()
+        else:
+            thread_acquired = thread_lock.acquire(
+                timeout=max(0.0, deadline - time.monotonic())
+            )
+        if not thread_acquired:
+            raise StateError("another report publication is still in progress")
+        try:
+            with path.open("a+b") as stream:
+                stream.seek(0, os.SEEK_END)
+                if stream.tell() == 0:
+                    stream.write(b"\0")
+                    stream.flush()
+                stream.seek(0)
+                if os.name == "nt":
+                    lock_api: Any = importlib.import_module("msvcrt")
 
-                while True:
+                    while True:
+                        try:
+                            lock_api.locking(stream.fileno(), lock_api.LK_NBLCK, 1)
+                        except OSError as exc:
+                            if exc.errno not in {errno.EACCES, errno.EAGAIN, errno.EDEADLK}:
+                                raise
+                            if deadline is not None and time.monotonic() >= deadline:
+                                raise StateError(
+                                    "another report publication is still in progress"
+                                ) from exc
+                            time.sleep(0.05)
+                        else:
+                            break
                     try:
-                        lock_api.locking(stream.fileno(), lock_api.LK_NBLCK, 1)
-                    except OSError as exc:
-                        if exc.errno not in {errno.EACCES, errno.EAGAIN, errno.EDEADLK}:
-                            raise
-                        time.sleep(0.05)
-                    else:
-                        break
-                try:
-                    yield
-                finally:
-                    stream.seek(0)
-                    with suppress(OSError):
-                        lock_api.locking(stream.fileno(), lock_api.LK_UNLCK, 1)
-            else:
-                lock_api = importlib.import_module("fcntl")
-
-                lock_api.flock(stream.fileno(), lock_api.LOCK_EX)
-                try:
-                    yield
-                finally:
-                    with suppress(OSError):
-                        lock_api.flock(stream.fileno(), lock_api.LOCK_UN)
+                        yield
+                    finally:
+                        stream.seek(0)
+                        with suppress(OSError):
+                            lock_api.locking(stream.fileno(), lock_api.LK_UNLCK, 1)
+                else:
+                    lock_api = importlib.import_module("fcntl")
+                    operation = lock_api.LOCK_EX
+                    if deadline is not None:
+                        operation |= lock_api.LOCK_NB
+                    while True:
+                        try:
+                            lock_api.flock(stream.fileno(), operation)
+                        except OSError as exc:
+                            if exc.errno not in {
+                                errno.EACCES,
+                                errno.EAGAIN,
+                                errno.EWOULDBLOCK,
+                            }:
+                                raise
+                            if deadline is not None and time.monotonic() >= deadline:
+                                raise StateError(
+                                    "another report publication is still in progress"
+                                ) from exc
+                            time.sleep(0.05)
+                        else:
+                            break
+                    try:
+                        yield
+                    finally:
+                        with suppress(OSError):
+                            lock_api.flock(stream.fileno(), lock_api.LOCK_UN)
+        finally:
+            thread_lock.release()
 
     def _migrate(self) -> None:
         with self._connect() as connection:

@@ -84,6 +84,7 @@ def make_service(
     now: datetime,
     *,
     report_opener: Callable[[Path], bool] | None = None,
+    state: AttemptState = AttemptState.WORKING,
 ) -> tuple[AttemptService, Store, RuntimeFake]:
     source = load_pack(make_pack(tmp_path / "source-pack"))
     paths = AppPaths.discover(tmp_path / "state")
@@ -106,12 +107,15 @@ def make_service(
         attempt_id=attempt_id,
         candidate_id="z1234567",
     )
-    attempt = store.transition(
-        attempt.id,
-        AttemptState.WORKING,
-        at=now,
-        deadline_at=now + timedelta(minutes=10),
-    )
+    if state is AttemptState.WORKING:
+        attempt = store.transition(
+            attempt.id,
+            AttemptState.WORKING,
+            at=now,
+            deadline_at=now + timedelta(minutes=10),
+        )
+    elif state is not AttemptState.CREATED:
+        raise AssertionError(f"unsupported service fixture state: {state.value}")
     runtime = RuntimeFake({"q1.c": b"pass\n"})
     service = AttemptService(
         store=store,
@@ -298,6 +302,20 @@ def test_aborted_attempt_report_remains_ungraded_and_nonfinal(tmp_path: Path) ->
 
     with pytest.raises(StateError, match="finished or expired"):
         service.finalize_report()
+
+
+def test_created_attempt_report_is_rejected_before_rendering(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(
+        tmp_path,
+        now,
+        state=AttemptState.CREATED,
+    )
+
+    with pytest.raises(StateError, match="before reading time starts"):
+        service.publish_report()
+
+    assert list(store.paths.reports.glob(f"{service.attempt_id}.*")) == []
 
 
 def test_grade_has_no_report_file_side_effect_until_finalization(tmp_path: Path) -> None:

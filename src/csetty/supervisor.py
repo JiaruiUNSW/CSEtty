@@ -628,11 +628,13 @@ class AttemptService:
         return report
 
     def publish_report(
-        self, *, require_terminal: bool = False
+        self, *, require_terminal: bool = False, lock_timeout: float | None = None
     ) -> tuple[dict[str, Any], Path, Path, bool]:
         """Write a current report without racing another report publisher."""
-        with self.store.report_lock(self.attempt_id):
+        with self.store.report_lock(self.attempt_id, timeout=lock_timeout):
             attempt = self._attempt()
+            if attempt.state is AttemptState.CREATED:
+                raise StateError("a report is unavailable before reading time starts")
             finalized = attempt.state in {AttemptState.FINISHED, AttemptState.EXPIRED}
             if require_terminal and not finalized:
                 raise StateError("a final report requires a finished or expired attempt")

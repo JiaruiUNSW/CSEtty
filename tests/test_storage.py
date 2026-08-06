@@ -93,6 +93,14 @@ def test_report_lock_serializes_another_process(tmp_path: Path) -> None:
             raise AssertionError("lock holder did not become ready")
         time.sleep(0.02)
 
+    started = time.monotonic()
+    with (
+        pytest.raises(StateError, match="report publication is still in progress"),
+        store.report_lock(attempt_id, timeout=0.1),
+    ):
+        raise AssertionError("the held process lock must not be acquired")
+    assert time.monotonic() - started < 2
+
     acquired = threading.Event()
 
     def acquire_after_holder() -> None:

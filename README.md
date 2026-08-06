@@ -278,7 +278,8 @@ per attempt across processes, and a rewrite temporarily withdraws the readiness
 marker until both replacement files are complete. If the browser cannot be
 launched, the absolute report path remains in the terminal or supervisor log and `csetty report
 [ATTEMPT_ID]` remains available. Without an ID, `report` selects the newest
-attempt; every successful `start` also prints the full ID before reading begins.
+attempt; a `CREATED` attempt cannot be reported until reading starts. Every
+successful `start` also prints the full ID before reading begins.
 Outside the initial reading transition, a browser-launch failure is nonfatal and
 the ready loopback URL is printed so the timed workspace can still open.
 

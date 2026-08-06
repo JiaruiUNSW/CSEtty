@@ -12,6 +12,7 @@ from test_pack import make_pack
 import csetty.cli as cli
 import csetty.supervisor as supervisor_module
 from csetty.clock import FrozenClock
+from csetty.errors import StateError
 from csetty.models import AttemptMode, AttemptState, WorkspaceKind
 from csetty.pack import load_pack
 from csetty.paths import AppPaths
@@ -276,6 +277,43 @@ def test_resume_created_attempt_preserves_skip_reading_choice(
 def test_report_command_defaults_to_the_latest_attempt() -> None:
     args = cli._parser().parse_args(["report"])
     assert args.attempt_id is None
+
+
+def test_report_command_rejects_created_attempt_without_exposing_paper(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    pack = load_pack(make_pack(tmp_path / "pack"))
+    paths = AppPaths.discover(tmp_path / "state")
+    store = Store(paths)
+    attempt = store.create_attempt(
+        pack_id=pack.id,
+        pack_version=pack.version,
+        pack_path=pack.root,
+        pack_digest=pack.digest,
+        course=pack.course,
+        profile=pack.profile,
+        mode=AttemptMode.EXAM,
+        timed=True,
+        created_at=datetime.now(UTC),
+        workspace_kind=WorkspaceKind.VOLUME,
+        workspace_ref="created-report-volume",
+        image=pack.environment.image,
+        editor="terminal",
+        candidate_id="z1234567",
+    )
+    monkeypatch.setattr(
+        cli,
+        "_components",
+        lambda: (paths, store, RuntimeStub(), object()),
+    )
+
+    with pytest.raises(StateError, match="before reading time starts"):
+        cli._report(cli._parser().parse_args(["report", attempt.id, "--json"]))
+
+    assert capsys.readouterr().out == ""
+    assert list(paths.reports.glob(f"{attempt.id}.*")) == []
 
 
 def test_report_without_id_renders_the_newest_finished_attempt(

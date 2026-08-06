@@ -244,7 +244,7 @@ a command. The reading anchor is recorded only after the companion is healthy
 and the host browser-launch call succeeds. If that call raises or explicitly
 reports failure, the attempt remains `CREATED`, consumes no reading time, and
 can be retried with `csetty resume ATTEMPT_ID`. While `CREATED`, the companion
-serves a waiting page and rejects question and resource routes. A practice
+serves a waiting page and rejects question, resource, and report access. A practice
 attempt's explicit `--skip-reading` choice is stored with the attempt and remains
 in force if that `CREATED` attempt is resumed. The live countdown uses a
 monotonic clock. The reading anchor and
