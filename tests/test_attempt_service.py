@@ -279,6 +279,27 @@ def test_failed_report_rewrite_hides_the_previous_final_report(
     assert grade["report_finalized_at"] is None
 
 
+def test_aborted_attempt_report_remains_ungraded_and_nonfinal(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    store.transition(
+        service.attempt_id,
+        AttemptState.ABORTED,
+        at=now,
+        finish_reason="cancelled",
+    )
+
+    document, _json_report, _html_report, finalized = service.publish_report()
+
+    assert finalized is False
+    assert document["attempt"]["state"] == AttemptState.ABORTED.value
+    assert document["grade"] is None
+    assert store.get_grade(service.attempt_id) is None
+
+    with pytest.raises(StateError, match="finished or expired"):
+        service.finalize_report()
+
+
 def test_grade_has_no_report_file_side_effect_until_finalization(tmp_path: Path) -> None:
     now = datetime(2026, 8, 5, tzinfo=UTC)
     service, store, _runtime = make_service(tmp_path, now)

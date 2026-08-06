@@ -274,7 +274,8 @@ $regressionTests = @(
     'tests/test_companion.py::test_stale_working_report_is_not_ready_until_finalization_completes',
     'tests/test_storage.py::test_report_lock_serializes_another_process',
     'tests/test_cli_start.py::test_working_report_cannot_overwrite_a_concurrent_final_report',
-    'tests/test_attempt_service.py::test_failed_report_rewrite_hides_the_previous_final_report'
+    'tests/test_attempt_service.py::test_failed_report_rewrite_hides_the_previous_final_report',
+    'tests/test_attempt_service.py::test_aborted_attempt_report_remains_ungraded_and_nonfinal'
 )
 & .\.venv\Scripts\pytest.exe -vv @regressionTests *> $regressionLog
 $regressionExit = $LASTEXITCODE
@@ -299,7 +300,9 @@ The log must prove these exact states:
   forced working-report/finalization race leaves the durable report graded and
   `FINISHED`; and
 - a failed rewrite clears the old finalization marker instead of continuing to
-  advertise stale report files.
+  advertise stale report files; and
+- an `ABORTED` attempt remains ungraded and is never published as a final
+  `FINISHED`/`EXPIRED` report.
 
 ## 7. Create validation-only short packs
 

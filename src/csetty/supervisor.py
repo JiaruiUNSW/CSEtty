@@ -633,9 +633,9 @@ class AttemptService:
         """Write a current report without racing another report publisher."""
         with self.store.report_lock(self.attempt_id):
             attempt = self._attempt()
-            if require_terminal and not attempt.state.terminal:
+            finalized = attempt.state in {AttemptState.FINISHED, AttemptState.EXPIRED}
+            if require_terminal and not finalized:
                 raise StateError("a final report requires a finished or expired attempt")
-            finalized = attempt.state.terminal
             grade = self.grade() if finalized else None
             if finalized:
                 attempt = self.store.get_attempt(self.attempt_id)
