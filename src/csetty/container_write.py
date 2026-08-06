@@ -13,6 +13,13 @@ from pathlib import Path, PurePosixPath
 _MAX_INPUT_BYTES = 6 * 1024 * 1024
 
 
+def _required_os_flag(name: str) -> int:
+    value = getattr(os, name, None)
+    if not isinstance(value, int):
+        raise OSError(errno.ENOSYS, f"container writer requires POSIX flag {name}")
+    return value
+
+
 def _relative(value: str) -> PurePosixPath:
     path = PurePosixPath(value)
     if (
@@ -26,7 +33,7 @@ def _relative(value: str) -> PurePosixPath:
 
 
 def _open_parent(root: Path, parts: tuple[str, ...]) -> int:
-    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    flags = os.O_RDONLY | _required_os_flag("O_DIRECTORY") | _required_os_flag("O_NOFOLLOW")
     directory_fd = os.open(root, flags)
     try:
         for part in parts:
@@ -76,7 +83,7 @@ def write_file(root: Path, relative: str, content: bytes, *, overwrite: bool) ->
             return "kept"
         temporary_fd = os.open(
             temporary,
-            os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | _required_os_flag("O_NOFOLLOW"),
             0o600,
             dir_fd=directory_fd,
         )

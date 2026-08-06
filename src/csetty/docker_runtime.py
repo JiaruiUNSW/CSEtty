@@ -6,6 +6,7 @@ import importlib.metadata
 import json
 import os
 import shutil
+import stat
 import subprocess
 import tempfile
 from collections.abc import Iterable, Iterator, Mapping, Sequence
@@ -1156,6 +1157,44 @@ print(written)
         """Copy test assets without exposing author-only reference solutions."""
         copy_pack_files(pack.root, destination)
 
+    @staticmethod
+    def _make_bind_tree_readable(root: Path) -> None:
+        for path in (root, *sorted(root.rglob("*"))):
+            if path.is_symlink():
+                raise ValidationError(f"judge bind input contains a symlink: {path}")
+            mode = path.stat(follow_symlinks=False).st_mode
+            permissions = stat.S_IMODE(mode)
+            if stat.S_ISDIR(mode):
+                path.chmod(permissions | 0o055)
+            elif stat.S_ISREG(mode):
+                path.chmod(permissions | 0o444)
+            else:
+                raise ValidationError(f"judge bind input is not a regular file: {path}")
+
+    @classmethod
+    def _copy_judge_submission(cls, source: Path, destination: Path) -> None:
+        if source.is_symlink() or not source.is_dir():
+            raise ValidationError("judge submission snapshot must be a regular directory")
+        source_root = source.resolve(strict=True)
+        for path in sorted(source_root.rglob("*")):
+            if path.is_symlink():
+                raise ValidationError(
+                    f"judge submission contains a symlink: {path.relative_to(source_root)}"
+                )
+            relative = path.relative_to(source_root)
+            target = destination / relative
+            if path.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+            elif path.is_file():
+                resolved = path.resolve(strict=True)
+                if not resolved.is_relative_to(source_root):
+                    raise ValidationError(f"judge submission escapes its root: {relative}")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(resolved, target)
+            else:
+                raise ValidationError(f"judge submission is not a regular file: {relative}")
+        cls._make_bind_tree_readable(destination)
+
     def run_judge(
         self,
         *,
@@ -1174,11 +1213,19 @@ print(written)
             "groups": [self._serialize_group(pack, group) for group in groups],
         }
         self.paths.cache.mkdir(parents=True, exist_ok=True)
-        with tempfile.TemporaryDirectory(
-            prefix="csetty-judge-pack-", dir=self.paths.cache
-        ) as judge_pack_name:
+        with (
+            tempfile.TemporaryDirectory(
+                prefix="csetty-judge-pack-", dir=self.paths.cache
+            ) as judge_pack_name,
+            tempfile.TemporaryDirectory(
+                prefix="csetty-judge-submission-", dir=self.paths.cache
+            ) as judge_submission_name,
+        ):
             judge_pack = Path(judge_pack_name)
+            judge_submission = Path(judge_submission_name)
             self._copy_judge_pack(pack, judge_pack)
+            self._make_bind_tree_readable(judge_pack)
+            self._copy_judge_submission(snapshot, judge_submission)
             arguments = [
                 "run",
                 "--rm",
@@ -1201,7 +1248,7 @@ print(written)
                 "--tmpfs",
                 "/judge:rw,nosuid,nodev,exec,uid=1000,gid=1000,size=512m",
                 "--mount",
-                f"type=bind,source={snapshot.resolve()},target=/submission,readonly",
+                f"type=bind,source={judge_submission},target=/submission,readonly",
                 "--mount",
                 f"type=bind,source={judge_pack},target=/pack,readonly",
                 "--user",

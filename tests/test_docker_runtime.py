@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import stat
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -322,13 +324,33 @@ def test_judge_is_ephemeral_offline_and_mounts_only_read_only_inputs(
     pack = load_pack(make_pack(tmp_path / "pack"))
     snapshot = tmp_path / "snapshot"
     snapshot.mkdir()
-    (snapshot / "q1.c").write_text("int main(void) { return 0; }\n", encoding="utf-8")
+    submission = snapshot / "q1.c"
+    submission.write_text("int main(void) { return 0; }\n", encoding="utf-8")
+    if os.name != "nt":
+        snapshot.chmod(0o700)
+        submission.chmod(0o600)
     captured: list[list[str]] = []
 
     monkeypatch.setattr(runtime, "pinned_judge_image", lambda _attempt: "sha256:judge-fixed")
 
     def fake_run(arguments, **_kwargs):
         captured.append(list(arguments))
+        submission_mount = next(
+            value
+            for value in arguments
+            if value.startswith("type=bind,source=") and "target=/submission" in value
+        )
+        mounted_root = Path(
+            submission_mount.removeprefix("type=bind,source=").split(",target=", 1)[0]
+        )
+        mounted_submission = mounted_root / "q1.c"
+        assert mounted_root != snapshot.resolve()
+        assert mounted_submission.read_text(encoding="utf-8") == submission.read_text(
+            encoding="utf-8"
+        )
+        if os.name != "nt":
+            assert stat.S_IMODE(mounted_root.stat().st_mode) & stat.S_IXOTH
+            assert stat.S_IMODE(mounted_submission.stat().st_mode) & stat.S_IROTH
         return CommandResult(tuple(arguments), 0, '{"status":"PASS","groups":[]}\n', "")
 
     monkeypatch.setattr(runtime, "_run", fake_run)

@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
 
 from csetty.container_inspect import _safe
 from csetty.container_write import write_file
+
+pytestmark = pytest.mark.skipif(
+    os.name != "posix", reason="container path helpers execute only inside the Linux image"
+)
 
 
 def test_container_write_is_atomic_and_respects_overwrite(tmp_path: Path) -> None:

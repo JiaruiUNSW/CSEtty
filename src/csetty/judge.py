@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import importlib
 import json
 import os
-import resource
 import shutil
 import signal
 import subprocess
@@ -34,8 +34,20 @@ def _copy_tree_without_links(source: Path, destination: Path) -> None:
 
 
 def _limit_child() -> None:
-    resource.setrlimit(resource.RLIMIT_NOFILE, (64, 64))
-    os.setsid()
+    resource_module = importlib.import_module("resource")
+    resource_module.setrlimit(resource_module.RLIMIT_NOFILE, (64, 64))
+
+
+def _kill_process_group(process: subprocess.Popen[bytes]) -> None:
+    if sys.platform == "win32":
+        process.kill()
+        return
+    killpg = getattr(os, "killpg", None)
+    sigkill = getattr(signal, "SIGKILL", signal.SIGTERM)
+    if callable(killpg):
+        killpg(process.pid, sigkill)
+    else:  # pragma: no cover - defensive fallback for non-Windows POSIX variants
+        process.kill()
 
 
 def _execute(
@@ -65,8 +77,8 @@ def _execute(
                     stdin=stdin_stream,
                     stdout=stdout_stream,
                     stderr=stderr_stream,
-                    start_new_session=False,
-                    preexec_fn=_limit_child,
+                    start_new_session=sys.platform != "win32",
+                    preexec_fn=None if sys.platform == "win32" else _limit_child,
                 )
                 deadline = started + timeout_ms / 1000
                 timed_out = False
@@ -83,7 +95,7 @@ def _execute(
                         time.sleep(0.01)
                         continue
                     with suppress(ProcessLookupError):
-                        os.killpg(process.pid, signal.SIGKILL)
+                        _kill_process_group(process)
                     process.wait(timeout=2)
         except FileNotFoundError as exc:
             return {
