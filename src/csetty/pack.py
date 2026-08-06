@@ -490,8 +490,12 @@ def _pack_files(root: Path) -> Iterable[tuple[Path, PurePosixPath]]:
             continue
         if path.is_symlink():
             try:
-                resolved = path.resolve(strict=True)
-            except OSError as exc:
+                link_target = Path(os.readlink(path))
+                unresolved = (
+                    link_target if link_target.is_absolute() else path.parent / link_target
+                )
+                resolved = unresolved.resolve(strict=True)
+            except (OSError, RuntimeError) as exc:
                 raise ValidationError(f"pack contains a broken symlink: {relative}") from exc
             if not resolved.is_relative_to(resolved_root):
                 raise ValidationError(f"pack symlink escapes its root: {relative}")
