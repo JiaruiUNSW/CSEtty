@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Any
 
 _EXPECTED_PLATFORMS = {("linux", "amd64"), ("linux", "arm64")}
+_SBOM_PREDICATE = "https://spdx.dev/Document"
+_PROVENANCE_PREDICATES = {
+    "https://slsa.dev/provenance/v0.2",
+    "https://slsa.dev/provenance/v1",
+}
 
 
 def _json_member(archive: tarfile.TarFile, name: str) -> dict[str, Any]:
@@ -50,6 +55,15 @@ def _leaf_descriptors(
     raise SystemExit("OCI index nesting exceeds the supported depth")
 
 
+def _verify_attestation_predicates(image_digest: str, predicates: set[str]) -> None:
+    has_sbom = _SBOM_PREDICATE in predicates
+    has_provenance = not predicates.isdisjoint(_PROVENANCE_PREDICATES)
+    if not has_sbom or not has_provenance:
+        raise SystemExit(
+            f"attestation for {image_digest} lacks SBOM/provenance: {sorted(predicates)}"
+        )
+
+
 def verify(path: Path, *, profile: str, role: str) -> None:
     with tarfile.open(path, mode="r:*") as archive:
         layout = _json_member(archive, "oci-layout")
@@ -87,10 +101,6 @@ def verify(path: Path, *, profile: str, role: str) -> None:
                 + ", ".join(sorted(missing_attestations))
             )
 
-        required_predicates = {
-            "https://spdx.dev/Document",
-            "https://slsa.dev/provenance/v0.2",
-        }
         for image_digest in sorted(image_digests):
             attestation = _json_member(
                 archive,
@@ -104,10 +114,7 @@ def verify(path: Path, *, profile: str, role: str) -> None:
                 for layer in layers
                 if isinstance(layer, dict)
             }
-            if not required_predicates.issubset(predicates):
-                raise SystemExit(
-                    f"attestation for {image_digest} lacks SBOM/provenance: {sorted(predicates)}"
-                )
+            _verify_attestation_predicates(image_digest, predicates)
 
         for platform, descriptor in sorted(images.items()):
             manifest = _json_member(archive, _blob_name(str(descriptor["digest"])))
