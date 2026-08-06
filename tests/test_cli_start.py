@@ -88,14 +88,18 @@ def test_exam_start_opens_read_only_page_before_reading_and_reuses_it_for_workin
     monkeypatch.setattr(cli.PackRepository, "get", lambda _self, _selector: source_pack)
     monkeypatch.setattr(cli, "_components", lambda: (paths, store, runtime, object()))
     monkeypatch.setattr(cli, "run_exam_entry_gate", lambda _course: "z1234567")
-    monkeypatch.setattr(
-        cli,
-        "launch_companion",
-        lambda _paths, attempt, **kwargs: (
-            events.append(("page", attempt.state, kwargs.get("open_browser", True)))
-            or SimpleNamespace(url="http://127.0.0.1/reading/")
-        ),
-    )
+    def launch_reading_page(
+        _paths: object, attempt: object, **kwargs: object
+    ) -> SimpleNamespace:
+        events.append(("page-ready", attempt.state))  # type: ignore[union-attr]
+        callback = kwargs["ready_callback"]
+        assert callable(callback)
+        callback()
+        current = store.get_attempt(attempt.id)  # type: ignore[union-attr]
+        events.append(("page-open", current.state, kwargs.get("open_browser", True)))
+        return SimpleNamespace(url="http://127.0.0.1/reading/")
+
+    monkeypatch.setattr(cli, "launch_companion", launch_reading_page)
     monkeypatch.setattr(
         cli,
         "_reading",
@@ -120,10 +124,65 @@ def test_exam_start_opens_read_only_page_before_reading_and_reuses_it_for_workin
     )
     assert cli._start(args) == 0
     assert events == [
-        ("page", AttemptState.READING, True),
+        ("page-ready", AttemptState.CREATED),
+        ("page-open", AttemptState.READING, True),
         ("countdown",),
         ("working", AttemptState.WORKING, False),
     ]
+
+
+def test_report_command_defaults_to_the_latest_attempt() -> None:
+    args = cli._parser().parse_args(["report"])
+    assert args.attempt_id is None
+
+
+def test_report_without_id_renders_the_newest_finished_attempt(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    pack = load_pack(make_pack(tmp_path / "pack"))
+    paths = AppPaths.discover(tmp_path / "state")
+    store = Store(paths)
+    now = datetime.now(UTC)
+    attempt = store.create_attempt(
+        pack_id=pack.id,
+        pack_version=pack.version,
+        pack_path=pack.root,
+        pack_digest=pack.digest,
+        course=pack.course,
+        profile=pack.profile,
+        mode=AttemptMode.EXAM,
+        timed=True,
+        created_at=now,
+        workspace_kind=WorkspaceKind.VOLUME,
+        workspace_ref="report-volume",
+        image=pack.environment.image,
+        editor="terminal",
+        candidate_id="z1234567",
+    )
+    attempt = store.transition(
+        attempt.id,
+        AttemptState.WORKING,
+        at=now,
+        deadline_at=now + timedelta(hours=3),
+    )
+    store.transition(
+        attempt.id,
+        AttemptState.FINISHED,
+        at=now,
+        finish_reason="student",
+    )
+    monkeypatch.setattr(
+        cli,
+        "_components",
+        lambda: (paths, store, RuntimeStub(), object()),
+    )
+
+    assert cli._report(cli._parser().parse_args(["report"])) == 0
+    output = capsys.readouterr().out
+    assert attempt.id in output
+    assert (paths.reports / f"{attempt.id}.html").is_file()
 
 
 def test_working_launch_opens_isolated_code_and_companion(

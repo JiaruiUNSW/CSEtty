@@ -243,6 +243,35 @@ def test_browser_open_failure_does_not_fail_finishing_or_report_generation(
     assert "The browser could not be opened automatically." in finished["stdout"]
 
 
+def test_finish_without_a_report_opener_still_writes_the_report(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+
+    finished = service.finish()
+
+    html_report = store.paths.reports / f"{service.attempt_id}.html"
+    assert finished["exit_code"] == 0
+    assert html_report.is_file()
+    assert f"Local HTML report: {html_report}" in finished["stdout"]
+    assert "Opened local HTML report" not in finished["stdout"]
+
+
+def test_grade_has_no_report_file_side_effect_until_finalization(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    store.transition(
+        service.attempt_id,
+        AttemptState.FINISHED,
+        at=now,
+        finish_reason="student",
+    )
+
+    service.grade()
+
+    assert not (store.paths.reports / f"{service.attempt_id}.html").exists()
+    assert not (store.paths.reports / f"{service.attempt_id}.json").exists()
+
+
 def test_supervisor_expiry_generates_and_opens_report(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -279,6 +308,52 @@ def test_supervisor_expiry_generates_and_opens_report(
     assert run_supervisor(state_dir=store.paths.root, attempt_id=service.attempt_id) == 0
     assert store.get_attempt(service.attempt_id).state is AttemptState.EXPIRED
     assert opened == [store.paths.reports / f"{service.attempt_id}.html"]
+    assert stopped == [service.attempt_id]
+
+
+def test_supervisor_stops_container_when_bridge_expiry_report_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    now = datetime.now(UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    stopped: list[str] = []
+
+    class ExpiryRuntime:
+        def __init__(self, paths: AppPaths) -> None:
+            self.paths = paths
+
+        def bridge_directory(self, attempt_id: str) -> Path:
+            return self.paths.attempts / attempt_id / "bridge"
+
+        @staticmethod
+        def stop_container(attempt: object) -> None:
+            stopped.append(attempt.id)  # type: ignore[union-attr]
+
+    class ExpiryBridge:
+        def __init__(self, *, store: Store, attempt: object, **_kwargs: object) -> None:
+            self.store = store
+            self.attempt = attempt
+
+        def process_once(self, _handler: object) -> bool:
+            self.store.transition(
+                self.attempt.id,  # type: ignore[union-attr]
+                AttemptState.EXPIRED,
+                at=datetime.now(UTC),
+                finish_reason="deadline",
+            )
+            return True
+
+    def fail_report(_self: AttemptService) -> tuple[dict[str, object], Path, bool]:
+        raise RuntimeError("report failed")
+
+    monkeypatch.setattr(supervisor_module, "DockerRuntime", ExpiryRuntime)
+    monkeypatch.setattr(supervisor_module, "BridgeServer", ExpiryBridge)
+    monkeypatch.setattr(AttemptService, "finalize_report", fail_report)
+    monkeypatch.setattr(supervisor_module.signal, "signal", lambda *_args: None)
+
+    with pytest.raises(RuntimeError, match="report failed"):
+        run_supervisor(state_dir=store.paths.root, attempt_id=service.attempt_id)
     assert stopped == [service.attempt_id]
 
 

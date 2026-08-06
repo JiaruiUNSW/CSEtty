@@ -21,7 +21,7 @@ csetty code [ATTEMPT_ID]
 csetty page [ATTEMPT_ID]
 csetty export ATTEMPT_ID DESTINATION
 csetty attempts list
-csetty report ATTEMPT_ID [--json]
+csetty report [ATTEMPT_ID] [--json]
 csetty bank validate PATH
 csetty bank stats PATH
 csetty bank verify PATH
@@ -56,6 +56,8 @@ refused rather than overwriting content in a non-empty new bind directory.
 `resume`, `code`, and `page` accept a full attempt UUID or an unambiguous prefix.
 With no argument, they select the most recent active attempt. `page` starts or
 reuses the loopback-only exam companion; it does not restart the attempt.
+`report` also accepts a full UUID or unambiguous prefix; with no argument, it
+selects the newest attempt, including a finished or expired attempt.
 
 The `bank` commands validate original source questions, report coverage, verify
 all reference implementations in the real judge, or build a deterministic

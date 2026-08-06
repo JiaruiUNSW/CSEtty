@@ -112,13 +112,20 @@ def launch_companion(
     *,
     open_browser: bool = True,
     browser_open: Callable[[str], object] = webbrowser.open,
+    ready_callback: Callable[[], None] | None = None,
 ) -> CompanionInfo:
     """Start or reuse the loopback-only page for an attempt."""
+
+    def publish(info: CompanionInfo) -> CompanionInfo:
+        if ready_callback is not None:
+            ready_callback()
+        if open_browser:
+            browser_open(info.url)
+        return info
+
     existing = _read_info(paths, attempt.id)
     if existing is not None and _healthy(existing):
-        if open_browser:
-            browser_open(existing.url)
-        return existing
+        return publish(existing)
 
     root = _attempt_root(paths, attempt.id)
     root.mkdir(parents=True, exist_ok=True)
@@ -132,43 +139,46 @@ def launch_companion(
         pass
 
     process: subprocess.Popen[bytes] | None = None
-    if owns_lock:
-        log_path = root / "companion.log"
-        with log_path.open("ab", buffering=0) as log:
-            kwargs: dict[str, Any] = {
-                "stdin": subprocess.DEVNULL,
-                "stdout": log,
-                "stderr": log,
-                "close_fds": True,
-            }
-            if os.name == "nt":
-                detached = getattr(subprocess, "DETACHED_PROCESS", 0)
-                new_group = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-                kwargs["creationflags"] = detached | new_group
-            else:
-                kwargs["start_new_session"] = True
-            process = subprocess.Popen(
-                [
-                    sys.executable,
-                    "-m",
-                    "csetty.companion",
-                    "--serve",
-                    "--state-dir",
-                    str(paths.root),
-                    "--attempt",
-                    attempt.id,
-                ],
-                **kwargs,
-            )
-
-    deadline = time.monotonic() + _START_TIMEOUT_SECONDS
     try:
+        if owns_lock:
+            log_path = root / "companion.log"
+            with log_path.open("ab", buffering=0) as log:
+                kwargs: dict[str, Any] = {
+                    "stdin": subprocess.DEVNULL,
+                    "stdout": log,
+                    "stderr": log,
+                    "close_fds": True,
+                }
+                if os.name == "nt":
+                    detached = getattr(subprocess, "DETACHED_PROCESS", 0)
+                    new_group = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+                    kwargs["creationflags"] = detached | new_group
+                else:
+                    kwargs["start_new_session"] = True
+                try:
+                    process = subprocess.Popen(
+                        [
+                            sys.executable,
+                            "-m",
+                            "csetty.companion",
+                            "--serve",
+                            "--state-dir",
+                            str(paths.root),
+                            "--attempt",
+                            attempt.id,
+                        ],
+                        **kwargs,
+                    )
+                except OSError as exc:
+                    raise ToolUnavailableError(
+                        f"exam companion page failed to start: {exc}"
+                    ) from exc
+
+        deadline = time.monotonic() + _START_TIMEOUT_SECONDS
         while time.monotonic() < deadline:
             info = _read_info(paths, attempt.id)
             if info is not None and _healthy(info):
-                if open_browser:
-                    browser_open(info.url)
-                return info
+                return publish(info)
             if process is not None and process.poll() is not None:
                 detail = (root / "companion.log").read_text(
                     encoding="utf-8", errors="replace"
@@ -354,7 +364,7 @@ class CompanionApplication:
             links=self._navigation(pack, active),
             status=(
                 f'<span class="phase-badge">{html.escape(attempt.state.value)}</span>'
-                f'<span>{timer_label}: <span class="timer" id="timer">{timer}</span></span>'
+                f'<span>{timer_label}: <span class="timer" data-countdown>{timer}</span></span>'
             ),
         )
         return f"""<!doctype html>
@@ -382,7 +392,7 @@ class CompanionApplication:
 <header class="exam-hero">
 <p class="text-muted text-uppercase"><strong>{surface_label}</strong></p>
 <h1>{html.escape(pack.title)}</h1>
-<p class="lead">{len(pack.questions)} questions — {total_marks} marks<br>{html.escape(timer_label)}: {timer}</p>
+<p class="lead">{len(pack.questions)} questions — {total_marks} marks<br>{html.escape(timer_label)}: <span data-countdown>{timer}</span></p>
 <p class="text-muted">Candidate {html.escape(attempt.candidate_id or 'practice user')} · not made or managed by UNSW</p>
 </header>
 {message_html}{content}
@@ -393,14 +403,15 @@ class CompanionApplication:
   const initialState = document.body.dataset.state;
   const statusUrl = document.body.dataset.statusUrl;
   const reportUrl = document.body.dataset.reportUrl;
-  const timer = document.getElementById('timer');
+  const timers = document.querySelectorAll('[data-countdown]');
   const update = () => {{
-    if (!deadline || !timer) return;
+    if (!deadline || timers.length === 0) return;
     const seconds = Math.max(0, Math.floor((Date.parse(deadline) - Date.now()) / 1000));
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
     const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');
-    timer.textContent = `${{h}}:${{m}}:${{s}}`;
+    const text = `${{h}}:${{m}}:${{s}}`;
+    timers.forEach((timer) => {{ timer.textContent = text; }});
   }};
   update(); setInterval(update, 1000);
   const refreshOnStateChange = async () => {{
@@ -418,7 +429,11 @@ class CompanionApplication:
       // A transient local-page failure is retried on the next poll.
     }}
   }};
-  setInterval(refreshOnStateChange, 1000);
+  const pollLoop = async () => {{
+    await refreshOnStateChange();
+    setTimeout(pollLoop, 1000);
+  }};
+  pollLoop();
 }})();
 </script>
 </body>
@@ -526,8 +541,16 @@ class CompanionApplication:
             controls_heading = "Exam controls"
             controls_text = f"Closing the editor does not stop the clock. {editor_text}"
         if attempt.state.terminal:
-            editor_control = f'<a class="btn" href="{self.base_path}/report">Open final report</a>'
-            controls_text += " The final report opens here as soon as local grading is complete."
+            if self.report_ready(attempt):
+                editor_control = (
+                    f'<a class="btn" href="{self.base_path}/report">Open final report</a>'
+                )
+                controls_text += " The final report is ready."
+            else:
+                editor_control = (
+                    '<span class="btn" aria-disabled="true">Preparing final report…</span>'
+                )
+                controls_text += " The final report will open automatically when ready."
         if attempt.state is AttemptState.READING:
             resources_text = (
                 "Only the bundled resources explicitly permitted by this paper are available "
@@ -640,6 +663,9 @@ class CompanionHandler(BaseHTTPRequestHandler):
         return cast(CompanionHTTPServer, self.server).application
 
     def log_message(self, format: str, *args: object) -> None:
+        path = urlsplit(self.path).path
+        if path.endswith("/health") or path.endswith("/status.json"):
+            return
         sys.stderr.write(f"companion: {self.address_string()} {format % args}\n")
 
     def _headers(self, status: HTTPStatus, *, content_type: str, length: int) -> None:

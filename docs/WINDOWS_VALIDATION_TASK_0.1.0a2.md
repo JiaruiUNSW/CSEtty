@@ -262,9 +262,30 @@ function New-ShortPack {
     Copy-Item $Source $Destination -Recurse
     $manifest = Join-Path $Destination 'pack.toml'
     $text = Get-Content $manifest -Raw
-    $text = $text.Replace("id = `"$OldId`"", "id = `"$NewId`"")
-    $text = $text.Replace('reading_time_seconds = 600', "reading_time_seconds = $ReadingSeconds")
-    $text = $text.Replace('working_time_seconds = 10800', "working_time_seconds = $WorkingSeconds")
+    $replacements = @(
+        @{ Old = "id = `"$OldId`""; New = "id = `"$NewId`"" },
+        @{ Old = 'reading_time_seconds = 600'; New = "reading_time_seconds = $ReadingSeconds" },
+        @{ Old = 'working_time_seconds = 10800'; New = "working_time_seconds = $WorkingSeconds" }
+    )
+    foreach ($replacement in $replacements) {
+        if (-not $text.Contains($replacement.Old)) {
+            throw "Expected manifest value not found: $($replacement.Old)"
+        }
+        $updated = $text.Replace($replacement.Old, $replacement.New)
+        if ($updated -eq $text) {
+            throw "Manifest substitution made no change: $($replacement.Old)"
+        }
+        $text = $updated
+    }
+    foreach ($expected in @(
+        "id = `"$NewId`"",
+        "reading_time_seconds = $ReadingSeconds",
+        "working_time_seconds = $WorkingSeconds"
+    )) {
+        if (-not $text.Contains($expected)) {
+            throw "Final manifest value missing: $expected"
+        }
+    }
     [System.IO.File]::WriteAllText(
         $manifest,
         $text,
@@ -294,13 +315,28 @@ After creating each copy, run `csetty pack validate PATH` and record `PASS`. Als
 run `git status --short` and confirm the Git working tree remains unchanged
 except for the required results Markdown file.
 
+Every new PowerShell tab must repeat the environment setup; variables and venv
+activation from the first tab are not inherited. Replace the first two values
+with the absolute paths selected earlier, then use `$csetty` in that tab:
+
+```powershell
+$checkout = 'C:\absolute\path\to\CSEtty'
+$validationRoot = 'C:\absolute\path\to\csetty-windows-a2-validation'
+$stateRoot = Join-Path $validationRoot 'state'
+$env:CSETTY_STATE_DIR = $stateRoot
+$csetty = Join-Path $checkout '.venv\Scripts\csetty.exe'
+$comp1511ShortPack = Join-Path $validationRoot 'packs\comp1511-windows-a2-smoke'
+$comp1521ShortPack = Join-Path $validationRoot 'packs\comp1521-windows-a2-smoke'
+& $csetty --version
+```
+
 ## 8. COMP1511 explicit-finish GUI flow
 
 Run this from a real interactive Windows Terminal/PowerShell tab using the
 validation-only COMP1511 pack path and default VS Code editor:
 
 ```powershell
-.\.venv\Scripts\csetty.exe start $comp1511ShortPack --mode exam
+& $csetty start $comp1511ShortPack --mode exam
 ```
 
 Interact with dummy values `z5555555`, `validation-only`, and `yes`. Validate in
@@ -334,11 +370,13 @@ order:
 12. The finished report shows the same COMP1511 green course visual language,
     the correct candidate/attempt ID, `FINISHED`, score evidence, and the local
     estimate notice.
-13. The report remains available through `csetty report ATTEMPT_ID`.
+13. The report remains available through `& $csetty report` without requiring
+    the user to recover the attempt ID; the explicit ID remains accepted.
 
 Confirm the companion listener is loopback-only. Use the page port with
-`Get-NetTCPConnection -LocalPort PORT` and record that it is not bound to
-`0.0.0.0` or a LAN interface.
+`Get-NetTCPConnection -LocalPort PORT` and record every observed local address.
+Only `127.0.0.1` or `::1` is acceptable; reject `0.0.0.0`, `::`, and every other
+address, including all LAN/VPN interface addresses.
 
 ## 9. COMP1521 timed-expiry GUI flow
 
@@ -347,7 +385,7 @@ Use terminal editor mode so expiry can be observed without another VS Code
 window:
 
 ```powershell
-.\.venv\Scripts\csetty.exe start $comp1521ShortPack --mode exam --editor terminal
+& $csetty start $comp1521ShortPack --mode exam --editor terminal
 ```
 
 Use the same dummy simulation credentials and validate:
@@ -364,7 +402,8 @@ Use the same dummy simulation credentials and validate:
    writes JSON/HTML reports and automatically opens the HTML report;
 7. the report uses the same COMP1521 teal course visual language and records the
    attempt as `EXPIRED`; and
-8. `csetty report ATTEMPT_ID` can recover the durable result.
+8. `& $csetty report` can recover the newest durable result without an ID; an
+   explicit attempt ID remains accepted.
 
 Do not manually open the report before deciding whether automatic opening
 worked. If it does not open, record whether the report file still exists and the

@@ -86,7 +86,7 @@ def _parser() -> argparse.ArgumentParser:
     attempts_sub.add_parser("list")
 
     report = subcommands.add_parser("report", help="show an attempt report")
-    report.add_argument("attempt_id")
+    report.add_argument("attempt_id", nargs="?")
     report.add_argument("--json", action="store_true")
 
     bank = subcommands.add_parser("bank", help="validate and build from original question banks")
@@ -480,8 +480,11 @@ def _start(args: argparse.Namespace) -> int:
     should_read = pack.reading_time_seconds > 0 and not args.skip_reading
     reading_page_open = False
     if should_read:
-        attempt = store.transition(attempt.id, AttemptState.READING, at=clock.now())
-        companion = launch_companion(paths, attempt)
+        def begin_reading() -> None:
+            nonlocal attempt
+            attempt = store.transition(attempt.id, AttemptState.READING, at=clock.now())
+
+        companion = launch_companion(paths, attempt, ready_callback=begin_reading)
         reading_page_open = True
         print(f"Opened read-only exam paper: {companion.url}")
         assert attempt.reading_started_at is not None
@@ -513,9 +516,9 @@ def _resume(args: argparse.Namespace) -> int:
         reading_end = attempt.reading_started_at + timedelta(seconds=pack.reading_time_seconds)
         if clock.now() < reading_end:
             companion = launch_companion(paths, attempt)
+            reading_page_open = True
             print(f"Opened read-only exam paper: {companion.url}")
             _reading(pack, ends_at=reading_end, clock=clock)
-            reading_page_open = True
         else:
             reading_page_open = False
         attempt = _enter_working(attempt=attempt, pack=pack, store=store, anchor=reading_end)
@@ -589,7 +592,13 @@ def _list_attempts() -> int:
 def _report(args: argparse.Namespace) -> int:
     paths, store, runtime, _vscode = _components()
     clock = SystemClock()
-    attempt = store.resolve_attempt(args.attempt_id)
+    if args.attempt_id is None:
+        attempts = store.list_attempts()
+        if not attempts:
+            raise ValidationError("there is no attempt to report")
+        attempt = attempts[0]
+    else:
+        attempt = store.resolve_attempt(args.attempt_id)
     pack = _attempt_pack(attempt)
     attempt = store.expire_if_due(attempt.id, now=clock.now())
     grade_row = store.get_grade(attempt.id)

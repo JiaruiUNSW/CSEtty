@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import getpass
+import os
 import re
 import sys
 from collections.abc import Callable
@@ -10,10 +11,34 @@ from .errors import StateError, UsageError
 
 _ZID_PATTERN = re.compile(r"^z[0-9]{7}$")
 _CLEAR_TERMINAL = "\x1b[2J\x1b[3J\x1b[H"
+_ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
 
 
 def valid_zid(value: str) -> bool:
     return _ZID_PATTERN.fullmatch(value) is not None
+
+
+def _enable_windows_virtual_terminal(output: TextIO) -> None:
+    """Best-effort enable ANSI processing for an attached Windows console."""
+    if os.name != "nt":
+        return
+    try:
+        import ctypes
+        import importlib
+
+        msvcrt = importlib.import_module("msvcrt")
+        handle = msvcrt.get_osfhandle(output.fileno())
+        kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
+        mode = ctypes.c_uint32()
+        if kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+            kernel32.SetConsoleMode(
+                handle,
+                mode.value | _ENABLE_VIRTUAL_TERMINAL_PROCESSING,
+            )
+    except (AttributeError, ImportError, OSError, ValueError):
+        # Windows Terminal, ConPTY, and POSIX-like terminals may already handle
+        # ANSI even when no Win32 console mode is available for this stream.
+        return
 
 
 def clear_exam_terminal(stream: TextIO | None = None) -> None:
@@ -21,6 +46,7 @@ def clear_exam_terminal(stream: TextIO | None = None) -> None:
     output = sys.stdout if stream is None else stream
     if not output.isatty():
         return
+    _enable_windows_virtual_terminal(output)
     output.write(_CLEAR_TERMINAL)
     output.flush()
 

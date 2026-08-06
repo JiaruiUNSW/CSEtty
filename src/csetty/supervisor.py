@@ -534,9 +534,7 @@ class AttemptService:
             report = existing.get("report")
             if not isinstance(report, dict):
                 raise ValidationError("stored grade report is invalid")
-            restored = {str(key): value for key, value in report.items()}
-            self._write_report_files(self.store.get_attempt(self.attempt_id), restored)
-            return restored
+            return {str(key): value for key, value in report.items()}
         self._verify_pack_integrity()
         attempt = self.store.get_attempt(self.attempt_id)
         if not attempt.state.terminal:
@@ -627,7 +625,6 @@ class AttemptService:
             total=str(score["total"]),
             report=report,
         )
-        self._write_report_files(attempt, report)
         return report
 
     def _write_report_files(
@@ -645,7 +642,8 @@ class AttemptService:
     def finalize_report(self) -> tuple[dict[str, Any], Path, bool | None]:
         """Grade, persist both report formats, and optionally open the HTML report."""
         report = self.grade()
-        html_report = self.store.paths.reports / f"{self.attempt_id}.html"
+        attempt = self.store.get_attempt(self.attempt_id)
+        _json_report, html_report = self._write_report_files(attempt, report)
         opened = None if self.report_opener is None else self.report_opener(html_report)
         return report, html_report, opened
 
@@ -757,13 +755,15 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
             handled = bridge.process_once(service.handle)
             current = store.get_attempt(attempt.id)
             if current.state.terminal:
-                if current.state is AttemptState.EXPIRED:
-                    _report, html_report, opened = service.finalize_report()
-                    action = "Opened" if opened else "Created"
-                    print(f"{action} final HTML report: {html_report}", flush=True)
-                if handled:
-                    time.sleep(0.3)
-                runtime.stop_container(current)
+                try:
+                    if current.state is AttemptState.EXPIRED:
+                        _report, html_report, opened = service.finalize_report()
+                        action = "Opened" if opened else "Created"
+                        print(f"{action} final HTML report: {html_report}", flush=True)
+                    if handled:
+                        time.sleep(0.3)
+                finally:
+                    runtime.stop_container(current)
                 return 0
             time.sleep(poll_seconds)
         return 0

@@ -253,8 +253,8 @@ personal shell alias rather than a standard command, so it is not defined.
 .venv/bin/csetty code [ATTEMPT_ID]
 .venv/bin/csetty page [ATTEMPT_ID]
 .venv/bin/csetty export ATTEMPT_ID EMPTY_DESTINATION
-.venv/bin/csetty report ATTEMPT_ID
-.venv/bin/csetty report ATTEMPT_ID --json
+.venv/bin/csetty report [ATTEMPT_ID]
+.venv/bin/csetty report [ATTEMPT_ID] --json
 ```
 
 Closing the shell or VS Code never pauses or finishes a timed attempt. A
@@ -267,7 +267,8 @@ After `exam finish` or automatic timed expiry, the supervisor grades the latest
 accepted submissions, writes both report formats, and opens the HTML report in
 the host's default browser. If the browser cannot be launched, the absolute
 report path remains in the terminal or supervisor log and `csetty report
-ATTEMPT_ID` remains available.
+[ATTEMPT_ID]` remains available. Without an ID, `report` selects the newest
+attempt; every successful `start` also prints the full ID before reading begins.
 
 ## Original question banks
 

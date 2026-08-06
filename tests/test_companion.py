@@ -20,7 +20,7 @@ from csetty.companion import (
     launch_companion,
 )
 from csetty.course_resources import course_resource_links
-from csetty.errors import StateError
+from csetty.errors import StateError, ToolUnavailableError
 from csetty.models import AttemptMode, AttemptState, WorkspaceKind
 from csetty.pack import load_pack
 from csetty.paths import AppPaths
@@ -157,6 +157,51 @@ def test_companion_cold_start_can_become_healthy_after_ten_seconds(
     assert elapsed["seconds"] == 12
 
 
+def test_companion_runs_ready_callback_before_opening_existing_page(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _application_instance, store, attempt_id = _application(tmp_path)
+    attempt = store.get_attempt(attempt_id)
+    expected = CompanionInfo(
+        attempt_id=attempt_id,
+        pid=os.getpid(),
+        port=32123,
+        token="t" * 43,
+        started_at=datetime.now(UTC).isoformat(),
+    )
+    events: list[str] = []
+    monkeypatch.setattr(companion_module, "_read_info", lambda *_args: expected)
+    monkeypatch.setattr(companion_module, "_healthy", lambda _info: True)
+
+    assert (
+        launch_companion(
+            store.paths,
+            attempt,
+            ready_callback=lambda: events.append("ready"),
+            browser_open=lambda _url: events.append("open"),
+        )
+        == expected
+    )
+    assert events == ["ready", "open"]
+
+
+def test_companion_process_creation_failure_removes_startup_lock(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _application_instance, store, attempt_id = _application(tmp_path)
+    attempt = store.get_attempt(attempt_id)
+    monkeypatch.setattr(companion_module, "_read_info", lambda *_args: None)
+
+    def fail_to_start(*_args: object, **_kwargs: object) -> None:
+        raise OSError("process creation failed")
+
+    monkeypatch.setattr(companion_module.subprocess, "Popen", fail_to_start)
+
+    with pytest.raises(ToolUnavailableError, match="process creation failed"):
+        launch_companion(store.paths, attempt, open_browser=False)
+    assert not (store.paths.attempts / attempt_id / "companion.starting").exists()
+
+
 def test_companion_status_tracks_latest_submission(tmp_path: Path) -> None:
     application, store, attempt_id = _application(tmp_path)
     store.record_submission(
@@ -186,6 +231,9 @@ def test_reading_companion_shows_full_prompt_without_editor_or_external_resource
     assert 'target="_blank" rel="noopener noreferrer"' not in overview
     assert 'data-state="READING"' in overview
     assert "/status.json" in overview
+    assert overview.count('class="timer" data-countdown') == 1
+    assert overview.count("<span data-countdown>") == 1
+    assert "setTimeout(pollLoop, 1000)" in overview
     assert "Detailed question" in question
     assert "Detailed question" in overview
     assert '<article class="question-prompt">' in overview
@@ -233,7 +281,8 @@ def test_finished_companion_does_not_offer_unusable_vscode_recovery(tmp_path: Pa
     assert "Open VSC" not in overview
     assert "Open VSC" not in question
     assert "recovery is unavailable because this attempt is FINISHED" in overview
-    assert "Open final report" in overview
+    assert "Preparing final report" in overview
+    assert "Open final report" not in overview
 
 
 def test_finished_companion_serves_and_advertises_the_durable_report(tmp_path: Path) -> None:
@@ -250,7 +299,9 @@ def test_finished_companion_serves_and_advertises_the_durable_report(tmp_path: P
 
     assert application.status_document()["report_ready"] is True
     assert application.render_report() == "<!doctype html><title>Final report</title>"
-    assert 'data-report-url="/' in application.render_overview()
+    overview = application.render_overview()
+    assert 'data-report-url="/' in overview
+    assert "Open final report" in overview
 
 
 def test_report_opener_uses_the_live_companion_http_route(tmp_path: Path) -> None:

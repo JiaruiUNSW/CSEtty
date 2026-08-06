@@ -50,7 +50,7 @@ csetty resume [ATTEMPT_ID]
 csetty code [ATTEMPT_ID]
 csetty export ATTEMPT_ID DESTINATION
 csetty attempts list
-csetty report ATTEMPT_ID [--json]
+csetty report [ATTEMPT_ID] [--json]
 ```
 
 The complete container command contract is maintained in `COMMAND_SPEC.md`.
