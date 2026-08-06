@@ -202,6 +202,12 @@ def launch_companion(
     finally:
         if owns_lock:
             lock.unlink(missing_ok=True)
+    if process is not None and process.poll() is None:
+        try:
+            process.kill()
+            process.wait(timeout=5)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
     raise ToolUnavailableError(
         f"exam companion page did not start; inspect {root / 'companion.log'}"
     )

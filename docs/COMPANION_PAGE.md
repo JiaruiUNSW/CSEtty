@@ -5,12 +5,13 @@ Status: implemented for reading, working, finished, and expired attempts.
 ## Lifecycle
 
 During formal exam mode, sign-in and acknowledgement remain in the host
-terminal. Once reading time begins, CSEExamTTY opens the companion page as a
-full read-only paper in the default browser. It exposes every question prompt
-and the pack's explicitly permitted local resources, but it does not create an
-editable workspace or container and does not offer an editor control. The
-reading clock is anchored only after the companion is healthy and the browser
-launch succeeds; a failed launch leaves the attempt in resumable `CREATED`
+terminal. Before reading time begins, CSEExamTTY starts the companion, waits for
+its loopback endpoint to become healthy, and asks the default browser to open
+the full read-only paper. Only after that browser-launch call succeeds does it
+persist the reading start time. The page exposes every question prompt and the
+pack's explicitly permitted local resources, but it does not create an editable
+workspace or container and does not offer an editor control. A failed launch
+leaves the attempt in resumable `CREATED`
 state without deducting reading time. In `CREATED`, the companion exposes only a
 waiting page and rejects all question and resource routes, so its recovery URL
 cannot reveal the paper before the clock starts. When the
@@ -46,7 +47,8 @@ The overview contains:
 - bundled offline resources declared by the pack;
 - an index of relevant official public course pages outside reading time; and
 - an **Open VSC** recovery control while the attempt is working; and
-- an **Open final report** control after the report has been generated.
+- an **Open final report** control only after the persisted finalization marker
+  confirms grading and both JSON/HTML report writes completed.
 
 Each question page renders the pack's original Markdown prompt, including
 background, exact requirements, examples, implementation notes, required

@@ -98,9 +98,10 @@ reply in addition to recording their absolute paths and hashes:
 1. `01-terminal-signin-cleared.png`
 2. `02-comp1511-reading-full-paper.png`
 3. `03-comp1511-working-vscode.png`
-4. `04-comp1511-finished-report.png`
-5. `05-comp1521-reading-full-paper.png`
-6. `06-comp1521-expired-report.png`
+4. `03a-comp1511-working-report-not-final.png`
+5. `04-comp1511-finished-report.png`
+6. `05-comp1521-reading-full-paper.png`
+7. `06-comp1521-expired-report.png`
 
 Use the computer/browser control available on the Windows host when possible.
 If GUI control is unavailable, capture equivalent screenshots with a real local
@@ -257,6 +258,39 @@ After both profiles are ready, run:
 All must exit zero. Confirm `csetty-mips 0.1.1` is the COMP1521 runtime and no
 upstream mipsy checkout or executable is used.
 
+### Targeted recovery and report-readiness contracts
+
+Run the named tests separately and preserve their verbose output as
+`targeted-regressions.txt` under the evidence directory:
+
+```powershell
+$regressionLog = Join-Path $evidenceRoot 'targeted-regressions.txt'
+$regressionTests = @(
+    'tests/test_companion.py::test_companion_browser_failure_is_nonfatal_without_reading_callback',
+    'tests/test_companion.py::test_created_companion_withholds_paper_and_resource_routes',
+    'tests/test_cli_start.py::test_resume_created_attempt_preserves_skip_reading_choice',
+    'tests/test_companion.py::test_stale_working_report_is_not_ready_until_finalization_completes'
+)
+& .\.venv\Scripts\pytest.exe -vv @regressionTests *> $regressionLog
+$regressionExit = $LASTEXITCODE
+Get-Content $regressionLog
+if ($regressionExit -ne 0) {
+    throw "Targeted regression tests failed with exit code $regressionExit"
+}
+Get-FileHash $regressionLog -Algorithm SHA256
+```
+
+The log must prove these exact states:
+
+- an explicit `browser_open` false result without a reading callback returns a
+  healthy companion instead of raising;
+- `CREATED` renders only the waiting page and rejects question/resource access;
+- a persisted practice `--skip-reading` attempt resumes directly into working;
+  and
+- a working-time HTML/JSON pair plus a terminal state and even a grade are not
+  sufficient for `report_ready`; only the later finalization marker publishes
+  the report.
+
 ## 7. Create validation-only short packs
 
 Do not edit anything under the Git checkout's `packs` directory. Copy each pack
@@ -294,8 +328,12 @@ function New-ShortPack {
         @{ Old = 'working_time_seconds = 10800'; New = "working_time_seconds = $WorkingSeconds" }
     )
     foreach ($replacement in $replacements) {
-        if (-not $text.Contains($replacement.Old)) {
-            throw "Expected manifest value not found: $($replacement.Old)"
+        $count = ([regex]::Matches(
+            $text,
+            [regex]::Escape($replacement.Old)
+        )).Count
+        if ($count -ne 1) {
+            throw "Expected exactly one manifest value, found ${count}: $($replacement.Old)"
         }
         $updated = $text.Replace($replacement.Old, $replacement.New)
         if ($updated -eq $text) {
@@ -308,8 +346,9 @@ function New-ShortPack {
         "reading_time_seconds = $ReadingSeconds",
         "working_time_seconds = $WorkingSeconds"
     )) {
-        if (-not $text.Contains($expected)) {
-            throw "Final manifest value missing: $expected"
+        $count = ([regex]::Matches($text, [regex]::Escape($expected))).Count
+        if ($count -ne 1) {
+            throw "Expected exactly one final manifest value, found ${count}: $expected"
         }
     }
     [System.IO.File]::WriteAllText(
@@ -389,14 +428,49 @@ order:
    isolated VS Code window then open.
 9. The working view exposes **Open VSC**. Invoke it once and confirm it reconnects
    to the same attempt/container rather than creating a new attempt.
-10. In the exam terminal run `check`, then `exam finish --yes` without submitting
+10. While the attempt is `WORKING`, induce a non-reading browser-launch failure
+    against the live companion by running the following validation-only probe
+    from the checkout venv. Substitute the recorded UUID. Save the script and
+    output under `$evidenceRoot`, not in the repository:
+
+    ```python
+    import sys
+    from csetty.companion import launch_companion
+    from csetty.docker_runtime import DockerRuntime
+    from csetty.models import AttemptState
+    from csetty.paths import AppPaths
+    from csetty.storage import Store
+
+    paths = AppPaths.discover()
+    store = Store(paths)
+    attempt = store.resolve_attempt(sys.argv[1])
+    assert attempt.state is AttemptState.WORKING
+    info = launch_companion(paths, attempt, browser_open=lambda _url: False)
+    current = store.get_attempt(attempt.id)
+    assert current.state is AttemptState.WORKING
+    assert DockerRuntime(paths)._container_running(current.container_name)
+    print(f"PASS state={current.state.value} url={info.url}")
+    ```
+
+    Run it with `& .\.venv\Scripts\python.exe PROBE_PATH UUID`, require exit 0,
+    and record the output, command duration, and SHA-256. The existing exam page,
+    container and VS Code window must remain usable; this is the required
+    evidence that a failed browser request does not strand a running attempt.
+11. Still while `WORKING`, run `& $csetty report UUID` once to create the
+    non-final working report. Read the token and port from
+    `$stateRoot\attempts\UUID\companion.json`, request its `status.json`, and
+    require `state` to remain `WORKING` and `report_ready` to remain `false`.
+    The browser must remain on the working paper rather than redirecting. Capture
+    `03a-comp1511-working-report-not-final.png`, plus the status JSON and report
+    command output.
+12. In the exam terminal run `check`, then `exam finish --yes` without submitting
     real answers. The warning for missing submissions is acceptable.
-11. Finish writes JSON and HTML reports and automatically opens the HTML report
+13. Finish writes JSON and HTML reports and automatically opens the HTML report
     in the host default browser.
-12. The finished report shows the same COMP1511 green course visual language,
+14. The finished report shows the same COMP1511 green course visual language,
     the correct candidate/attempt ID, `FINISHED`, score evidence, and the local
     estimate notice.
-13. The report remains available through `& $csetty report` without requiring
+15. The report remains available through `& $csetty report` without requiring
     the user to recover the attempt ID; the explicit ID remains accepted.
 
 Confirm the companion listener is loopback-only. Use the page port with
@@ -475,7 +549,7 @@ git status --short --branch
 Stop-Transcript
 ```
 
-Only `docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md` may be a new/modified tracked
-file. Do not commit or push the result unless the originating task explicitly
-asks after reviewing it. Send the complete result summary and screenshot
-attachments back to the originating Codex task.
+Only `docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md` may be the sole path reported
+by `git status` (normally as untracked). Do not commit or push the result unless
+the originating task explicitly asks after reviewing it. Send the complete
+result summary and screenshot attachments back to the originating Codex task.

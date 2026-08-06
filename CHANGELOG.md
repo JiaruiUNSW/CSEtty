@@ -33,6 +33,9 @@
 - Publishes companion report readiness only after the final grade and both
   durable report files have completed, preventing a pre-finish report from
   being redirected as the final result.
+- Stops an expired attempt's container even when resume-time report generation
+  fails, terminates a companion child that misses its startup deadline, and
+  contains permission races in the judge's direct-kill fallback.
 
 ## 0.1.0a1 — 2026-08-06
 

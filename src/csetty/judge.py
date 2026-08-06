@@ -54,7 +54,7 @@ def _kill_process_group(process: subprocess.Popen[bytes]) -> None:
             # Popen has not observed its exit yet. Recheck before falling back
             # to terminating the child process itself.
             if process.poll() is None:
-                with suppress(ProcessLookupError):
+                with suppress(OSError):
                     process.kill()
     else:  # pragma: no cover - defensive fallback for non-Windows POSIX variants
         process.kill()

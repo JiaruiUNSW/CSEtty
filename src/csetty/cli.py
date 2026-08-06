@@ -368,15 +368,18 @@ def _launch_working(
     clock = SystemClock()
     attempt = store.expire_if_due(attempt.id, now=clock.now())
     if attempt.state is AttemptState.EXPIRED:
-        service = AttemptService(
-            store=store,
-            runtime=runtime,
-            attempt=attempt,
-            pack=pack,
-            clock=clock,
-            report_opener=open_report_in_browser,
-        )
-        _report, html_report, opened = service.finalize_report()
+        try:
+            service = AttemptService(
+                store=store,
+                runtime=runtime,
+                attempt=attempt,
+                pack=pack,
+                clock=clock,
+                report_opener=open_report_in_browser,
+            )
+            _report, html_report, opened = service.finalize_report()
+        finally:
+            runtime.stop_container(attempt)
         if opened:
             raise StateError("attempt deadline has passed; the final report was opened")
         raise StateError(f"attempt deadline has passed; final report: {html_report}")

@@ -391,3 +391,57 @@ def test_working_launch_opens_isolated_code_and_companion(
         == 0
     )
     assert events == ["container", "supervisor", "page", "code"]
+
+
+def test_working_launch_stops_expired_container_when_report_finalization_fails(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    pack = load_pack(make_pack(tmp_path / "pack"))
+    paths = AppPaths.discover(tmp_path / "state")
+    store = Store(paths)
+    started = datetime.now(UTC) - timedelta(minutes=1)
+    attempt = store.create_attempt(
+        pack_id=pack.id,
+        pack_version=pack.version,
+        pack_path=pack.root,
+        pack_digest=pack.digest,
+        course=pack.course,
+        profile=pack.profile,
+        mode=AttemptMode.EXAM,
+        timed=True,
+        created_at=started,
+        workspace_kind=WorkspaceKind.VOLUME,
+        workspace_ref="expired-launch-volume",
+        image=pack.environment.image,
+        editor="terminal",
+        candidate_id="z1234567",
+    )
+    attempt = store.transition(
+        attempt.id,
+        AttemptState.WORKING,
+        at=started,
+        deadline_at=started + timedelta(seconds=1),
+    )
+    stopped: list[str] = []
+
+    class ExpiredRuntime:
+        @staticmethod
+        def stop_container(current: object) -> None:
+            stopped.append(current.id)  # type: ignore[union-attr]
+
+    def fail_report(_service: object) -> object:
+        raise RuntimeError("report failed")
+
+    monkeypatch.setattr(cli.AttemptService, "finalize_report", fail_report)
+
+    with pytest.raises(RuntimeError, match="report failed"):
+        cli._launch_working(
+            attempt=attempt,
+            pack=pack,
+            paths=paths,
+            store=store,
+            runtime=ExpiredRuntime(),  # type: ignore[arg-type]
+            vscode=object(),  # type: ignore[arg-type]
+        )
+    assert store.get_attempt(attempt.id).state is AttemptState.EXPIRED
+    assert stopped == [attempt.id]

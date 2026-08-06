@@ -275,6 +275,51 @@ def test_companion_process_creation_failure_removes_startup_lock(
     assert not (store.paths.attempts / attempt_id / "companion.starting").exists()
 
 
+def test_companion_startup_timeout_kills_spawned_process(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _application_instance, store, attempt_id = _application(tmp_path)
+    attempt = store.get_attempt(attempt_id)
+    elapsed = {"seconds": 0.0}
+
+    class HangingProcess:
+        kill_calls = 0
+        wait_calls = 0
+
+        @staticmethod
+        def poll() -> None:
+            return None
+
+        def kill(self) -> None:
+            self.kill_calls += 1
+
+        def wait(self, *, timeout: int) -> None:
+            assert timeout == 5
+            self.wait_calls += 1
+
+    process = HangingProcess()
+    monkeypatch.setattr(companion_module, "_START_TIMEOUT_SECONDS", 2.0)
+    monkeypatch.setattr(companion_module, "_read_info", lambda *_args: None)
+    monkeypatch.setattr(companion_module.subprocess, "Popen", lambda *_a, **_kw: process)
+    monkeypatch.setattr(
+        companion_module.time,
+        "monotonic",
+        lambda: elapsed["seconds"],
+    )
+    monkeypatch.setattr(
+        companion_module.time,
+        "sleep",
+        lambda seconds: elapsed.__setitem__("seconds", elapsed["seconds"] + seconds),
+    )
+
+    with pytest.raises(ToolUnavailableError, match="did not start"):
+        launch_companion(store.paths, attempt, open_browser=False)
+
+    assert process.kill_calls == 1
+    assert process.wait_calls == 1
+    assert not (store.paths.attempts / attempt_id / "companion.starting").exists()
+
+
 def test_companion_status_tracks_latest_submission(tmp_path: Path) -> None:
     application, store, attempt_id = _application(tmp_path)
     store.record_submission(
