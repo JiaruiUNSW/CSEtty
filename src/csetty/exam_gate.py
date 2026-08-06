@@ -2,15 +2,27 @@ from __future__ import annotations
 
 import getpass
 import re
+import sys
 from collections.abc import Callable
+from typing import TextIO
 
 from .errors import StateError, UsageError
 
 _ZID_PATTERN = re.compile(r"^z[0-9]{7}$")
+_CLEAR_TERMINAL = "\x1b[2J\x1b[3J\x1b[H"
 
 
 def valid_zid(value: str) -> bool:
     return _ZID_PATTERN.fullmatch(value) is not None
+
+
+def clear_exam_terminal(stream: TextIO | None = None) -> None:
+    """Clear the visible screen and scrollback before an interactive exam gate."""
+    output = sys.stdout if stream is None else stream
+    if not output.isatty():
+        return
+    output.write(_CLEAR_TERMINAL)
+    output.flush()
 
 
 def run_exam_entry_gate(
@@ -18,7 +30,9 @@ def run_exam_entry_gate(
     *,
     input_fn: Callable[[str], str] = input,
     password_fn: Callable[[str], str] = getpass.getpass,
+    clear_fn: Callable[[], None] = clear_exam_terminal,
 ) -> str:
+    clear_fn()
     print("=" * 60)
     print(f"Welcome to the {course} Exam Simulation")
     print("=" * 60)

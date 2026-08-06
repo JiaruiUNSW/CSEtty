@@ -24,7 +24,7 @@ from .models import Attempt, AttemptMode, AttemptState, WorkspaceKind
 from .pack import Pack, PackRepository, load_pack, snapshot_author_materials, snapshot_pack
 from .paths import AppPaths
 from .question_bank import build_exam_pack, build_verification_pack, load_question_bank
-from .report import render_report_text, report_document, write_reports
+from .report import open_report_in_browser, render_report_text, report_document, write_reports
 from .storage import Store
 from .supervisor import AttemptService, ensure_supervisor
 from .util import atomic_write
@@ -363,22 +363,33 @@ def _launch_working(
     store: Store,
     runtime: DockerRuntime,
     vscode: VSCodeManager,
+    open_companion_browser: bool = True,
 ) -> int:
     clock = SystemClock()
     attempt = store.expire_if_due(attempt.id, now=clock.now())
     if attempt.state is AttemptState.EXPIRED:
         service = AttemptService(
-            store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock
+            store=store,
+            runtime=runtime,
+            attempt=attempt,
+            pack=pack,
+            clock=clock,
+            report_opener=open_report_in_browser,
         )
-        service.grade()
-        raise StateError("attempt deadline has passed; a final report is available")
+        _report, html_report, opened = service.finalize_report()
+        if opened:
+            raise StateError("attempt deadline has passed; the final report was opened")
+        raise StateError(f"attempt deadline has passed; final report: {html_report}")
     if attempt.state is not AttemptState.WORKING:
         raise StateError(f"cannot launch workspace while attempt is {attempt.state.value}")
     _ensure_editor_ready(attempt, vscode)
     runtime.start_container(attempt, pack, network=attempt.network)
     ensure_supervisor(paths, attempt)
-    companion = launch_companion(paths, attempt)
-    print(f"Opened exam companion page: {companion.url}")
+    companion = launch_companion(paths, attempt, open_browser=open_companion_browser)
+    if open_companion_browser:
+        print(f"Opened exam companion page: {companion.url}")
+    else:
+        print(f"Exam companion page is ready: {companion.url}")
     if attempt.editor == "code":
         vscode.attach(attempt)
         print(f"Opened isolated VS Code for attempt {attempt.id}")
@@ -467,8 +478,12 @@ def _start(args: argparse.Namespace) -> int:
         raise
     print(f"Attempt created: {attempt.id}")
     should_read = pack.reading_time_seconds > 0 and not args.skip_reading
+    reading_page_open = False
     if should_read:
         attempt = store.transition(attempt.id, AttemptState.READING, at=clock.now())
+        companion = launch_companion(paths, attempt)
+        reading_page_open = True
+        print(f"Opened read-only exam paper: {companion.url}")
         assert attempt.reading_started_at is not None
         reading_end = attempt.reading_started_at + timedelta(seconds=pack.reading_time_seconds)
         _reading(pack, ends_at=reading_end, clock=clock)
@@ -482,6 +497,7 @@ def _start(args: argparse.Namespace) -> int:
         store=store,
         runtime=runtime,
         vscode=vscode,
+        open_companion_browser=not reading_page_open,
     )
 
 
@@ -496,10 +512,18 @@ def _resume(args: argparse.Namespace) -> int:
         assert attempt.reading_started_at is not None
         reading_end = attempt.reading_started_at + timedelta(seconds=pack.reading_time_seconds)
         if clock.now() < reading_end:
+            companion = launch_companion(paths, attempt)
+            print(f"Opened read-only exam paper: {companion.url}")
             _reading(pack, ends_at=reading_end, clock=clock)
+            reading_page_open = True
+        else:
+            reading_page_open = False
         attempt = _enter_working(attempt=attempt, pack=pack, store=store, anchor=reading_end)
     elif attempt.state is AttemptState.CREATED:
+        reading_page_open = False
         attempt = _enter_working(attempt=attempt, pack=pack, store=store, anchor=clock.now())
+    else:
+        reading_page_open = False
     return _launch_working(
         attempt=attempt,
         pack=pack,
@@ -507,6 +531,7 @@ def _resume(args: argparse.Namespace) -> int:
         store=store,
         runtime=runtime,
         vscode=vscode,
+        open_companion_browser=not reading_page_open,
     )
 
 

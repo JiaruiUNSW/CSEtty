@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import html
 import json
+import webbrowser
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -13,8 +14,23 @@ from .models import Attempt
 from .pack import Pack, Question
 from .util import atomic_write, safe_relative_path
 from .web_render import markdown_to_html
+from .web_theme import course_navbar, course_theme_class, theme_style
 
 _MAX_EMBEDDED_SOURCE_BYTES = 256 * 1024
+
+
+def open_report_in_browser(
+    html_path: Path,
+    *,
+    browser_open: Callable[[str], object] = webbrowser.open,
+) -> bool:
+    """Open a completed local report without making browser failure fatal."""
+    if not html_path.is_file():
+        return False
+    try:
+        return bool(browser_open(html_path.resolve().as_uri()))
+    except (OSError, webbrowser.Error):
+        return False
 
 
 def _source_document(data: bytes) -> dict[str, Any]:
@@ -343,7 +359,7 @@ def _test_details(evaluation: Mapping[str, Any] | None) -> str:
             comparison = ""
             if test.get("result") != "PASS":
                 comparison = (
-                    "<details><summary>Input, expected output, and actual output</summary>"
+                    '<details class="report-detail"><summary>Input, expected output, and actual output</summary>'
                     f"<h5>Input</h5>{_code_block(test.get('stdin'))}"
                     f"<h5>Expected stdout</h5>{_code_block(test.get('expected_stdout'))}"
                     f"<h5>Actual stdout</h5>{_code_block(test.get('stdout_preview'))}"
@@ -445,6 +461,7 @@ def render_report_html(document: Mapping[str, Any]) -> str:
     )
 
     question_sections = []
+    question_nav_items = []
     questions = document.get("questions", [])
     if not questions and grade:
         questions = [
@@ -462,6 +479,8 @@ def render_report_html(document: Mapping[str, Any]) -> str:
             for index, item in enumerate(grade.get("questions", []), start=1)
         ]
     for question in questions:
+        number = question.get("number")
+        question_id = html.escape(str(question.get("id", number)), quote=True)
         evaluation = question.get("evaluation")
         state = (
             "NOT SUBMITTED"
@@ -475,20 +494,50 @@ def render_report_html(document: Mapping[str, Any]) -> str:
         earned = "—" if evaluation is None else evaluation.get("points_earned")
         available = "—" if evaluation is None else evaluation.get("automatic_points")
         tags = "".join(f'<span class="badge">{html.escape(str(tag))}</span>' for tag in question.get("tags", []))
+        question_nav_items.append(
+            f'<a href="#report-question-{question_id}">Q{number}. '
+            f"{html.escape(str(question.get('title')))}</a>"
+        )
         question_sections.append(
-            "<section class=\"question card\">"
-            f"<h2>Q{question.get('number')}. {html.escape(str(question.get('title')))}</h2>"
-            f"<p><strong>{state}</strong> · automatic points {earned}/{available} · paper marks {question.get('points')}</p>"
+            f'<section class="exam-section report-question" id="report-question-{question_id}">'
+            '<header class="section-heading">'
+            f"<h2>Q{number}. {html.escape(str(question.get('title')))} "
+            f"<small>({question.get('points')} marks)</small></h2>"
+            f"<p><strong>{state}</strong> · automatic points {earned}/{available}</p></header>"
             f"<p>{tags}</p>"
-            "<details><summary>Question requirements</summary>"
+            '<details class="report-detail"><summary>Question requirements</summary>'
             f"{markdown_to_html(str(question.get('prompt_markdown', '')))}</details>"
-            "<details open><summary>Submitted answer</summary>"
+            '<details class="report-detail" open><summary>Submitted answer</summary>'
             f"{_submission_html(question)}</details>"
-            "<details open><summary>Evaluation details</summary>"
+            '<details class="report-detail" open><summary>Evaluation details</summary>'
             f"{_test_details(evaluation)}</details>"
-            "<details><summary>Worked solution and reference implementation</summary>"
+            '<details class="report-detail"><summary>Worked solution and reference implementation</summary>'
             f"{_solution_html(question)}</details>"
             "</section>"
+        )
+
+    identity = f"{attempt.get('profile', '')} {attempt.get('course', '')} {attempt.get('image', '')}"
+    course = str(
+        attempt.get("course") or ("COMP1521" if "1521" in identity else "COMP1511")
+    )
+    profile = str(attempt.get("profile", ""))
+    theme_class = course_theme_class(profile, course)
+    navbar = course_navbar(
+        course=course,
+        home_url="#summary",
+        links=(
+            '<a href="#summary">Summary</a>'
+            '<details class="nav-menu"><summary>Questions</summary>'
+            f'<div class="nav-menu-items">{"".join(question_nav_items)}</div></details>'
+        ),
+        status=f'<span class="badge">{html.escape(str(attempt["state"]))}</span>',
+    )
+    hero_score = "Automatic grade not available"
+    if grade:
+        score = grade["score"]
+        hero_score = (
+            f"Automatic score {score['earned']}/{score['automatically_available']} "
+            f"· paper total {score['total']}"
         )
 
     return f"""<!doctype html>
@@ -498,26 +547,29 @@ def render_report_html(document: Mapping[str, Any]) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>CSEExamTTY report {html.escape(attempt["id"])}</title>
+{theme_style()}
 <style>
-:root {{ --ink:#17253d; --nav:#132a4a; --accent:#f2b134; }}
-* {{ box-sizing:border-box; }} body {{ margin:0; background:#edf1f5; color:var(--ink); font:16px/1.55 system-ui,sans-serif; }}
-header {{ background:var(--nav); color:white; border-bottom:6px solid var(--accent); padding:1.4rem max(1rem,calc((100% - 1100px)/2)); }}
-main {{ max-width:1100px; margin:1.5rem auto; padding:0 1rem; }} .card {{ background:white; border:1px solid #d4dbe3; border-radius:.35rem; padding:1.25rem; margin-bottom:1rem; }}
-.notice {{ background:#fff6d9; border-left:5px solid var(--accent); }} .score {{ font-size:1.35rem; }} .score span,.muted {{ color:#627184; font-size:.9rem; }}
+.score {{ font-size:1.35rem; }} .score span {{ color:var(--muted); font-size:.9rem; }}
 .summary-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; }}
-table {{ width:100%; border-collapse:collapse; }} th,td {{ text-align:left; vertical-align:top; border:1px solid #ccd4dd; padding:.5rem; }} th {{ background:#f0f3f6; }}
-details {{ border-top:1px solid #d8dee6; padding:.8rem 0; }} summary {{ cursor:pointer; font-weight:700; }}
-pre {{ overflow:auto; max-height:34rem; background:#101b2b; color:#f5f7fa; padding:1rem; border-radius:.3rem; }} code {{ overflow-wrap:anywhere; }}
-.badge {{ display:inline-block; border-radius:999px; background:#e5edf6; margin:.12rem .2rem .12rem 0; padding:.15rem .5rem; font-size:.82rem; }}
+.summary-grid .card-body {{ height:100%; }}
+.report-question {{ scroll-margin-top:5rem; }}
+.report-question .section-heading small {{ color:var(--muted); font-size:60%; font-weight:400; }}
+.report-question pre {{ max-height:34rem; }}
 .result-pass {{ color:#176b35; font-weight:700; }} .result-wrong_output,.result-wrong_exit_status,.result-compile_error,.result-runtime_error,.result-timeout,.result-output_limit,.result-internal_error {{ color:#a12622; font-weight:700; }}
 </style>
 </head>
-<body>
-<header><h1>CSEExamTTY local attempt report</h1><p>This is a local estimate, not an official UNSW mark.</p></header>
-<main>
-<section class="card notice"><p>{html.escape(document["notice"])}</p></section>
-<section class="card">
-<h2>Attempt summary</h2>
+<body class="{theme_class}">
+{navbar}
+<main class="container" aria-label="Content">
+<header class="exam-hero">
+<p class="text-muted text-uppercase"><strong>Local CSEExamTTY practice examination result</strong></p>
+<h1>{html.escape(course)} attempt report</h1>
+<p class="lead">{html.escape(str(attempt['pack']))}<br>{html.escape(hero_score)}</p>
+<p class="text-muted">Candidate {html.escape(str(attempt.get('candidate_id') or 'practice user'))} · not an official UNSW mark</p>
+</header>
+<div class="alert alert-warning"><p>{html.escape(document["notice"])}</p></div>
+<section class="exam-section" id="summary">
+<header class="section-heading"><h2>Attempt summary</h2></header>
 <dl>
 <dt>Attempt</dt><dd><code>{html.escape(attempt["id"])}</code></dd>
 <dt>Pack</dt><dd>{html.escape(attempt["pack"])}</dd>
@@ -532,12 +584,14 @@ pre {{ overflow:auto; max-height:34rem; background:#101b2b; color:#f5f7fa; paddi
 <h3>Accepted submission history</h3><ul>{submission_items}</ul>
 </section>
 <section class="summary-grid">
-<div class="card"><h2>What went well</h2><ul>{_feedback_list(feedback.get("strengths", []), empty="No automatic strengths identified yet.")}</ul></div>
-<div class="card"><h2>What still needs work</h2><ul>{_feedback_list(feedback.get("needs_work", []), empty="No automatic weaknesses identified.")}</ul></div>
+<div class="card"><div class="card-body"><h2>What went well</h2><ul>{_feedback_list(feedback.get("strengths", []), empty="No automatic strengths identified yet.")}</ul></div></div>
+<div class="card"><div class="card-body"><h2>What still needs work</h2><ul>{_feedback_list(feedback.get("needs_work", []), empty="No automatic weaknesses identified.")}</ul></div></div>
 </section>
-<section class="card"><h2>Final recommendations</h2><ol>{_feedback_list(feedback.get("recommendations", []), empty="No recommendations available.")}</ol></section>
-<section class="card"><h2>Recorded toolchain</h2><ul>{tool_items}</ul></section>
+<section class="exam-section"><header class="section-heading"><h2>Final recommendations</h2></header><ol>{_feedback_list(feedback.get("recommendations", []), empty="No recommendations available.")}</ol></section>
+<section class="exam-section"><header class="section-heading"><h2>Recorded toolchain</h2></header><ul>{tool_items}</ul></section>
+<h1 id="questions">Questions</h1>
 {''.join(question_sections)}
+<p class="text-muted text-uppercase" style="text-align:center"><strong>— End of local report. —</strong></p>
 </main>
 </body>
 </html>

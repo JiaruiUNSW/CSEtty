@@ -14,10 +14,15 @@ from csetty.pack import load_pack
 from csetty.paths import AppPaths
 from csetty.storage import Store
 from csetty.web_render import markdown_to_html
+from csetty.web_theme import THEME_NAME, theme_style
 
 
 def _application(
-    tmp_path: Path, *, editor: str = "code"
+    tmp_path: Path,
+    *,
+    editor: str = "code",
+    state: AttemptState = AttemptState.WORKING,
+    profile: str = "comp1511",
 ) -> tuple[CompanionApplication, Store, str]:
     root = make_pack(tmp_path / "pack")
     (root / "paper" / "q1.md").write_text(
@@ -25,14 +30,22 @@ def _application(
         encoding="utf-8",
     )
     manifest = root / "pack.toml"
-    manifest.write_text(
-        manifest.read_text(encoding="utf-8").replace(
-            'kind = "c_program"',
-            'kind = "c_program"\nprompt = "paper/q1.md"\n'
-            'difficulty = 2\ntrack = "normal"\ntags = ["arrays-1d"]',
-        ),
-        encoding="utf-8",
+    manifest_text = manifest.read_text(encoding="utf-8").replace(
+        'kind = "c_program"',
+        'kind = "c_program"\nprompt = "paper/q1.md"\n'
+        'difficulty = 2\ntrack = "normal"\ntags = ["arrays-1d"]',
     )
+    if state is AttemptState.READING:
+        manifest_text = manifest_text.replace(
+            "reading_time_seconds = 0", "reading_time_seconds = 600"
+        )
+    if profile == "comp1521":
+        manifest_text = (
+            manifest_text.replace('course = "COMP1511"', 'course = "COMP1521"')
+            .replace('profile = "comp1511"', 'profile = "comp1521"')
+            .replace("csetty/comp1511:dev", "csetty/comp1521:dev")
+        )
+    manifest.write_text(manifest_text, encoding="utf-8")
     pack = load_pack(root)
     paths = AppPaths.discover(tmp_path / "state")
     store = Store(paths)
@@ -53,12 +66,15 @@ def _application(
         editor=editor,
         candidate_id="z1234567",
     )
-    attempt = store.transition(
-        attempt.id,
-        AttemptState.WORKING,
-        at=now,
-        deadline_at=now + timedelta(hours=3),
-    )
+    if state is AttemptState.READING:
+        attempt = store.transition(attempt.id, AttemptState.READING, at=now)
+    else:
+        attempt = store.transition(
+            attempt.id,
+            AttemptState.WORKING,
+            at=now,
+            deadline_at=now + timedelta(hours=3),
+        )
     application = CompanionApplication(
         paths=paths,
         store=store,
@@ -85,6 +101,10 @@ def test_companion_overview_and_question_are_pack_driven(tmp_path: Path) -> None
     assert overview.count('target="_blank" rel="noopener noreferrer"') == len(
         course_resource_links("comp1511")
     )
+    assert theme_style() in overview
+    assert f'data-csetty-theme="{THEME_NAME}"' in question
+    assert f'data-csetty-theme-script="{THEME_NAME}"' in overview
+    assert 'class="course-comp1511"' in overview
 
 
 def test_companion_status_tracks_latest_submission(tmp_path: Path) -> None:
@@ -98,6 +118,42 @@ def test_companion_status_tracks_latest_submission(tmp_path: Path) -> None:
     status = application.status_document()
     assert status["state"] == "WORKING"
     assert status["questions"] == [{"id": "q1", "submitted": True, "sequence": 1}]
+
+
+def test_reading_companion_shows_full_prompt_without_editor_or_external_resources(
+    tmp_path: Path,
+) -> None:
+    application, _store, _attempt_id = _application(tmp_path, state=AttemptState.READING)
+    overview = application.render_overview()
+    question = application.render_question("q1")
+    status = application.status_document()
+
+    assert "read-only exam paper" in overview
+    assert "Reading time remaining" in overview
+    assert "Locked during reading time" in overview
+    assert "workspace and editor remain locked" in overview
+    assert "Open VSC" not in overview
+    assert 'target="_blank" rel="noopener noreferrer"' not in overview
+    assert 'data-state="READING"' in overview
+    assert "/status.json" in overview
+    assert "Detailed question" in question
+    assert "Detailed question" in overview
+    assert '<article class="question-prompt">' in overview
+    assert 'id="question-q1"' in overview
+    assert "Use <code>&lt;safe&gt;</code>." in question
+    assert status["state"] == "READING"
+    assert status["remaining_seconds"] is not None
+    assert 0 <= status["remaining_seconds"] <= 600
+
+
+def test_comp1521_companion_uses_the_teal_course_variant(tmp_path: Path) -> None:
+    application, _store, _attempt_id = _application(tmp_path, profile="comp1521")
+    overview = application.render_overview()
+
+    assert 'class="course-comp1521"' in overview
+    assert "COMP1521 — CSEExamTTY" in overview
+    assert "--course-accent: #42a097" in overview
+    assert theme_style() in overview
 
 
 def test_reopen_callback_is_invoked(tmp_path: Path) -> None:

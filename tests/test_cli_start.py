@@ -68,6 +68,64 @@ def test_start_records_an_attempt_owned_pack_snapshot(
     assert (frozen_root / "starter" / "q1.c").read_text(encoding="utf-8") != "changed\n"
 
 
+def test_exam_start_opens_read_only_page_before_reading_and_reuses_it_for_working(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    source_root = make_pack(tmp_path / "source-pack")
+    manifest = source_root / "pack.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            "reading_time_seconds = 0", "reading_time_seconds = 600"
+        ),
+        encoding="utf-8",
+    )
+    source_pack = load_pack(source_root)
+    paths = AppPaths.discover(tmp_path / "state")
+    store = Store(paths)
+    runtime = RuntimeStub()
+    events: list[tuple[object, ...]] = []
+
+    monkeypatch.setattr(cli.PackRepository, "get", lambda _self, _selector: source_pack)
+    monkeypatch.setattr(cli, "_components", lambda: (paths, store, runtime, object()))
+    monkeypatch.setattr(cli, "run_exam_entry_gate", lambda _course: "z1234567")
+    monkeypatch.setattr(
+        cli,
+        "launch_companion",
+        lambda _paths, attempt, **kwargs: (
+            events.append(("page", attempt.state, kwargs.get("open_browser", True)))
+            or SimpleNamespace(url="http://127.0.0.1/reading/")
+        ),
+    )
+    monkeypatch.setattr(
+        cli,
+        "_reading",
+        lambda _pack, **_kwargs: events.append(("countdown",)),
+    )
+
+    def launch_working(**kwargs: object) -> int:
+        attempt = kwargs["attempt"]
+        events.append(
+            (
+                "working",
+                attempt.state,  # type: ignore[union-attr]
+                kwargs["open_companion_browser"],
+            )
+        )
+        return 0
+
+    monkeypatch.setattr(cli, "_launch_working", launch_working)
+
+    args = cli._parser().parse_args(
+        ["start", source_pack.id, "--mode", "exam", "--editor", "terminal"]
+    )
+    assert cli._start(args) == 0
+    assert events == [
+        ("page", AttemptState.READING, True),
+        ("countdown",),
+        ("working", AttemptState.WORKING, False),
+    ]
+
+
 def test_working_launch_opens_isolated_code_and_companion(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -117,7 +175,9 @@ def test_working_launch_opens_isolated_code_and_companion(
     monkeypatch.setattr(
         cli,
         "launch_companion",
-        lambda *_args: events.append("page") or SimpleNamespace(url="http://127.0.0.1/test/"),
+        lambda *_args, **_kwargs: (
+            events.append("page") or SimpleNamespace(url="http://127.0.0.1/test/")
+        ),
     )
 
     assert (

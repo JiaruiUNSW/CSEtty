@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Prepares the `0.1.0a2` source-only alpha release candidate while leaving its
+  owner approval and new CI evidence fail-closed until they are completed.
+- Clears the invoking terminal and scrollback before the simulated exam sign-in,
+  then opens the full read-only paper in the browser during reading time.
+- Uses one packaged COMP1511/COMP1521 course-exam theme for both the live paper
+  and final report, with the appropriate green or teal course accent.
+- Generates and opens the HTML report automatically after explicit finish or
+  timed expiry, while retaining the durable report path if browser launch fails.
 - Adds a protected, tokenless PyPI Trusted Publishing workflow triggered only
   by a published GitHub Release. The isolated OIDC job downloads no source and
   publishes only tag-matched, checksum-verified wheel/sdist assets.

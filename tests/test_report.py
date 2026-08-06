@@ -8,7 +8,13 @@ from test_pack import make_pack
 
 from csetty.models import Attempt, AttemptMode, AttemptState, WorkspaceKind
 from csetty.pack import load_pack, snapshot_author_materials
-from csetty.report import render_report_html, render_report_text, report_document
+from csetty.report import (
+    open_report_in_browser,
+    render_report_html,
+    render_report_text,
+    report_document,
+)
+from csetty.web_theme import THEME_NAME, theme_style
 
 
 def _document():
@@ -45,6 +51,8 @@ def _document():
         "attempt": {
             "id": "attempt",
             "pack": "pack@1.0.0",
+            "course": "COMP1511",
+            "profile": "comp1511",
             "candidate_id": "z1234567",
             "state": "FINISHED",
             "mode": "exam",
@@ -67,6 +75,45 @@ def test_terminal_and_html_reports_include_groups_hurdles_and_hashes() -> None:
     assert "Core hurdle: PASS" in page
     assert "public" in page
     assert "Question &lt;one&gt;" in page
+    assert theme_style() in page
+    assert f'data-csetty-theme="{THEME_NAME}"' in page
+    assert f'data-csetty-theme-script="{THEME_NAME}"' in page
+    assert 'class="course-comp1511"' in page
+
+
+def test_comp1521_report_uses_the_same_teal_course_theme() -> None:
+    document = _document()
+    document["attempt"]["course"] = "COMP1521"
+    document["attempt"]["profile"] = "comp1521"
+    document["attempt"]["image"] = "csetty/comp1521:dev"
+
+    page = render_report_html(document)
+
+    assert 'class="course-comp1521"' in page
+    assert "COMP1521 — CSEExamTTY" in page
+    assert "--course-accent: #42a097" in page
+    assert theme_style() in page
+
+
+def test_completed_html_report_opens_as_a_local_file_url(tmp_path: Path) -> None:
+    html_path = tmp_path / "attempt report.html"
+    html_path.write_text("<html></html>", encoding="utf-8")
+    opened: list[str] = []
+
+    assert open_report_in_browser(
+        html_path,
+        browser_open=lambda url: opened.append(url) is None,
+    )
+    assert opened == [html_path.resolve().as_uri()]
+
+
+def test_missing_html_report_is_not_sent_to_the_browser(tmp_path: Path) -> None:
+    opened: list[str] = []
+    assert not open_report_in_browser(
+        tmp_path / "missing.html",
+        browser_open=lambda url: opened.append(url) is None,
+    )
+    assert opened == []
 
 
 def test_full_report_embeds_submission_evaluation_and_terminal_solution(tmp_path: Path) -> None:

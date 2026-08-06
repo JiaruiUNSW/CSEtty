@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 import pytest
 from test_pack import make_pack
 
+import csetty.supervisor as supervisor_module
 from csetty.clock import FrozenClock
 from csetty.errors import StateError, ValidationError
 from csetty.models import AttemptMode, AttemptState, WorkspaceKind
@@ -14,7 +16,7 @@ from csetty.pack import Pack, load_pack, snapshot_pack
 from csetty.pack import TestGroup as PackTestGroup
 from csetty.paths import AppPaths
 from csetty.storage import Store
-from csetty.supervisor import AttemptService, _question_alias, _resolve_question
+from csetty.supervisor import AttemptService, _question_alias, _resolve_question, run_supervisor
 
 
 class RuntimeFake:
@@ -77,7 +79,12 @@ class RuntimeFake:
         }
 
 
-def make_service(tmp_path: Path, now: datetime) -> tuple[AttemptService, Store, RuntimeFake]:
+def make_service(
+    tmp_path: Path,
+    now: datetime,
+    *,
+    report_opener: Callable[[Path], bool] | None = None,
+) -> tuple[AttemptService, Store, RuntimeFake]:
     source = load_pack(make_pack(tmp_path / "source-pack"))
     paths = AppPaths.discover(tmp_path / "state")
     store = Store(paths)
@@ -112,6 +119,7 @@ def make_service(tmp_path: Path, now: datetime) -> tuple[AttemptService, Store, 
         attempt=attempt,
         pack=pack,
         clock=FrozenClock(now),
+        report_opener=report_opener,
     )
     return service, store, runtime
 
@@ -175,6 +183,103 @@ def test_check_and_show_submission_when_nothing_was_submitted(tmp_path: Path) ->
         "stdout": "",
         "stderr": "No submission found for q1.\n",
     }
+
+
+def test_finish_generates_and_opens_the_html_report(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    opened: list[Path] = []
+
+    def open_report(path: Path) -> bool:
+        assert path.is_file()
+        opened.append(path)
+        return True
+
+    service, store, _runtime = make_service(tmp_path, now, report_opener=open_report)
+    finished = service.finish()
+
+    expected = store.paths.reports / f"{service.attempt_id}.html"
+    assert opened == [expected]
+    assert expected.is_file()
+    assert (store.paths.reports / f"{service.attempt_id}.json").is_file()
+    assert f"Opened local HTML report: {expected}" in finished["stdout"]
+
+
+def test_expired_attempt_finalization_opens_the_html_report(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    opened: list[Path] = []
+    service, store, _runtime = make_service(
+        tmp_path,
+        now,
+        report_opener=lambda path: opened.append(path) is None,
+    )
+    clock = service.clock
+    assert isinstance(clock, FrozenClock)
+    clock.advance(seconds=10 * 60)
+    expired = store.expire_if_due(service.attempt_id, now=clock.now())
+    assert expired.state is AttemptState.EXPIRED
+
+    _report, html_report, was_opened = service.finalize_report()
+
+    assert was_opened is True
+    assert opened == [html_report]
+    assert html_report.is_file()
+
+
+def test_browser_open_failure_does_not_fail_finishing_or_report_generation(
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(
+        tmp_path,
+        now,
+        report_opener=lambda _path: False,
+    )
+
+    finished = service.finish()
+
+    html_report = store.paths.reports / f"{service.attempt_id}.html"
+    assert finished["exit_code"] == 0
+    assert html_report.is_file()
+    assert "The browser could not be opened automatically." in finished["stdout"]
+
+
+def test_supervisor_expiry_generates_and_opens_report(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    now = datetime.now(UTC) - timedelta(minutes=20)
+    service, store, _runtime = make_service(tmp_path, now)
+    opened: list[Path] = []
+    stopped: list[str] = []
+
+    class ExpiryRuntime:
+        def __init__(self, paths: AppPaths) -> None:
+            self.paths = paths
+
+        def bridge_directory(self, attempt_id: str) -> Path:
+            return self.paths.attempts / attempt_id / "bridge"
+
+        @staticmethod
+        def run_judge(**_kwargs: object) -> dict[str, object]:
+            raise AssertionError("an attempt without submissions must not invoke the judge")
+
+        @staticmethod
+        def stop_container(attempt: object) -> None:
+            stopped.append(attempt.id)  # type: ignore[union-attr]
+
+    def open_report(path: Path) -> bool:
+        assert path.is_file()
+        opened.append(path)
+        return True
+
+    monkeypatch.setattr(supervisor_module, "DockerRuntime", ExpiryRuntime)
+    monkeypatch.setattr(supervisor_module, "open_report_in_browser", open_report)
+    monkeypatch.setattr(supervisor_module.signal, "signal", lambda *_args: None)
+
+    assert run_supervisor(state_dir=store.paths.root, attempt_id=service.attempt_id) == 0
+    assert store.get_attempt(service.attempt_id).state is AttemptState.EXPIRED
+    assert opened == [store.paths.reports / f"{service.attempt_id}.html"]
+    assert stopped == [service.attempt_id]
 
 
 def test_q_number_alias_resolves_prefixed_pack_activity(tmp_path: Path) -> None:

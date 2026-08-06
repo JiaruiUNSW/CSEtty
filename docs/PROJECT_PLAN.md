@@ -7,6 +7,7 @@ current course images passed fresh Stage 4 prepare/offline-attach checks on
 2026-08-06. COMP1511 passed its full end-to-end workflow; COMP1521 passed a live
 MIPS/autotest/submission/finish/report workflow using the repository's
 independent `csetty-mips` runtime. Stage 6 source-only `0.1.0a1` was published;
+the source tree now prepares the fail-closed `0.1.0a2` release candidate, and
 subsequent releases use the protected GitHub Actions/PyPI OIDC path. Stable
 `0.1.0` desktop acceptance remains open.
 
@@ -183,10 +184,13 @@ Exam mode first presents a host-terminal welcome, simulated zID/password, the
 explicit non-UNSW disclaimer, and an original academic-integrity/exam-condition
 warning. Only `yes` proceeds. The simulation password is never retained.
 
-After acceptance, the paper is shown for read-only reading time. The workspace,
-interactive container, and VS Code are created only after reading ends. Exam
-mode is always timed and offline. Practice is untimed by default and has no
-pause function when explicitly timed.
+After acceptance, the companion opens every complete prompt as a read-only
+long-form paper. The workspace, interactive container, and VS Code are created
+only after reading ends; the existing page then refreshes to working state.
+Live paper and final report share the same packaged CSE course-exam theme, with
+the COMP1511 green or COMP1521 teal profile variant selected from attempt
+metadata. Exam mode is always timed and offline. Practice is untimed by default
+and has no pause function when explicitly timed.
 
 While working, the supervisor broadcasts fixed terminal warnings at 60, 30, 15,
 and 5 minutes. Threshold delivery is persisted so restart does not duplicate or
@@ -206,6 +210,9 @@ backfill multiple stale warnings.
 - Reports include attempt/candidate metadata, hashes, pack digest, image ID,
   tool versions, automatic score, paper total, group/test outcomes, hurdles,
   and a prominent local-estimate notice.
+- Explicit finish and timed expiry both generate JSON/HTML reports and request
+  that the host default browser open the HTML result; browser failure leaves the
+  durable files and attempt state intact.
 
 ## 6. Security model
 

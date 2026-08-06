@@ -1,5 +1,5 @@
 [release]
-version = "0.1.0a1"
+version = "0.1.0a2"
 channel = "alpha"
 artifact_policy = "source-only-no-prebuilt-images"
 owner_approved = false
@@ -14,4 +14,3 @@ pack_content_license = "docs/RELEASE_EVIDENCE_0.1.0a1.md#pack-license"
 branding_and_name_review = "docs/RELEASE_EVIDENCE_0.1.0a1.md#branding"
 cross_platform_acceptance = "https://github.com/JiaruiUNSW/CSEtty/actions/runs/RUN_ID"
 multiarch_acceptance = "https://github.com/JiaruiUNSW/CSEtty/actions/runs/RUN_ID"
-

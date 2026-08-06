@@ -11,12 +11,13 @@ local submission is an official submission.
 
 ## Current status
 
-The `0.1.0a1` source-only public alpha is implemented. On the current Apple Silicon Mac,
-both current course images have passed fresh offline VS Code preparation and
-attach checks plus companion, autotest, submission, finish, judge, and report
+The source tree is the `0.1.0a2` source-only alpha release candidate; `0.1.0a1`
+remains the latest published alpha. On the current Apple Silicon Mac, both
+current course images have passed fresh offline VS Code preparation and attach
+checks plus companion, autotest, submission, finish, judge, and report
 workflows. COMP1521 uses the separately released `csetty-mips` dependency; no
-upstream mipsy binary or source is included in its course image. The
-alpha includes:
+upstream mipsy binary or source is included in its course image. The alpha
+includes:
 
 - COMP1511: 11 original questions, 100 points, DCC/GCC/Clang, arrays, linked
   lists, debugging, functions, and whole programs;
@@ -35,12 +36,14 @@ alpha includes:
   socket, dropped capabilities, resource limits, and no network by default; and
 - an isolated host VS Code instance attached to the interactive container after
   an explicit per-image `prepare` step;
-- a loopback-only companion page opened beside VS Code, with detailed question
-  pages, bundled references, an official-course-resource link index, live
-  state/countdown, and an **Open VSC** recovery button; and
-- a post-exam HTML report containing each submitted source file, detailed test
-  evidence, worked solution, reference implementation, strengths, gaps, and
-  targeted revision advice.
+- a loopback-only companion page opened as a full read-only paper during reading
+  time and reused beside VS Code during working time, with detailed question
+  pages, bundled references, live state/countdown, and an **Open VSC** recovery
+  button when working; and
+- a post-exam HTML report that opens automatically after an explicit finish or
+  timed expiry and contains each submitted source file, detailed test evidence,
+  worked solution, reference implementation, strengths, gaps, and targeted
+  revision advice.
 
 The repository publishes Python/project source, original assessment materials,
 Compose/Dockerfile definitions, and integrity locks only. `prepare` builds
@@ -172,18 +175,30 @@ Exam simulation mode is always timed and offline:
 
 The exam entry sequence happens in the **host terminal before reading time**:
 
-1. `Welcome to the COMPxxxx Exam Simulation`;
-2. a simulated zID in the form `z` plus seven digits;
-3. any non-empty simulation password (never authenticated, stored, hashed, or
+1. the interactive terminal screen and scrollback are cleared;
+2. `Welcome to the COMPxxxx Exam Simulation`;
+3. a simulated zID in the form `z` plus seven digits;
+4. any non-empty simulation password (never authenticated, stored, hashed, or
    logged; do not enter a real UNSW password);
-4. the local-system disclaimer and academic-integrity/exam-condition warning;
-5. exact acknowledgement by typing `yes`; and
-6. the read-only paper and reading countdown.
+5. the local-system disclaimer and academic-integrity/exam-condition warning;
+6. exact acknowledgement by typing `yes`; and
+7. the full read-only paper and reading countdown.
 
-No editable container or VS Code window exists during reading time. Only after
-reading time ends is the starter workspace created and VS Code and the local
-exam companion page are opened. A practice attempt, including one started with
-`--skip-reading`, deliberately does not show the exam sign-in gate.
+During reading time, the companion page opens in the host browser with every
+complete question prompt and only the resources explicitly permitted by the
+pack. No editable container, workspace, or VS Code window exists yet. When
+reading time ends, the same page updates to working state and the starter
+workspace, supervised container, and VS Code are opened. A practice attempt,
+including one started with `--skip-reading`, deliberately does not show the exam
+sign-in gate.
+
+The live paper is a single navigable long-form exam page rather than a
+question-name dashboard. Its offline visual shell follows the public CSE course
+exam conventions: a course-colour navbar, light examination header, bordered
+question headings, Bootstrap-style alerts/tables, and light code/TTY blocks.
+COMP1511 uses its green accent and COMP1521 its teal accent. The final HTML
+report imports the same local theme, so finishing the exam changes the content
+and status, not the course's visual language.
 
 The companion is served only on `127.0.0.1` at an unguessable per-process path.
 Its **Open VSC** control reconnects to the existing supervised container and
@@ -248,6 +263,11 @@ latest accepted submission for each question, never unsaved or later workspace
 content. At 60, 30, 15, and 5 minutes remaining, the supervisor broadcasts an
 English warning to every open exam terminal, including VS Code integrated
 terminals. Every report is prominently labelled as a local estimate.
+After `exam finish` or automatic timed expiry, the supervisor grades the latest
+accepted submissions, writes both report formats, and opens the HTML report in
+the host's default browser. If the browser cannot be launched, the absolute
+report path remains in the terminal or supervisor log and `csetty report
+ATTEMPT_ID` remains available.
 
 ## Original question banks
 

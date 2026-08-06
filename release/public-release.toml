@@ -1,9 +1,9 @@
 [release]
-version = "0.1.0a1"
+version = "0.1.0a2"
 channel = "alpha"
 artifact_policy = "source-only-no-prebuilt-images"
-owner_approved = true
-approval_date = "2026-08-06"
+owner_approved = false
+approval_date = "PENDING_OWNER_APPROVAL"
 
 [gates]
 project_license = "docs/RELEASE_EVIDENCE_0.1.0a1.md#project-license"
@@ -12,5 +12,5 @@ csetty_mips_provenance_and_license = "docs/RELEASE_EVIDENCE_0.1.0a1.md#csetty-mi
 vscode_and_extensions_terms = "docs/RELEASE_EVIDENCE_0.1.0a1.md#vscode-terms"
 pack_content_license = "docs/RELEASE_EVIDENCE_0.1.0a1.md#pack-license"
 branding_and_name_review = "docs/RELEASE_EVIDENCE_0.1.0a1.md#branding"
-cross_platform_acceptance = "https://github.com/JiaruiUNSW/CSEtty/actions/runs/31081135512"
-multiarch_acceptance = "https://github.com/JiaruiUNSW/CSEtty/actions/runs/31081135512"
+cross_platform_acceptance = "PENDING_0.1.0a2_CI_RUN"
+multiarch_acceptance = "PENDING_0.1.0a2_CI_RUN"

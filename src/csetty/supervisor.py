@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -24,7 +24,7 @@ from .grading import calculate_grade, render_grade_text
 from .models import Attempt, AttemptMode, AttemptState, ResultClass, TestVisibility
 from .pack import Pack, Question, TestGroup, load_pack, pack_digest
 from .paths import AppPaths
-from .report import report_document, write_reports
+from .report import open_report_in_browser, report_document, write_reports
 from .storage import Store, process_is_alive
 from .util import canonical_json, safe_relative_path, sha256_bytes
 
@@ -207,12 +207,14 @@ class AttemptService:
         attempt: Attempt,
         pack: Pack,
         clock: Clock,
+        report_opener: Callable[[Path], bool] | None = None,
     ) -> None:
         self.store = store
         self.runtime = runtime
         self.attempt_id = attempt.id
         self.pack = pack
         self.clock = clock
+        self.report_opener = report_opener
         self.countdown = DeadlineCountdown(attempt.deadline_at, clock)
 
     def _attempt(self) -> Attempt:
@@ -531,7 +533,9 @@ class AttemptService:
             report = existing.get("report")
             if not isinstance(report, dict):
                 raise ValidationError("stored grade report is invalid")
-            return {str(key): value for key, value in report.items()}
+            restored = {str(key): value for key, value in report.items()}
+            self._write_report_files(self.store.get_attempt(self.attempt_id), restored)
+            return restored
         self._verify_pack_integrity()
         attempt = self.store.get_attempt(self.attempt_id)
         if not attempt.state.terminal:
@@ -622,6 +626,12 @@ class AttemptService:
             total=str(score["total"]),
             report=report,
         )
+        self._write_report_files(attempt, report)
+        return report
+
+    def _write_report_files(
+        self, attempt: Attempt, report: Mapping[str, Any]
+    ) -> tuple[Path, Path]:
         document = report_document(
             attempt=attempt,
             pack=self.pack,
@@ -629,8 +639,14 @@ class AttemptService:
             grade=report,
             object_reader=self.store.object_bytes,
         )
-        write_reports(self.store.paths.reports, attempt.id, document)
-        return report
+        return write_reports(self.store.paths.reports, attempt.id, document)
+
+    def finalize_report(self) -> tuple[dict[str, Any], Path, bool | None]:
+        """Grade, persist both report formats, and optionally open the HTML report."""
+        report = self.grade()
+        html_report = self.store.paths.reports / f"{self.attempt_id}.html"
+        opened = None if self.report_opener is None else self.report_opener(html_report)
+        return report, html_report, opened
 
     def finish(self) -> Mapping[str, Any]:
         attempt = self._require_working()
@@ -642,18 +658,27 @@ class AttemptService:
             at=self.clock.now(),
             finish_reason="student",
         )
-        report = self.grade()
+        report, html_report, opened = self.finalize_report()
         prefix = ""
         if missing:
             prefix = f"Warning: no accepted submission for {', '.join(missing)}.\n"
-        html_report = self.store.paths.reports / f"{attempt.id}.html"
+        if opened is True:
+            report_message = f"Opened local HTML report: {html_report}\n"
+        elif opened is False:
+            report_message = (
+                f"Local HTML report: {html_report}\n"
+                "The browser could not be opened automatically.\n"
+            )
+        else:
+            report_message = f"Local HTML report: {html_report}\n"
         return {
             "exit_code": 0,
             "stdout": (
                 prefix
                 + "Attempt finished.\n\n"
                 + render_grade_text(report)
-                + f"\n\nLocal HTML report: {html_report}\n"
+                + "\n\n"
+                + report_message
                 + f"On the host, run: csetty report {attempt.id}\n"
             ),
             "stderr": "",
@@ -669,7 +694,14 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
     if pack.digest != attempt.pack_digest:
         raise ValidationError("attempt pack content changed after attempt creation")
     runtime = DockerRuntime(paths)
-    service = AttemptService(store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock)
+    service = AttemptService(
+        store=store,
+        runtime=runtime,
+        attempt=attempt,
+        pack=pack,
+        clock=clock,
+        report_opener=open_report_in_browser,
+    )
     bridge = BridgeServer(
         root=runtime.bridge_directory(attempt.id), attempt=attempt, store=store, clock=clock
     )
@@ -689,7 +721,9 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
             current = store.expire_if_due(attempt.id, now=clock.now())
             if current.state is AttemptState.EXPIRED:
                 try:
-                    service.grade()
+                    _report, html_report, opened = service.finalize_report()
+                    action = "Opened" if opened else "Created"
+                    print(f"{action} final HTML report: {html_report}", flush=True)
                 finally:
                     runtime.stop_container(current)
                 return 0
@@ -723,7 +757,9 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
             current = store.get_attempt(attempt.id)
             if current.state.terminal:
                 if current.state is AttemptState.EXPIRED:
-                    service.grade()
+                    _report, html_report, opened = service.finalize_report()
+                    action = "Opened" if opened else "Created"
+                    print(f"{action} final HTML report: {html_report}", flush=True)
                 if handled:
                     time.sleep(0.3)
                 runtime.stop_container(current)

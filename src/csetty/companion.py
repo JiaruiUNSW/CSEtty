@@ -15,7 +15,7 @@ import urllib.request
 import webbrowser
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -33,6 +33,7 @@ from .supervisor import ensure_supervisor
 from .util import atomic_write
 from .vscode import VSCodeManager
 from .web_render import markdown_to_html
+from .web_theme import course_navbar, course_theme_class, theme_style
 
 _MAX_REQUEST_BYTES = 4096
 _START_TIMEOUT_SECONDS = 10.0
@@ -210,10 +211,17 @@ class CompanionApplication:
         return attempt, pack
 
     @staticmethod
-    def _remaining_seconds(attempt: Attempt) -> int | None:
-        if attempt.deadline_at is None:
+    def _countdown_end(attempt: Attempt, pack: Pack) -> datetime | None:
+        if attempt.state is AttemptState.READING and attempt.reading_started_at is not None:
+            return attempt.reading_started_at + timedelta(seconds=pack.reading_time_seconds)
+        return attempt.deadline_at
+
+    @classmethod
+    def _remaining_seconds(cls, attempt: Attempt, pack: Pack) -> int | None:
+        countdown_end = cls._countdown_end(attempt, pack)
+        if countdown_end is None:
             return None
-        return max(0, int((attempt.deadline_at - datetime.now(UTC)).total_seconds()))
+        return max(0, int((countdown_end - datetime.now(UTC)).total_seconds()))
 
     @staticmethod
     def _remaining_text(seconds: int | None) -> str:
@@ -232,7 +240,7 @@ class CompanionApplication:
             "attempt_id": attempt.id,
             "course": pack.course,
             "state": attempt.state.value,
-            "remaining_seconds": self._remaining_seconds(attempt),
+            "remaining_seconds": self._remaining_seconds(attempt, pack),
             "deadline_at": (
                 None if attempt.deadline_at is None else attempt.deadline_at.isoformat()
             ),
@@ -276,14 +284,17 @@ class CompanionApplication:
     def _navigation(self, pack: Pack, active: str | None = None) -> str:
         question_items = []
         for index, question in enumerate(pack.questions, start=1):
-            selected = ' aria-current="page" class="active"' if question.id == active else ""
+            selected = ' aria-current="page"' if question.id == active else ""
             question_items.append(
-                f'<li><a{selected} href="{self.base_path}/question/{html.escape(question.id)}">'
-                f"Q{index}. {html.escape(question.title)}</a></li>"
+                f'<a{selected} href="{self.base_path}/#question-{html.escape(question.id, quote=True)}">'
+                f"Q{index}. {html.escape(question.title)}</a>"
             )
         return (
-            f'<a class="home-link" href="{self.base_path}/">Exam overview</a>'
-            f'<ol class="question-nav">{"".join(question_items)}</ol>'
+            f'<a href="{self.base_path}/">Paper</a>'
+            '<details class="nav-menu">'
+            '<summary>Questions</summary>'
+            f'<div class="nav-menu-items">{"".join(question_items)}</div>'
+            "</details>"
         )
 
     def _layout(
@@ -297,78 +308,73 @@ class CompanionApplication:
         message: str | None = None,
         error: bool = False,
     ) -> str:
-        remaining = self._remaining_seconds(attempt)
+        remaining = self._remaining_seconds(attempt, pack)
         timer = self._remaining_text(remaining)
         message_html = ""
         if message:
             message_html = (
-                f'<div class="message {"error" if error else "success"}">'
+                f'<div class="message alert {"alert-danger" if error else "alert-success"}">'
                 f"{html.escape(message)}</div>"
             )
-        deadline = "" if attempt.deadline_at is None else attempt.deadline_at.isoformat()
+        countdown_end = self._countdown_end(attempt, pack)
+        deadline = "" if countdown_end is None else countdown_end.isoformat()
+        reading = attempt.state is AttemptState.READING
+        timer_label = "Reading time remaining" if reading else "Remaining"
+        surface_label = (
+            "Local CSEExamTTY read-only exam paper"
+            if reading
+            else "Local CSEExamTTY practice examination"
+        )
+        status_url = f"{self.base_path}/status.json"
+        theme_class = course_theme_class(pack.profile, pack.course)
+        total_marks = sum(question.points for question in pack.questions)
+        navbar = course_navbar(
+            course=pack.course,
+            home_url=f"{self.base_path}/",
+            links=self._navigation(pack, active),
+            status=(
+                f'<span class="phase-badge">{html.escape(attempt.state.value)}</span>'
+                f'<span>{timer_label}: <span class="timer" id="timer">{timer}</span></span>'
+            ),
+        )
         return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>{html.escape(title)} — CSEExamTTY</title>
+<title>{html.escape(title)} — {html.escape(pack.course)} — CSEExamTTY</title>
+{theme_style()}
 <style>
-:root {{ --ink:#17253d; --nav:#132a4a; --accent:#f2b134; --paper:#fff; --muted:#607086; }}
-* {{ box-sizing:border-box; }}
-body {{ margin:0; color:var(--ink); background:#edf1f5; font:16px/1.55 system-ui,sans-serif; }}
-header {{ background:var(--nav); color:white; border-bottom:6px solid var(--accent); padding:1rem 1.5rem; }}
-header h1 {{ margin:0; font-size:1.45rem; }}
-header p {{ margin:.25rem 0 0; opacity:.88; }}
-.status {{ display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:.75rem; }}
-.timer {{ font:700 1.25rem ui-monospace,monospace; background:#071a31; padding:.35rem .65rem; border-radius:.25rem; }}
-.shell {{ display:grid; grid-template-columns:minmax(230px,300px) minmax(0,1fr); min-height:calc(100vh - 130px); }}
-nav {{ background:#f8fafc; border-right:1px solid #c9d2dc; padding:1rem; overflow:auto; }}
-nav a {{ color:#173e6d; text-decoration:none; }}
-nav a:hover, nav a.active {{ color:#8a4d00; text-decoration:underline; }}
-.home-link {{ display:block; font-weight:700; margin-bottom:.75rem; }}
-.question-nav {{ margin:0; padding-left:1.35rem; }}
-.question-nav li {{ margin:.35rem 0; }}
-main {{ min-width:0; padding:1.5rem; }}
-.card {{ max-width:1050px; min-width:0; margin:0 auto 1rem; background:var(--paper); border:1px solid #d3dae2; border-radius:.35rem; padding:1.35rem; box-shadow:0 2px 8px #17253d12; overflow-x:auto; }}
-.notice {{ border-left:5px solid var(--accent); background:#fff7df; }}
-.message {{ max-width:1050px; margin:0 auto 1rem; padding:.85rem 1rem; border-radius:.3rem; }}
-.success {{ background:#e6f7eb; border:1px solid #65a878; }}
-.error {{ background:#fff0f0; border:1px solid #c66; }}
-.actions {{ display:flex; gap:.75rem; flex-wrap:wrap; margin:1rem 0; }}
-button,.button {{ appearance:none; border:0; border-radius:.25rem; padding:.65rem .9rem; background:#1d568f; color:white; font-weight:700; cursor:pointer; text-decoration:none; }}
-button:hover,.button:hover {{ background:#123d69; }}
-table {{ width:100%; border-collapse:collapse; }}
-th,td {{ padding:.55rem; border-bottom:1px solid #d5dce4; text-align:left; vertical-align:top; }}
-th {{ background:#f1f4f7; }}
-code {{ background:#eef1f4; padding:.08rem .25rem; border-radius:.2rem; overflow-wrap:anywhere; }}
-pre {{ overflow:auto; background:#101b2b; color:#f5f7fa; padding:1rem; border-radius:.3rem; }}
-pre code {{ background:transparent; padding:0; }}
-.badge {{ display:inline-block; border-radius:999px; background:#e5edf6; margin:.12rem .2rem .12rem 0; padding:.15rem .5rem; font-size:.82rem; }}
-.resource-grid {{ columns:2 280px; column-gap:2rem; }}
-.resource-section {{ break-inside:avoid; margin-bottom:1rem; }}
-.resource-section h3 {{ margin-bottom:.25rem; }}
-.resource-section ul {{ margin-top:.25rem; }}
-.muted {{ color:var(--muted); }}
-@media (max-width:760px) {{ .shell {{ grid-template-columns:1fr; }} nav {{ border-right:0; border-bottom:1px solid #c9d2dc; max-height:34vh; }} main {{ padding:.8rem; }} }}
+.timer {{ font:700 1rem SFMono-Regular,Menlo,Monaco,Consolas,monospace; }}
+.phase-badge {{ padding:.15rem .4rem; color:#212529; font-size:.75rem; font-weight:700; background:#fff; border-radius:.2rem; }}
+.question-prompt > h1:first-child {{ display:none; }}
+.question-meta {{ margin:.5rem 0 1rem; }}
+.paper-question {{ scroll-margin-top:5rem; }}
+.paper-question .section-heading small {{ color:var(--muted); font-size:60%; font-weight:400; }}
+.message {{ margin-bottom:1rem; }}
+@media (max-width:760px) {{ .navbar-status {{ font-size:.78rem; }} }}
 </style>
 </head>
-<body data-deadline="{html.escape(deadline, quote=True)}">
-<header>
-<h1>{html.escape(pack.course)} local exam workspace</h1>
-<p>{html.escape(pack.title)} · not made or managed by UNSW</p>
-<div class="status"><span>State: <strong>{html.escape(attempt.state.value)}</strong></span><span>Remaining: <span class="timer" id="timer">{timer}</span></span></div>
+<body class="{theme_class}" data-deadline="{html.escape(deadline, quote=True)}" data-state="{html.escape(attempt.state.value, quote=True)}" data-status-url="{html.escape(status_url, quote=True)}">
+{navbar}
+<main class="container" aria-label="Content">
+<header class="exam-hero">
+<p class="text-muted text-uppercase"><strong>{surface_label}</strong></p>
+<h1>{html.escape(pack.title)}</h1>
+<p class="lead">{len(pack.questions)} questions — {total_marks} marks<br>{html.escape(timer_label)}: {timer}</p>
+<p class="text-muted">Candidate {html.escape(attempt.candidate_id or 'practice user')} · not made or managed by UNSW</p>
 </header>
-<div class="shell">
-<nav aria-label="Question navigation">{self._navigation(pack, active)}</nav>
-<main>{message_html}{content}</main>
-</div>
+{message_html}{content}
+</main>
 <script>
 (() => {{
   const deadline = document.body.dataset.deadline;
+  const initialState = document.body.dataset.state;
+  const statusUrl = document.body.dataset.statusUrl;
   const timer = document.getElementById('timer');
-  if (!deadline || !timer) return;
   const update = () => {{
+    if (!deadline || !timer) return;
     const seconds = Math.max(0, Math.floor((Date.parse(deadline) - Date.now()) / 1000));
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
     const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
@@ -376,15 +382,28 @@ pre code {{ background:transparent; padding:0; }}
     timer.textContent = `${{h}}:${{m}}:${{s}}`;
   }};
   update(); setInterval(update, 1000);
+  const refreshOnStateChange = async () => {{
+    if (!initialState || !statusUrl) return;
+    try {{
+      const response = await fetch(statusUrl, {{ cache: 'no-store' }});
+      if (!response.ok) return;
+      const status = await response.json();
+      if (status.state !== initialState) window.location.reload();
+    }} catch (_error) {{
+      // A transient local-page failure is retried on the next poll.
+    }}
+  }};
+  setInterval(refreshOnStateChange, 1000);
 }})();
 </script>
 </body>
 </html>"""
 
-    def _resource_sections(self, pack: Pack) -> str:
+    def _resource_sections(self, pack: Pack, *, include_external: bool = True) -> str:
         sections: dict[str, list[CourseResourceLink]] = {}
-        for link in course_resource_links(pack.profile):
-            sections.setdefault(link.section, []).append(link)
+        if include_external:
+            for link in course_resource_links(pack.profile):
+                sections.setdefault(link.section, []).append(link)
         external = []
         for section, links in sections.items():
             items = "".join(
@@ -412,53 +431,113 @@ pre code {{ background:transparent; padding:0; }}
             for submission in self.store.list_submissions(attempt.id)
         }
         rows = []
+        question_sections = []
         for index, question in enumerate(pack.questions, start=1):
             submission = latest.get(question.id)
-            status = "Not submitted" if submission is None else f"Submitted #{submission['sequence']}"
+            if attempt.state is AttemptState.READING:
+                status = "Locked during reading time"
+                status_class = "alert-course"
+            else:
+                status = (
+                    "Not submitted"
+                    if submission is None
+                    else f"Submitted #{submission['sequence']}"
+                )
+                status_class = "alert-warning" if submission is None else "alert-success"
             tags = "".join(f'<span class="badge">{html.escape(tag)}</span>' for tag in question.tags)
+            files = ", ".join(
+                f"<code>{html.escape(path)}</code>" for path in question.submission_files
+            )
             rows.append(
                 "<tr>"
-                f'<td><a href="{self.base_path}/question/{html.escape(question.id)}">Q{index}</a></td>'
+                f'<td><a href="#question-{html.escape(question.id, quote=True)}">Q{index}</a></td>'
                 f"<td>{html.escape(question.title)}<br>{tags}</td>"
                 f"<td>{question.points}</td><td>{html.escape(question.track)}</td>"
                 f"<td>{html.escape(status)}</td></tr>"
             )
-        if attempt.editor == "code" and attempt.state is AttemptState.WORKING:
+            question_sections.append(
+                f'<section class="exam-section paper-question" id="question-{html.escape(question.id, quote=True)}">'
+                '<header class="section-heading">'
+                f"<h2>Question {index} <small>({question.points} marks)</small></h2>"
+                f"<p>{html.escape(question.title)}</p></header>"
+                f'<p class="question-meta">{tags}</p>'
+                f'<div class="alert {status_class}"><strong>Submission:</strong> {files} · '
+                f"<strong>Status:</strong> {html.escape(status)}</div>"
+                f'<article class="question-prompt">{markdown_to_html(pack.question_prompt(question))}</article>'
+                '<div class="actions no-print">'
+                f'<a class="btn" href="{self.base_path}/question/{html.escape(question.id, quote=True)}">'
+                "Open focused question view</a></div></section>"
+            )
+        if attempt.state is AttemptState.READING:
+            editor_control = ""
+            editor_text = (
+                "Reading time is read-only. Read every complete question using the "
+                "navigation; the workspace and editor remain locked until working time begins."
+            )
+            controls_heading = "Reading time"
+            controls_text = editor_text
+        elif attempt.editor == "code" and attempt.state is AttemptState.WORKING:
             editor_control = (
                 f'<form method="post" action="{self.base_path}/reopen-code">'
-                '<button type="submit">Open VSC</button></form>'
+                '<button class="btn" type="submit">Open VSC</button></form>'
             )
             editor_text = (
                 "Use this recovery control to reconnect to the existing supervised Docker "
                 "container; it does not create a new attempt."
             )
+            controls_heading = "Exam controls"
+            controls_text = f"Closing the editor does not stop the clock. {editor_text}"
         elif attempt.editor == "code":
             editor_control = ""
             editor_text = (
                 f"VS Code recovery is unavailable because this attempt is "
                 f"{attempt.state.value}."
             )
+            controls_heading = "Exam controls"
+            controls_text = f"Closing the editor does not stop the clock. {editor_text}"
         else:
             editor_control = ""
             editor_text = "This attempt uses terminal mode. Run csetty resume to reopen its terminal."
+            controls_heading = "Exam controls"
+            controls_text = f"Closing the editor does not stop the clock. {editor_text}"
+        if attempt.state is AttemptState.READING:
+            resources_text = (
+                "Only the bundled resources explicitly permitted by this paper are available "
+                "during reading time."
+            )
+            resources = self._resource_sections(pack, include_external=False)
+            resources_heading = "Permitted resources"
+        else:
+            resources_text = (
+                "Bundled resources are available offline. Official public links are an index "
+                "only: their content is not copied into CSEExamTTY and requires host network "
+                "access. Docker remains subject to the attempt network policy."
+            )
+            resources = self._resource_sections(pack)
+            resources_heading = "Course resources"
         content = f"""
-<section class="card notice">
-<h2>Local simulation notice</h2>
+<section class="exam-section" id="instructions">
+<header class="section-heading"><h2>Examination information</h2></header>
+<div class="alert alert-warning">
+<h3>Local simulation notice</h3>
 <p>This original mock exam system is not made or managed by the UNSW School of Computer Science and Engineering. Submissions remain on this computer and are not sent to UNSW.</p>
-</section>
-<section class="card">
-<h2>Exam controls</h2>
-<p>Closing the editor does not stop the clock. {editor_text}</p>
+</div>
+<div class="alert alert-course">
+<h3>{controls_heading}</h3>
+<p>{controls_text}</p>
 <div class="actions">{editor_control}</div>
+</div>
 </section>
-<section class="card">
-<h2>Questions</h2>
-<table><thead><tr><th>#</th><th>Question</th><th>Marks</th><th>Track</th><th>Submission</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
+<section class="exam-section" id="paper-at-a-glance">
+<header class="section-heading"><h2>Paper at a glance</h2></header>
+<div class="table-scroll"><table><thead><tr><th>#</th><th>Question</th><th>Marks</th><th>Track</th><th>Submission</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 </section>
-<section class="card">
-<h2>Course resources</h2>
-<p class="muted">Bundled resources are available offline. Official public links are an index only: their content is not copied into CSEExamTTY and requires host network access. Docker remains subject to the attempt network policy.</p>
-<div class="resource-grid">{self._resource_sections(pack)}</div>
+<h1 id="questions">Questions</h1>
+{''.join(question_sections)}
+<section class="exam-section" id="resources">
+<header class="section-heading"><h2>{resources_heading}</h2></header>
+<p class="muted">{resources_text}</p>
+<div class="resource-grid">{resources}</div>
 </section>"""
         return self._layout(
             attempt=attempt,
@@ -483,14 +562,15 @@ pre code {{ background:transparent; padding:0; }}
         if attempt.editor == "code" and attempt.state is AttemptState.WORKING:
             editor_control = (
                 f'<form method="post" action="{self.base_path}/reopen-code">'
-                '<button type="submit">Open VSC</button></form>'
+                '<button class="btn" type="submit">Open VSC</button></form>'
             )
         content = f"""
-<section class="card">
+<section class="exam-section paper-question" id="question-{html.escape(question.id, quote=True)}">
+<header class="section-heading"><h2>{html.escape(question.title)} <small>({question.points} marks)</small></h2></header>
 <p>{metadata}</p>
 <p><strong>Marks:</strong> {question.points} · <strong>Submission:</strong> {files}</p>
-<article>{markdown_to_html(pack.question_prompt(question))}</article>
-<div class="actions"><a class="button" href="{self.base_path}/">Back to overview</a>{editor_control}</div>
+<article class="question-prompt">{markdown_to_html(pack.question_prompt(question))}</article>
+<div class="actions"><a class="btn" href="{self.base_path}/#question-{html.escape(question.id, quote=True)}">Back to full paper</a>{editor_control}</div>
 </section>"""
         return self._layout(
             attempt=attempt,
@@ -507,7 +587,11 @@ pre code {{ background:transparent; padding:0; }}
         resource = pack.resources[index]
         path = pack.root / resource.path
         text = path.read_text(encoding="utf-8")
-        content = f'<section class="card"><article>{markdown_to_html(text)}</article></section>'
+        content = (
+            '<section class="exam-section">'
+            f'<header class="section-heading"><h2>{html.escape(resource.label)}</h2></header>'
+            f'<article>{markdown_to_html(text)}</article></section>'
+        )
         return self._layout(
             attempt=attempt,
             pack=pack,

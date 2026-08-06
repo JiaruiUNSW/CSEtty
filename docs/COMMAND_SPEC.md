@@ -66,9 +66,11 @@ blueprints.
 
 Only `csetty start ... --mode exam` runs the entry gate. It occurs in the host
 terminal before an attempt record, reading view, workspace, container, or VS
-Code window is created.
+Code window is created. After startup prerequisites pass, CSEExamTTY clears the
+interactive terminal's visible screen and scrollback before drawing the gate;
+redirected non-TTY output is left unchanged.
 
-The sequence is:
+The visible sequence after that clear is:
 
 1. `Welcome to the COMPxxxx Exam Simulation`;
 2. a lowercase `z` followed by exactly seven digits;
@@ -101,8 +103,11 @@ check
 - `exam finish` requires terminal confirmation; non-TTY callers must pass
   `--yes`. It makes the attempt terminal, grades latest accepted snapshots, and
   warns when a question has no accepted submission. It writes the JSON and HTML
-  reports and prints the local HTML path plus the matching host `csetty report`
-  command.
+  reports, opens the HTML report in the host's default browser, and prints the
+  local HTML path plus the matching host `csetty report` command. Browser launch
+  failure never invalidates the completed attempt or generated reports. The
+  HTML report uses the same packaged COMP1511/COMP1521 course theme as the live
+  paper; it does not depend on remote CSS or JavaScript.
 
 Closing Bash or VS Code is not finish. A timed deadline continues.
 
@@ -224,13 +229,18 @@ An `INTERNAL_ERROR` is a simulator/pack failure, not a student failure.
 
 ## 8. Timing semantics
 
-During reading time, only the host paper/countdown exists; there is no editable
-container on which to run a command. The live countdown uses a monotonic clock.
-The reading anchor and working deadline are persisted as UTC timestamps so a
-restart cannot grant more time.
+During reading time, the host terminal shows the paper index/countdown and the
+loopback-only companion shows every complete prompt plus explicitly permitted
+bundled resources. There is no workspace or editable container on which to run
+a command. The live countdown uses a monotonic clock. The reading anchor and
+working deadline are persisted as UTC timestamps so a restart cannot grant more
+time. The open page detects the transition to working state and refreshes
+without opening a duplicate browser tab.
 
-The supervisor checks expiry before operations and while polling. Once an
-attempt is `FINISHED`, `EXPIRED`, or `ABORTED`, it is immutable.
+The supervisor checks expiry before operations and while polling. A timed expiry
+uses the same final grading, report-writing, and browser-opening path as an
+explicit finish. Once an attempt is `FINISHED`, `EXPIRED`, or `ABORTED`, it is
+immutable.
 
 ## 9. Exit codes
 

@@ -1,13 +1,18 @@
 # Exam companion page
 
-Status: implemented for working, finished, and expired attempts.
+Status: implemented for reading, working, finished, and expired attempts.
 
 ## Lifecycle
 
-During formal exam mode, sign-in, acknowledgement, and reading time remain in
-the host terminal. No editable container exists during reading time. When the
-working period begins, CSEExamTTY starts the supervised interactive container,
-opens the isolated VS Code profile, and opens the companion page in the default
+During formal exam mode, sign-in and acknowledgement remain in the host
+terminal. Once reading time begins, CSEExamTTY opens the companion page as a
+full read-only paper in the default browser. It exposes every question prompt
+and the pack's explicitly permitted local resources, but it does not create an
+editable workspace or container and does not offer an editor control. When the
+working period begins, the page automatically refreshes to working state while
+CSEExamTTY starts the supervised interactive container and opens the isolated
+VS Code profile. On explicit finish or timed expiry, the supervisor generates
+the final reports and opens the HTML report separately in the host's default
 browser.
 
 The page can be reopened without changing the attempt:
@@ -27,20 +32,40 @@ The overview contains:
 - local-simulation and non-UNSW notice;
 - attempt state, persisted deadline, and live countdown;
 - question order, marks, track, tags, and latest submission sequence;
-- detailed links for every question;
+- every complete question prompt in one long-form paper plus focused links;
 - bundled offline resources declared by the pack;
-- an index of relevant official public course pages; and
-- an **Open VSC** recovery control.
+- an index of relevant official public course pages outside reading time; and
+- an **Open VSC** recovery control while the attempt is working.
 
 Each question page renders the pack's original Markdown prompt, including
 background, exact requirements, examples, implementation notes, required
 filename, marks, difficulty, track, and tags.
 
+## Visual contract
+
+The companion and final HTML report use one packaged, offline theme. It follows
+the common public COMP1511/COMP1521 exam-page vocabulary without importing
+remote Bootstrap, course CSS, logos, or scripts: course-colour navigation, a
+light examination jumbotron, bordered section headings with a left colour tab,
+Bootstrap-style cards/alerts/tables, and light code or terminal blocks.
+
+The profile selects only the established course variant:
+
+- COMP1511: green accent `#6abd6e`, wide exam column;
+- COMP1521: teal accent `#42a097`, narrower exam column.
+
+The shared CSS is emitted from `src/csetty/web_theme.py` into both surfaces and
+is identified by `data-csetty-theme="cse-course-exam-v1"`. Page-specific CSS may
+only cover live controls or report results; it must not redefine the course
+shell. This keeps reading, working, finished companion views and the generated
+report visually consistent.
+
 Official course links are not mirrored content. They open in the host browser
 and remain usable during an exam whenever the host has network access because
 `--network none` applies to Docker, not the host. They are clearly separated
 from bundled offline resources, and Docker's network policy never claims to
-control the host browser.
+control the host browser. They are hidden during reading time so that the page
+shows only resources explicitly permitted by the paper.
 
 ## Open VSC recovery
 
