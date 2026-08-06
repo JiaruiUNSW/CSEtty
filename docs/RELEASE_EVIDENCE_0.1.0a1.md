@@ -89,20 +89,45 @@ release.
   opinion. The alpha must never describe itself as an official UNSW service.
 
 <a id="cross-platform"></a>
-## Cross-platform alpha acceptance — PENDING FIRST PUBLIC CI RUN
+## Cross-platform alpha acceptance — PASS
 
-The required evidence is a passing GitHub Actions run containing host tests on
-Windows, Linux amd64/arm64, macOS Intel, and macOS Apple Silicon. This alpha does
-not claim completed Docker Desktop/WSL2 or offline VS Code acceptance outside
-the locally tested Apple Silicon system; those remain stable-release gates.
+Public GitHub Actions run
+[31081135512](https://github.com/JiaruiUNSW/CSEtty/actions/runs/31081135512)
+passed at commit `c91b91664d61c9c9a65cc71b34b6b9e1b9e61a91`. Its host
+matrix covered:
+
+- Windows Server 2025 x64 with Python 3.11;
+- Ubuntu x64 with Python 3.11, 3.12, and 3.13;
+- Ubuntu 24.04 arm64 with Python 3.11;
+- macOS Apple Silicon with Python 3.11; and
+- macOS Intel with Python 3.11.
+
+Every host job ran Ruff, mypy, pytest, built the wheel, and smoke-tested a fresh
+wheel installation. Separate native arm64 jobs built and exercised the local
+COMP1511 and COMP1521 source images. The same candidate passed local Apple
+Silicon fixed-pack, full question-bank, and live Docker acceptance before the
+public run.
+
+This alpha does not claim completed Docker Desktop/WSL2 or offline VS Code
+acceptance outside the locally tested Apple Silicon system; those remain
+stable-release gates.
 
 <a id="multiarch"></a>
-## Linux image architecture acceptance — PENDING FIRST PUBLIC CI RUN
+## Linux image architecture acceptance — PASS
 
-The required evidence is the same passing GitHub Actions run containing live
-linux/amd64 and linux/arm64 source-build acceptance plus runner-local multi-arch
-OCI, SBOM, provenance, label, pack, and judge checks. OCI archives and caches
-must remain runner-local.
+The same passing run completed independent COMP1511 and COMP1521 source-build
+jobs. For each profile it:
+
+- built and recorded local interactive and judge images from pinned sources;
+- passed every fixed-pack reference, all 75 question-bank references, and live
+  container acceptance;
+- built runner-local interactive and judge OCI archives for both linux/amd64
+  and linux/arm64 without pushing them; and
+- verified both platforms, profile/role/toolchain licence labels, SPDX SBOM,
+  and SLSA provenance attestations in every OCI archive.
+
+The four OCI archives and BuildKit outputs remained runner-local and were not
+published as workflow artifacts, registry layers, or public caches.
 
 <a id="artifact-inventory"></a>
 ## Published artifact inventory
@@ -120,4 +145,3 @@ Forbidden:
 - DCC binaries, Debian package archives, or upstream mipsy source/binaries;
 - VS Code Server or VSIX caches; and
 - credentials, local state databases, attempts, submissions, or reports.
-
