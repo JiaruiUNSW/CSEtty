@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -8,10 +10,13 @@ import pytest
 from test_pack import make_pack
 
 import csetty.cli as cli
+import csetty.supervisor as supervisor_module
+from csetty.clock import FrozenClock
 from csetty.models import AttemptMode, AttemptState, WorkspaceKind
 from csetty.pack import load_pack
 from csetty.paths import AppPaths
 from csetty.storage import Store
+from csetty.supervisor import AttemptService
 
 
 class RuntimeStub:
@@ -320,6 +325,117 @@ def test_report_without_id_renders_the_newest_finished_attempt(
     output = capsys.readouterr().out
     assert attempt.id in output
     assert (paths.reports / f"{attempt.id}.html").is_file()
+    grade = store.get_grade(attempt.id)
+    assert grade is not None
+    assert grade["report_finalized_at"] is not None
+
+
+def test_working_report_cannot_overwrite_a_concurrent_final_report(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    pack = load_pack(make_pack(tmp_path / "pack"))
+    paths = AppPaths.discover(tmp_path / "state")
+    store = Store(paths)
+    runtime = RuntimeStub()
+    now = datetime.now(UTC)
+    attempt = store.create_attempt(
+        pack_id=pack.id,
+        pack_version=pack.version,
+        pack_path=pack.root,
+        pack_digest=pack.digest,
+        course=pack.course,
+        profile=pack.profile,
+        mode=AttemptMode.EXAM,
+        timed=True,
+        created_at=now,
+        workspace_kind=WorkspaceKind.VOLUME,
+        workspace_ref="report-race-volume",
+        image=pack.environment.image,
+        editor="terminal",
+        candidate_id="z1234567",
+    )
+    attempt = store.transition(
+        attempt.id,
+        AttemptState.WORKING,
+        at=now,
+        deadline_at=now + timedelta(hours=3),
+    )
+    monkeypatch.setattr(cli, "_components", lambda: (paths, store, runtime, object()))
+
+    working_write_started = threading.Event()
+    allow_working_write = threading.Event()
+    finish_transitioned = threading.Event()
+    original_write_reports = supervisor_module.write_reports
+    original_transition = store.transition
+
+    def delayed_write_reports(root: Path, attempt_id: str, document: object):
+        assert isinstance(document, dict)
+        if document["attempt"]["state"] == AttemptState.WORKING.value:
+            working_write_started.set()
+            assert allow_working_write.wait(timeout=5)
+        return original_write_reports(root, attempt_id, document)
+
+    def observed_transition(
+        attempt_id: str,
+        target: AttemptState,
+        *,
+        at: datetime,
+        deadline_at: datetime | None = None,
+        finish_reason: str | None = None,
+    ):
+        current = original_transition(
+            attempt_id,
+            target,
+            at=at,
+            deadline_at=deadline_at,
+            finish_reason=finish_reason,
+        )
+        if target is AttemptState.FINISHED:
+            finish_transitioned.set()
+        return current
+
+    monkeypatch.setattr(supervisor_module, "write_reports", delayed_write_reports)
+    monkeypatch.setattr(store, "transition", observed_transition)
+    failures: list[BaseException] = []
+
+    def run_report() -> None:
+        try:
+            cli._report(cli._parser().parse_args(["report", attempt.id]))
+        except BaseException as exc:  # pragma: no cover - asserted below
+            failures.append(exc)
+
+    service = AttemptService(
+        store=store,
+        runtime=runtime,  # type: ignore[arg-type]
+        attempt=attempt,
+        pack=pack,
+        clock=FrozenClock(now),
+    )
+
+    def finish_attempt() -> None:
+        try:
+            service.finish()
+        except BaseException as exc:  # pragma: no cover - asserted below
+            failures.append(exc)
+
+    report_thread = threading.Thread(target=run_report)
+    finish_thread = threading.Thread(target=finish_attempt)
+    report_thread.start()
+    assert working_write_started.wait(timeout=5)
+    finish_thread.start()
+    assert finish_transitioned.wait(timeout=5)
+    assert finish_thread.is_alive()
+    allow_working_write.set()
+    report_thread.join(timeout=5)
+    finish_thread.join(timeout=5)
+
+    assert not report_thread.is_alive()
+    assert not finish_thread.is_alive()
+    assert failures == []
+    document = json.loads((paths.reports / f"{attempt.id}.json").read_text())
+    assert document["attempt"]["state"] == AttemptState.FINISHED.value
+    assert document["grade"] is not None
     grade = store.get_grade(attempt.id)
     assert grade is not None
     assert grade["report_finalized_at"] is not None

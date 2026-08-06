@@ -25,6 +25,10 @@ file retained as a fallback when the companion is unavailable.
 The redirect and **Open final report** control remain pending until a persisted
 finalization marker confirms the grade plus JSON and HTML writes completed; an
 HTML report generated while working is never treated as final.
+All report publishers for an attempt share a cross-process lock. A rewrite
+withdraws that marker before replacing either file and republishes it only after
+both replacements succeed, so a concurrent working report cannot overwrite a
+finished report while it remains advertised as final.
 
 The page can be reopened without changing the attempt:
 

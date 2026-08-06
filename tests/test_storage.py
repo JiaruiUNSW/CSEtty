@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import multiprocessing
+import threading
+import time
 import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -13,8 +16,67 @@ from csetty.storage import Store
 from csetty.supervisor import _deadline_warning_thresholds
 
 
+def _hold_report_lock(
+    state_dir: str,
+    attempt_id: str,
+    ready_path: str,
+    release_path: str,
+) -> None:
+    store = Store(AppPaths.discover(Path(state_dir)))
+    with store.report_lock(attempt_id):
+        Path(ready_path).touch()
+        deadline = time.monotonic() + 10
+        while not Path(release_path).exists():
+            if time.monotonic() >= deadline:
+                raise TimeoutError("parent did not release the report lock holder")
+            time.sleep(0.02)
+
+
 def make_store(tmp_path: Path) -> Store:
     return Store(AppPaths.discover(tmp_path / "state"))
+
+
+def test_report_lock_serializes_another_process(tmp_path: Path) -> None:
+    store = make_store(tmp_path)
+    attempt_id = "00000000-0000-4000-8000-000000000099"
+    ready = tmp_path / "report-lock-ready"
+    release = tmp_path / "report-lock-release"
+    context = multiprocessing.get_context("spawn")
+    holder = context.Process(
+        target=_hold_report_lock,
+        args=(str(store.paths.root), attempt_id, str(ready), str(release)),
+    )
+    holder.start()
+    deadline = time.monotonic() + 10
+    while not ready.exists():
+        if not holder.is_alive():
+            raise AssertionError(f"lock holder exited with {holder.exitcode}")
+        if time.monotonic() >= deadline:
+            raise AssertionError("lock holder did not become ready")
+        time.sleep(0.02)
+
+    acquired = threading.Event()
+
+    def acquire_after_holder() -> None:
+        with store.report_lock(attempt_id):
+            acquired.set()
+
+    waiter = threading.Thread(target=acquire_after_holder)
+    waiter.start()
+    try:
+        assert not acquired.wait(timeout=0.25)
+        release.touch()
+        assert acquired.wait(timeout=5)
+    finally:
+        release.touch(exist_ok=True)
+        holder.join(timeout=5)
+        if holder.is_alive():
+            holder.terminate()
+            holder.join(timeout=5)
+        waiter.join(timeout=5)
+
+    assert holder.exitcode == 0
+    assert not waiter.is_alive()
 
 
 def create_working_attempt(store: Store, now: datetime, *, deadline_seconds: int = 60):

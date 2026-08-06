@@ -24,8 +24,10 @@ The validation must exercise the visible defects addressed by the candidate:
 7. a `CREATED` recovery URL reveals neither questions nor resources;
 8. a non-reading browser-launch failure does not strand a running attempt;
 9. a practice `--skip-reading` attempt preserves that choice across recovery;
-   and
-10. a report created while working cannot trigger the final-report redirect.
+10. a report created while working cannot trigger the final-report redirect;
+    and
+11. concurrent working/final report publishers cannot overwrite the final
+    report or leave a stale report advertised as ready.
 
 ## 2. Target and boundaries
 
@@ -269,7 +271,10 @@ $regressionTests = @(
     'tests/test_companion.py::test_companion_browser_failure_is_nonfatal_without_reading_callback',
     'tests/test_companion.py::test_created_companion_withholds_paper_and_resource_routes',
     'tests/test_cli_start.py::test_resume_created_attempt_preserves_skip_reading_choice',
-    'tests/test_companion.py::test_stale_working_report_is_not_ready_until_finalization_completes'
+    'tests/test_companion.py::test_stale_working_report_is_not_ready_until_finalization_completes',
+    'tests/test_storage.py::test_report_lock_serializes_another_process',
+    'tests/test_cli_start.py::test_working_report_cannot_overwrite_a_concurrent_final_report',
+    'tests/test_attempt_service.py::test_failed_report_rewrite_hides_the_previous_final_report'
 )
 & .\.venv\Scripts\pytest.exe -vv @regressionTests *> $regressionLog
 $regressionExit = $LASTEXITCODE
@@ -289,7 +294,12 @@ The log must prove these exact states:
   and
 - a working-time HTML/JSON pair plus a terminal state and even a grade are not
   sufficient for `report_ready`; only the later finalization marker publishes
-  the report.
+  the report;
+- native-Windows processes serialize on the same per-attempt report lock, and a
+  forced working-report/finalization race leaves the durable report graded and
+  `FINISHED`; and
+- a failed rewrite clears the old finalization marker instead of continuing to
+  advertise stale report files.
 
 ## 7. Create validation-only short packs
 

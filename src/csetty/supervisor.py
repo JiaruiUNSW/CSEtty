@@ -627,24 +627,41 @@ class AttemptService:
         )
         return report
 
-    def _write_report_files(
-        self, attempt: Attempt, report: Mapping[str, Any]
-    ) -> tuple[Path, Path]:
-        document = report_document(
-            attempt=attempt,
-            pack=self.pack,
-            submissions=self.store.list_submissions(attempt.id),
-            grade=report,
-            object_reader=self.store.object_bytes,
-        )
-        return write_reports(self.store.paths.reports, attempt.id, document)
+    def publish_report(
+        self, *, require_terminal: bool = False
+    ) -> tuple[dict[str, Any], Path, Path, bool]:
+        """Write a current report without racing another report publisher."""
+        with self.store.report_lock(self.attempt_id):
+            attempt = self._attempt()
+            if require_terminal and not attempt.state.terminal:
+                raise StateError("a final report requires a finished or expired attempt")
+            finalized = attempt.state.terminal
+            grade = self.grade() if finalized else None
+            if finalized:
+                attempt = self.store.get_attempt(self.attempt_id)
+            document = report_document(
+                attempt=attempt,
+                pack=self.pack,
+                submissions=self.store.list_submissions(attempt.id),
+                grade=grade,
+                object_reader=self.store.object_bytes,
+            )
+            self.store.invalidate_report_finalization(attempt.id)
+            json_report, html_report = write_reports(
+                self.store.paths.reports, attempt.id, document
+            )
+            if finalized:
+                self.store.mark_report_finalized(attempt.id, at=self.clock.now())
+        return document, json_report, html_report, finalized
 
     def finalize_report(self) -> tuple[dict[str, Any], Path, bool | None]:
         """Grade, persist both report formats, and optionally open the HTML report."""
-        report = self.grade()
-        attempt = self.store.get_attempt(self.attempt_id)
-        _json_report, html_report = self._write_report_files(attempt, report)
-        self.store.mark_report_finalized(attempt.id, at=self.clock.now())
+        document, _json_report, html_report, finalized = self.publish_report(
+            require_terminal=True
+        )
+        report = document["grade"]
+        if not finalized or not isinstance(report, dict):
+            raise StateError("final report publication did not produce a grade")
         opened = None if self.report_opener is None else self.report_opener(html_report)
         return report, html_report, opened
 

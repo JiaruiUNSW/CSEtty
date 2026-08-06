@@ -113,7 +113,9 @@ check
   HTML report uses the same packaged COMP1511/COMP1521 course theme as the live
   paper; it does not depend on remote CSS or JavaScript. The companion declares
   the report ready only after the grade and both atomic report writes have been
-  recorded as finalized.
+  recorded as finalized. Report writes for one attempt are serialized across
+  processes; every rewrite clears readiness first and republishes it only after
+  both replacement files succeed.
 
 Closing Bash or VS Code is not finish. A timed deadline continues.
 

@@ -273,7 +273,9 @@ After `exam finish` or automatic timed expiry, the supervisor grades the latest
 accepted submissions, writes both report formats, and opens the HTML report in
 the host's default browser. The companion redirects only after the grade and
 both atomic report writes are durably marked complete, so an earlier working
-report cannot be mistaken for the final result. If the browser cannot be
+report cannot be mistaken for the final result. Report publishers are serialized
+per attempt across processes, and a rewrite temporarily withdraws the readiness
+marker until both replacement files are complete. If the browser cannot be
 launched, the absolute report path remains in the terminal or supervisor log and `csetty report
 [ATTEMPT_ID]` remains available. Without an ID, `report` selects the newest
 attempt; every successful `start` also prints the full ID before reading begins.

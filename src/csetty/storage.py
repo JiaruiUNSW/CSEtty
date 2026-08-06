@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import errno
+import importlib
 import json
 import os
 import secrets
 import sqlite3
+import threading
+import time
 import uuid
 from collections.abc import Iterator, Mapping
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -29,6 +33,9 @@ _TRANSITIONS: dict[AttemptState, set[AttemptState]] = {
     AttemptState.EXPIRED: set(),
     AttemptState.ABORTED: set(),
 }
+
+_REPORT_THREAD_LOCKS: dict[Path, threading.Lock] = {}
+_REPORT_THREAD_LOCKS_GUARD = threading.Lock()
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -167,6 +174,56 @@ class Store:
             raise
         finally:
             connection.close()
+
+    @contextmanager
+    def report_lock(self, attempt_id: str) -> Iterator[None]:
+        """Serialize report publication for one attempt across threads and processes."""
+        try:
+            parsed_id = uuid.UUID(attempt_id)
+        except ValueError as exc:
+            raise ValidationError("attempt id must be a canonical UUID") from exc
+        if str(parsed_id) != attempt_id:
+            raise ValidationError("attempt id must be a canonical UUID")
+
+        path = self.paths.attempts / attempt_id / "report.lock"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        resolved_path = path.resolve()
+        with _REPORT_THREAD_LOCKS_GUARD:
+            thread_lock = _REPORT_THREAD_LOCKS.setdefault(resolved_path, threading.Lock())
+
+        with thread_lock, path.open("a+b") as stream:
+            stream.seek(0, os.SEEK_END)
+            if stream.tell() == 0:
+                stream.write(b"\0")
+                stream.flush()
+            stream.seek(0)
+            if os.name == "nt":
+                lock_api: Any = importlib.import_module("msvcrt")
+
+                while True:
+                    try:
+                        lock_api.locking(stream.fileno(), lock_api.LK_NBLCK, 1)
+                    except OSError as exc:
+                        if exc.errno not in {errno.EACCES, errno.EAGAIN, errno.EDEADLK}:
+                            raise
+                        time.sleep(0.05)
+                    else:
+                        break
+                try:
+                    yield
+                finally:
+                    stream.seek(0)
+                    with suppress(OSError):
+                        lock_api.locking(stream.fileno(), lock_api.LK_UNLCK, 1)
+            else:
+                lock_api = importlib.import_module("fcntl")
+
+                lock_api.flock(stream.fileno(), lock_api.LOCK_EX)
+                try:
+                    yield
+                finally:
+                    with suppress(OSError):
+                        lock_api.flock(stream.fileno(), lock_api.LOCK_UN)
 
     def _migrate(self) -> None:
         with self._connect() as connection:
@@ -690,6 +747,14 @@ class Store:
             )
             if cursor.rowcount != 1:
                 raise StateError("a report cannot be finalized before its grade is recorded")
+
+    def invalidate_report_finalization(self, attempt_id: str) -> None:
+        """Hide a previously published report while its files are being replaced."""
+        with self.transaction(immediate=True) as connection:
+            connection.execute(
+                "UPDATE grades SET report_finalized_at = NULL WHERE attempt_id = ?",
+                (attempt_id,),
+            )
 
     def get_grade(self, attempt_id: str) -> dict[str, Any] | None:
         with self._connect() as connection:

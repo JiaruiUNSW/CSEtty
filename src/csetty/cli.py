@@ -24,7 +24,7 @@ from .models import Attempt, AttemptMode, AttemptState, WorkspaceKind
 from .pack import Pack, PackRepository, load_pack, snapshot_author_materials, snapshot_pack
 from .paths import AppPaths
 from .question_bank import build_exam_pack, build_verification_pack, load_question_bank
-from .report import open_report_in_browser, render_report_text, report_document, write_reports
+from .report import open_report_in_browser, render_report_text
 from .storage import Store
 from .supervisor import AttemptService, ensure_supervisor
 from .util import atomic_write
@@ -619,7 +619,7 @@ def _list_attempts() -> int:
 
 
 def _report(args: argparse.Namespace) -> int:
-    paths, store, runtime, _vscode = _components()
+    _paths, store, runtime, _vscode = _components()
     clock = SystemClock()
     if args.attempt_id is None:
         attempts = store.list_attempts()
@@ -629,24 +629,10 @@ def _report(args: argparse.Namespace) -> int:
     else:
         attempt = store.resolve_attempt(args.attempt_id)
     pack = _attempt_pack(attempt)
-    attempt = store.expire_if_due(attempt.id, now=clock.now())
-    grade_row = store.get_grade(attempt.id)
-    grade = None if grade_row is None else grade_row["report"]
-    if attempt.state in {AttemptState.FINISHED, AttemptState.EXPIRED} and grade is None:
-        service = AttemptService(
-            store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock
-        )
-        grade = service.grade()
-    document = report_document(
-        attempt=attempt,
-        pack=pack,
-        submissions=store.list_submissions(attempt.id),
-        grade=grade,
-        object_reader=store.object_bytes,
+    service = AttemptService(
+        store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock
     )
-    json_path, html_path = write_reports(paths.reports, attempt.id, document)
-    if attempt.state in {AttemptState.FINISHED, AttemptState.EXPIRED}:
-        store.mark_report_finalized(attempt.id, at=clock.now())
+    document, json_path, html_path, _finalized = service.publish_report()
     if args.json:
         print(json.dumps(document, indent=2, sort_keys=True))
     else:

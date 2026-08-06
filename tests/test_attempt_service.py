@@ -256,6 +256,29 @@ def test_finish_without_a_report_opener_still_writes_the_report(tmp_path: Path) 
     assert "Opened local HTML report" not in finished["stdout"]
 
 
+def test_failed_report_rewrite_hides_the_previous_final_report(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    service.finish()
+    grade = store.get_grade(service.attempt_id)
+    assert grade is not None
+    assert grade["report_finalized_at"] is not None
+
+    def fail_write(*_args: object, **_kwargs: object) -> tuple[Path, Path]:
+        raise OSError("report write failed")
+
+    monkeypatch.setattr(supervisor_module, "write_reports", fail_write)
+    with pytest.raises(OSError, match="report write failed"):
+        service.finalize_report()
+
+    grade = store.get_grade(service.attempt_id)
+    assert grade is not None
+    assert grade["report_finalized_at"] is None
+
+
 def test_grade_has_no_report_file_side_effect_until_finalization(tmp_path: Path) -> None:
     now = datetime(2026, 8, 5, tzinfo=UTC)
     service, store, _runtime = make_service(tmp_path, now)
