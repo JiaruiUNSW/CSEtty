@@ -34,6 +34,10 @@ _REQUIRED_RELEASE_FILES = (
     "TRADEMARKS.md",
     "THIRD_PARTY_NOTICES.md",
 )
+_TRUSTED_PUBLISH_WORKFLOW = Path(".github/workflows/publish-pypi.yml")
+_TRUSTED_PUBLISH_ACTION = (
+    "pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33"
+)
 _PUBLISH_PATTERNS = (
     re.compile(r"\bdocker\s+(?:buildx\s+build[^\n]*--push|push)\b", re.IGNORECASE),
     re.compile(r"\b(?:twine\s+upload|uv\s+publish)\b", re.IGNORECASE),
@@ -158,12 +162,94 @@ def _verify_sdist(project_root: Path, dist: Path) -> Path:
     return sdist
 
 
+def _verify_trusted_publish_workflow(project_root: Path, path: Path, text: str) -> None:
+    relative_path = path.relative_to(project_root)
+    if relative_path != _TRUSTED_PUBLISH_WORKFLOW:
+        raise SystemExit(f"trusted publishing is only allowed in {_TRUSTED_PUBLISH_WORKFLOW}")
+
+    required_fragments = (
+        "on:\n  release:\n    types: [published]",
+        "permissions: {}",
+        "github.repository == 'JiaruiUNSW/CSEtty'",
+        "github.event.action == 'published'",
+        "startsWith(github.event.release.tag_name, 'v')",
+        "environment:\n      name: pypi\n      url: https://pypi.org/p/cseexamtty",
+        "permissions:\n      contents: read\n      id-token: write",
+        'GH_TOKEN: ${{ github.token }}',
+        'gh release download "$RELEASE_TAG"',
+        '--pattern "cseexamtty-${release_version}-py3-none-any.whl"',
+        '--pattern "cseexamtty-${release_version}.tar.gz"',
+        '--pattern "cseexamtty-python.cdx.json"',
+        '--pattern "SHA256SUMS"',
+        '[[ ! "$RELEASE_TAG" =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+',
+        "if actual_files != expected_files:",
+        "if set(checksums) != expected_payloads:",
+        'hashlib.file_digest(stream, "sha256")',
+        'wheel_metadata.get("Version") != version',
+        'sdist_metadata.get("Version") != version',
+        'sbom.get("bomFormat") != "CycloneDX"',
+        "install -m 0644",
+        "packages-dir: pypi-dist/",
+        "attestations: true",
+        "print-hash: true",
+    )
+    missing = [fragment for fragment in required_fragments if fragment not in text]
+    if missing:
+        raise SystemExit(
+            "trusted publish workflow is missing required fail-closed controls: "
+            + ", ".join(repr(fragment) for fragment in missing)
+        )
+
+    job_headers = re.findall(r"(?m)^  ([A-Za-z][A-Za-z0-9_-]*):\s*$", text.split("jobs:", 1)[-1])
+    if job_headers != ["publish"]:
+        raise SystemExit(
+            "trusted publish workflow must contain only the isolated publish job; "
+            f"found {job_headers!r}"
+        )
+    action_uses = re.findall(r"(?m)^\s*uses:\s*([^\s#]+)", text)
+    if action_uses != [_TRUSTED_PUBLISH_ACTION]:
+        raise SystemExit(
+            "trusted publish workflow must use only the full-SHA-pinned PyPI action; "
+            f"found {action_uses!r}"
+        )
+    if text.count("id-token: write") != 1:
+        raise SystemExit("trusted publish workflow must grant id-token: write exactly once")
+    if text.count("permissions: {}") != 1:
+        raise SystemExit("trusted publish workflow must deny top-level permissions")
+    if text.count("run: |") != 1:
+        raise SystemExit("trusted publish workflow must contain one asset-validation run step")
+
+    forbidden_patterns = (
+        re.compile(r"(?m)^\s+(?:push|pull_request|workflow_dispatch|schedule):"),
+        re.compile(r"\$\{\{\s*secrets\."),
+        re.compile(r"(?im)^\s+(?:password|user|repository-url|skip-existing):"),
+        re.compile(r"actions/checkout@", re.IGNORECASE),
+        re.compile(r"\b(?:curl|wget|git|sudo)\b", re.IGNORECASE),
+        re.compile(r"\b(?:pip|uv|python(?:3)?)\s+(?:build|install|publish)\b", re.IGNORECASE),
+    )
+    for pattern in forbidden_patterns:
+        if pattern.search(text):
+            raise SystemExit(
+                "trusted publish workflow contains a forbidden trigger, credential, "
+                f"checkout, download, or build command: {pattern.pattern}"
+            )
+
+
 def _verify_private_workflows(project_root: Path) -> None:
     workflows = project_root / ".github" / "workflows"
+    trusted_publish_path = project_root / _TRUSTED_PUBLISH_WORKFLOW
+    if not trusted_publish_path.is_file():
+        raise SystemExit(f"missing trusted publish workflow: {_TRUSTED_PUBLISH_WORKFLOW}")
     for path in sorted(workflows.glob("*.y*ml")):
         text = path.read_text(encoding="utf-8")
+        if path == trusted_publish_path:
+            _verify_trusted_publish_workflow(project_root, path, text)
         for pattern in _PUBLISH_PATTERNS:
             if pattern.search(text):
+                if path == trusted_publish_path and pattern.pattern.startswith(
+                    "pypa/gh-action-pypi-publish"
+                ):
+                    continue
                 raise SystemExit(
                     f"private release gate found a publishing command in {path}: {pattern.pattern}"
                 )

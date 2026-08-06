@@ -1,0 +1,176 @@
+name: Publish Python distributions to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+concurrency:
+  group: pypi-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish verified release assets
+    if: >-
+      github.repository == 'JiaruiUNSW/CSEtty' &&
+      github.event.action == 'published' &&
+      startsWith(github.event.release.tag_name, 'v')
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/cseexamtty
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download and verify the release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]]; then
+            echo "Unsupported release tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+
+          release_version="${RELEASE_TAG#v}"
+          mkdir -p release-assets pypi-dist
+          gh release download "$RELEASE_TAG" \
+            --repo "$RELEASE_REPOSITORY" \
+            --dir release-assets \
+            --pattern "cseexamtty-${release_version}-py3-none-any.whl" \
+            --pattern "cseexamtty-${release_version}.tar.gz" \
+            --pattern "cseexamtty-python.cdx.json" \
+            --pattern "SHA256SUMS"
+
+          RELEASE_VERSION="$release_version" python3 - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import os
+          import re
+          import tarfile
+          import zipfile
+          from email.parser import BytesParser
+          from email.policy import default
+          from pathlib import Path, PurePosixPath
+
+          root = Path("release-assets")
+          version = os.environ["RELEASE_VERSION"]
+          wheel_name = f"cseexamtty-{version}-py3-none-any.whl"
+          sdist_name = f"cseexamtty-{version}.tar.gz"
+          sbom_name = "cseexamtty-python.cdx.json"
+          expected_payloads = {wheel_name, sdist_name, sbom_name}
+          expected_files = expected_payloads | {"SHA256SUMS"}
+          size_limits = {
+              wheel_name: 100 * 1024 * 1024,
+              sdist_name: 100 * 1024 * 1024,
+              sbom_name: 10 * 1024 * 1024,
+              "SHA256SUMS": 16 * 1024,
+          }
+
+          actual_files = {path.name for path in root.iterdir() if path.is_file()}
+          if actual_files != expected_files:
+              raise SystemExit(
+                  "release asset set differs from the allowed set: "
+                  f"expected {sorted(expected_files)!r}, found {sorted(actual_files)!r}"
+              )
+          oversized = {
+              filename: (root / filename).stat().st_size
+              for filename, limit in size_limits.items()
+              if (root / filename).stat().st_size > limit
+          }
+          if oversized:
+              raise SystemExit(f"release assets exceed size limits: {oversized!r}")
+
+          checksum_pattern = re.compile(r"([0-9a-f]{64})  ([A-Za-z0-9][A-Za-z0-9_.+-]*)")
+          checksums: dict[str, str] = {}
+          for line in (root / "SHA256SUMS").read_text(encoding="utf-8").splitlines():
+              match = checksum_pattern.fullmatch(line)
+              if match is None:
+                  raise SystemExit(f"invalid SHA256SUMS line: {line!r}")
+              digest, filename = match.groups()
+              if filename in checksums:
+                  raise SystemExit(f"duplicate SHA256SUMS entry: {filename}")
+              checksums[filename] = digest
+          if set(checksums) != expected_payloads:
+              raise SystemExit(
+                  "SHA256SUMS differs from the allowed payload set: "
+                  f"expected {sorted(expected_payloads)!r}, found {sorted(checksums)!r}"
+              )
+          for filename, expected_digest in checksums.items():
+              with (root / filename).open("rb") as stream:
+                  actual_digest = hashlib.file_digest(stream, "sha256").hexdigest()
+              if actual_digest != expected_digest:
+                  raise SystemExit(
+                      f"SHA-256 mismatch for {filename}: "
+                      f"expected {expected_digest}, found {actual_digest}"
+                  )
+
+          with zipfile.ZipFile(root / wheel_name) as archive:
+              metadata_entries = [
+                  entry
+                  for entry in archive.infolist()
+                  if entry.filename.endswith(".dist-info/METADATA")
+              ]
+              if len(metadata_entries) != 1 or metadata_entries[0].file_size > 1024 * 1024:
+                  raise SystemExit("wheel must contain exactly one dist-info/METADATA file")
+              wheel_metadata = BytesParser(policy=default).parsebytes(
+                  archive.read(metadata_entries[0])
+              )
+          if wheel_metadata.get("Name") != "cseexamtty":
+              raise SystemExit("wheel project name is not cseexamtty")
+          if wheel_metadata.get("Version") != version:
+              raise SystemExit("wheel version does not match the release tag")
+
+          with tarfile.open(root / sdist_name, mode="r:gz") as archive:
+              members = archive.getmembers()
+              if len(members) > 10_000:
+                  raise SystemExit("sdist contains too many archive members")
+              unsafe = [
+                  member.name
+                  for member in members
+                  if member.issym()
+                  or member.islnk()
+                  or not (member.isfile() or member.isdir())
+                  or PurePosixPath(member.name).is_absolute()
+                  or ".." in PurePosixPath(member.name).parts
+              ]
+              if unsafe:
+                  raise SystemExit(f"sdist contains unsafe members: {unsafe[:5]!r}")
+              pkg_info_name = f"cseexamtty-{version}/PKG-INFO"
+              pkg_info_members = [member for member in members if member.name == pkg_info_name]
+              if len(pkg_info_members) != 1 or pkg_info_members[0].size > 1024 * 1024:
+                  raise SystemExit("sdist must contain exactly one top-level PKG-INFO")
+              pkg_info_stream = archive.extractfile(pkg_info_members[0])
+              if pkg_info_stream is None:
+                  raise SystemExit("could not read sdist PKG-INFO")
+              sdist_metadata = BytesParser(policy=default).parsebytes(pkg_info_stream.read())
+          if sdist_metadata.get("Name") != "cseexamtty":
+              raise SystemExit("sdist project name is not cseexamtty")
+          if sdist_metadata.get("Version") != version:
+              raise SystemExit("sdist version does not match the release tag")
+
+          sbom = json.loads((root / sbom_name).read_text(encoding="utf-8"))
+          if sbom.get("bomFormat") != "CycloneDX":
+              raise SystemExit("release SBOM is not a CycloneDX document")
+          PY
+
+          install -m 0644 \
+            "release-assets/cseexamtty-${release_version}-py3-none-any.whl" \
+            "release-assets/cseexamtty-${release_version}.tar.gz" \
+            pypi-dist/
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
+        with:
+          packages-dir: pypi-dist/
+          attestations: true
+          print-hash: true

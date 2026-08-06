@@ -6,8 +6,9 @@ Status: stages 1–5 are implemented on the Apple Silicon local alpha. Both
 current course images passed fresh Stage 4 prepare/offline-attach checks on
 2026-08-06. COMP1511 passed its full end-to-end workflow; COMP1521 passed a live
 MIPS/autotest/submission/finish/report workflow using the repository's
-independent `csetty-mips` runtime. Stage 6 source-only `0.1.0a1` release
-engineering is in progress; stable `0.1.0` desktop acceptance remains open.
+independent `csetty-mips` runtime. Stage 6 source-only `0.1.0a1` was published;
+subsequent releases use the protected GitHub Actions/PyPI OIDC path. Stable
+`0.1.0` desktop acceptance remains open.
 
 ## 1. Product boundary
 
@@ -129,10 +130,10 @@ The complete container command contract is maintained in `COMMAND_SPEC.md`.
   real judge across every source-bank question. Both banks passed 75/75 on
   2026-08-06; this check is part of both Docker CI jobs.
 
-### Stage 6 — Source-only public alpha: release candidate
+### Stage 6 — Source-only public alpha: published
 
 The `0.1.0a1` alpha publishes source and Python distributions only. The
-following release engineering work is complete on the current Mac:
+following release engineering work is complete:
 
 - the wheel installs from outside a checkout with both pip and an isolated
   `uv tool install`; original author materials remain host-only for post-exam
@@ -148,17 +149,20 @@ following release engineering work is complete on the current Mac:
   archive, Python CycloneDX SBOM, and checksums; the DCC archive is not itself a
   published project artifact; and
 - a fail-closed public gate refuses tagging/PyPI upload while owner or public-CI
-  evidence is absent.
+  evidence is absent; and
+- a dedicated GitHub Actions workflow can publish only pre-staged,
+  checksum-verified release wheel/sdist assets through PyPI Trusted Publishing.
+  It has no checkout/build step, uses a protected `pypi` environment, pins the
+  PyPA action by full commit SHA, and retains the ban on workflow artifact and
+  image uploads.
 
-Alpha publication gates still to complete at the release commit:
+Stable-release acceptance still to complete:
 
-1. an actual GitHub-hosted run of the checked-in Windows/Linux/macOS host matrix;
-2. live linux/amd64 and linux/arm64 local-image acceptance plus runner-local
-   multi-architecture OCI/SBOM/provenance verification;
-3. final clean-commit wheel/sdist/SBOM/checksum and public-gate verification;
-4. annotated tag and PyPI publication using a new secure credential or Trusted
-   Publishing; and
-5. fresh installation and smoke verification from PyPI.
+1. broader native Windows 11, macOS Intel/Apple Silicon, and Ubuntu desktop
+   Docker/VS Code acceptance;
+2. repeatable release-candidate live linux/amd64 and linux/arm64 acceptance;
+3. owner review of each final clean-commit wheel/sdist/SBOM/checksum set; and
+4. a live protected-environment OIDC publication exercise for the next version.
 
 File-level licensing, DCC source-build notices, independent `csetty-mips`
 provenance/MPL notices, the no-redistribution VS Code/extension boundary, and

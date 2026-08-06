@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -13,18 +15,41 @@ def digest(path: Path) -> str:
     return result.hexdigest()
 
 
+def release_files(root: Path) -> tuple[Path, Path, Path]:
+    wheels = sorted(root.glob("cseexamtty-*.whl"))
+    sdists = sorted(root.glob("cseexamtty-*.tar.gz"))
+    sbom = root / "cseexamtty-python.cdx.json"
+    if len(wheels) != 1:
+        raise SystemExit(f"expected exactly one cseexamtty wheel, found {len(wheels)}")
+    if len(sdists) != 1:
+        raise SystemExit(f"expected exactly one cseexamtty sdist, found {len(sdists)}")
+    if not sbom.is_file():
+        raise SystemExit(f"missing release SBOM: {sbom}")
+    return wheels[0], sdists[0], sbom
+
+
 def main() -> int:
     root = Path(sys.argv[1] if len(sys.argv) == 2 else "dist").resolve(strict=True)
     output = root / "SHA256SUMS"
-    files = sorted(
-        path
-        for path in root.iterdir()
-        if path.is_file() and path != output and not path.name.startswith(".")
-    )
-    output.write_text(
-        "".join(f"{digest(path)}  {path.name}\n" for path in files),
-        encoding="utf-8",
-    )
+    files = release_files(root)
+    contents = "".join(f"{digest(path)}  {path.name}\n" for path in files)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=root,
+            prefix=".SHA256SUMS.",
+            delete=False,
+        ) as stream:
+            temporary_name = stream.name
+            stream.write(contents)
+            stream.flush()
+            os.fsync(stream.fileno())
+        Path(temporary_name).replace(output)
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
     print(output)
     return 0
 
