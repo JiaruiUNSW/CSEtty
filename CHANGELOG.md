@@ -19,6 +19,8 @@
 - Keeps Linux build entrypoints LF-only in Windows Git checkouts, tolerates slow
   companion/supervisor cold starts, and serves final reports through the
   authenticated loopback companion instead of Windows HTML file associations.
+- Preserves question-bank and pack test fixtures byte-for-byte when Windows Git
+  uses `core.autocrlf=true`, including printable fixtures with a `.bin` suffix.
 - Enables Windows virtual-terminal processing before clearing the exam shell,
   starts reading time only after the companion is healthy and the browser launch
   succeeds, preserves resumable reading after launch failure, and lets `report`

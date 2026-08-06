@@ -7,3 +7,8 @@ docker/Dockerfile.* text eol=lf
 docker/dcc-command text eol=lf
 docker/exam-command text eol=lf
 docker/mipsy-command text eol=lf
+
+# Test fixtures are byte-exact inputs. Git must not add CR bytes when a Windows
+# checkout enables core.autocrlf, including for printable .bin fixtures.
+question_bank/**/tests/** -text
+packs/**/tests/** -text

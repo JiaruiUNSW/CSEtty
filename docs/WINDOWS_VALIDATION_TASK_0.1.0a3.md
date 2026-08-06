@@ -153,6 +153,21 @@ Acceptance requirements:
   assuming this from Docker availability.
 - desktop VS Code and the `code` command are available.
 
+Confirm that Windows checkout conversion did not alter any byte-exact test
+fixture. This compares every working-tree fixture directly with its Git blob
+without interpreting its contents as text:
+
+```powershell
+$fixtureFiles = git ls-files 'question_bank/**/tests/**' 'packs/**/tests/**'
+foreach ($relative in $fixtureFiles) {
+    $expected = git rev-parse "HEAD:$relative"
+    $actual = git hash-object --no-filters -- $relative
+    if ($LASTEXITCODE -ne 0 -or $actual -ne $expected) {
+        throw "Fixture bytes differ from Git blob: $relative"
+    }
+}
+```
+
 If Docker Desktop is merely stopped, starting the already installed application
 is in scope. Do not change its backend or Windows features without user approval.
 

@@ -61,6 +61,21 @@ def test_windows_checkout_keeps_linux_build_entrypoints_lf_only() -> None:
         assert b"\r\n" not in (ROOT / relative).read_bytes()
 
 
+def test_windows_checkout_preserves_question_fixture_bytes() -> None:
+    attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
+    assert "question_bank/**/tests/** -text" in attributes
+    assert "packs/**/tests/** -text" in attributes
+
+    fixtures = (
+        *(ROOT / "question_bank").glob("**/tests/*"),
+        *(ROOT / "packs").glob("**/tests/*"),
+    )
+    assert fixtures
+    for fixture in fixtures:
+        if fixture.is_file():
+            assert b"\r\n" not in fixture.read_bytes(), fixture.relative_to(ROOT)
+
+
 def test_compose_declares_only_local_interactive_and_judge_builds() -> None:
     compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")
     expected = {
