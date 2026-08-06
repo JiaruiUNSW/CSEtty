@@ -52,15 +52,16 @@ jobs:
   docker-comp1511:
     name: COMP1511 local source build and multi-architecture verification
     runs-on: ubuntu-latest
-    env:
-      CSETTY_STATE_DIR: ${{ runner.temp }}/csetty-state
-      CSETTY_BUILD_CONTEXT: ${{ runner.temp }}/csetty-source-build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
+      - name: Configure runner-local paths
+        run: |
+          echo "CSETTY_STATE_DIR=$RUNNER_TEMP/csetty-state" >> "$GITHUB_ENV"
+          echo "CSETTY_BUILD_CONTEXT=$RUNNER_TEMP/csetty-source-build" >> "$GITHUB_ENV"
       - name: Install host package
         run: python -m pip install --disable-pip-version-check -e ".[dev]"
       - uses: docker/setup-qemu-action@v3
@@ -99,15 +100,16 @@ jobs:
   docker-comp1521:
     name: COMP1521 local source build and multi-architecture verification
     runs-on: ubuntu-latest
-    env:
-      CSETTY_STATE_DIR: ${{ runner.temp }}/csetty-state
-      CSETTY_BUILD_CONTEXT: ${{ runner.temp }}/csetty-source-build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
+      - name: Configure runner-local paths
+        run: |
+          echo "CSETTY_STATE_DIR=$RUNNER_TEMP/csetty-state" >> "$GITHUB_ENV"
+          echo "CSETTY_BUILD_CONTEXT=$RUNNER_TEMP/csetty-source-build" >> "$GITHUB_ENV"
       - name: Install host package
         run: python -m pip install --disable-pip-version-check -e ".[dev]"
       - uses: docker/setup-qemu-action@v3
@@ -150,14 +152,14 @@ jobs:
       fail-fast: false
       matrix:
         profile: [comp1511, comp1521]
-    env:
-      CSETTY_STATE_DIR: ${{ runner.temp }}/csetty-state
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
+      - name: Configure runner-local paths
+        run: echo "CSETTY_STATE_DIR=$RUNNER_TEMP/csetty-state" >> "$GITHUB_ENV"
       - name: Install host package
         run: python -m pip install --disable-pip-version-check -e ".[dev]"
       - name: Build and record native arm64 interactive and judge images
