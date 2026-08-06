@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "id": "c1521-low-023",
+  "title": "Array Distance Function",
+  "kind": "mips_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "mips-functions",
+    "mips-data",
+    "integer-representation"
+  ],
+  "weeks": [
+    2,
+    3,
+    4
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 30,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_low_023.s"
+  ],
+  "submission_files": [
+    "c1521_low_023.s"
+  ],
+  "build": {
+    "argv": []
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "mipsy",
+            "c1521_low_023.s"
+          ],
+          "stdin": "3\n1\n8\n-2\n4\n3\n-2\n",
+          "expected_stdout": "8\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "mipsy",
+            "c1521_low_023.s"
+          ],
+          "stdin": "0\n",
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "equal",
+          "argv": [
+            "mipsy",
+            "c1521_low_023.s"
+          ],
+          "stdin": "2\n7\n-4\n7\n-4\n",
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "spread",
+          "argv": [
+            "mipsy",
+            "c1521_low_023.s"
+          ],
+          "stdin": "4\n0\n10\n-5\n2\n3\n4\n5\n-2\n",
+          "expected_stdout": "23\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

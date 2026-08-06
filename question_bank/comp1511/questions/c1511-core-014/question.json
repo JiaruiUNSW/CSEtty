@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-014",
+  "title": "Descending Number Fence",
+  "kind": "c_program",
+  "difficulty": 1,
+  "track": "normal",
+  "tags": [
+    "io",
+    "loops"
+  ],
+  "weeks": [
+    2
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 10,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_014.c"
+  ],
+  "submission_files": [
+    "c1511_core_014.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_014.c",
+      "-o",
+      "c1511_core_014"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "four",
+          "argv": [
+            "./c1511_core_014"
+          ],
+          "stdin": "4\n",
+          "expected_stdout": "4>3>2>1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_core_014"
+          ],
+          "stdin": "1\n",
+          "expected_stdout": "1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "five",
+          "argv": [
+            "./c1511_core_014"
+          ],
+          "stdin": "5\n",
+          "expected_stdout": "5>4>3>2>1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "two",
+          "argv": [
+            "./c1511_core_014"
+          ],
+          "stdin": "2\n",
+          "expected_stdout": "2>1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

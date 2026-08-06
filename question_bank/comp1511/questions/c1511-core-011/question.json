@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-011",
+  "title": "Stable Sentinel Removal",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "arrays-1d",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    4
+  ],
+  "slots": [
+    "array_hurdle"
+  ],
+  "estimated_minutes": 23,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_011.c"
+  ],
+  "submission_files": [
+    "c1511_core_011.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_011.c",
+      "-o",
+      "c1511_core_011"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_core_011"
+          ],
+          "stdin": "6 -1\n3 -1 4 -1 5 6\n",
+          "expected_stdout": "3 4 5 6\nkept: 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "all-removed",
+          "argv": [
+            "./c1511_core_011"
+          ],
+          "stdin": "3 0\n0 0 0\n",
+          "expected_stdout": "\nkept: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "front-and-middle",
+          "argv": [
+            "./c1511_core_011"
+          ],
+          "stdin": "5 9\n9 1 9 2 3\n",
+          "expected_stdout": "1 2 3\nkept: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "negative-sentinel",
+          "argv": [
+            "./c1511_core_011"
+          ],
+          "stdin": "4 -2\n-2 -3 -2 -4\n",
+          "expected_stdout": "-3 -4\nkept: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

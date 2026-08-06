@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-027",
+  "title": "Triangle Label",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "conditionals",
+    "io"
+  ],
+  "weeks": [
+    2
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 12,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_027.c"
+  ],
+  "submission_files": [
+    "c1511_core_027.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_027.c",
+      "-o",
+      "c1511_core_027"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "isosceles",
+          "argv": [
+            "./c1511_core_027"
+          ],
+          "stdin": "5 5 8\n",
+          "expected_stdout": "triangle: isosceles\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "equilateral",
+          "argv": [
+            "./c1511_core_027"
+          ],
+          "stdin": "4 4 4\n",
+          "expected_stdout": "triangle: equilateral\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "invalid",
+          "argv": [
+            "./c1511_core_027"
+          ],
+          "stdin": "1 2 3\n",
+          "expected_stdout": "triangle: invalid\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "scalene",
+          "argv": [
+            "./c1511_core_027"
+          ],
+          "stdin": "4 5 6\n",
+          "expected_stdout": "triangle: scalene\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,3 @@
+short
+also short
+this line is deliberately longer than a tiny fixed buffer

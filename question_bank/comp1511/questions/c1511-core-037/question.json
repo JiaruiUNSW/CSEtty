@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-037",
+  "title": "Sensor Window Anomalies",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "arrays-1d",
+    "loops",
+    "functions",
+    "testing"
+  ],
+  "weeks": [
+    4,
+    8
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 36,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_037.c"
+  ],
+  "submission_files": [
+    "c1511_core_037.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_037.c",
+      "-o",
+      "c1511_core_037"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two",
+          "argv": [
+            "./c1511_core_037"
+          ],
+          "stdin": "5 3 4\n1 4 2 8 7\n",
+          "expected_stdout": "anomalies: 2\nmaximum range: 6\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "zero-threshold",
+          "argv": [
+            "./c1511_core_037"
+          ],
+          "stdin": "4 2 0\n5 5 5 5\n",
+          "expected_stdout": "anomalies: 3\nmaximum range: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "signed",
+          "argv": [
+            "./c1511_core_037"
+          ],
+          "stdin": "6 4 10\n-5 0 5 4 6 12\n",
+          "expected_stdout": "anomalies: 1\nmaximum range: 10\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "single-window",
+          "argv": [
+            "./c1511_core_037"
+          ],
+          "stdin": "3 3 5\n2 3 4\n",
+          "expected_stdout": "anomalies: 0\nmaximum range: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

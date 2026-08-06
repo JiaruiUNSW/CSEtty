@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-017",
+  "title": "Bounded Square Queue",
+  "kind": "c_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "threads",
+    "synchronisation"
+  ],
+  "weeks": [
+    9,
+    10
+  ],
+  "slots": [
+    "challenge_combo"
+  ],
+  "estimated_minutes": 65,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_017.c"
+  ],
+  "submission_files": [
+    "c1521_conc_017.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_017.c",
+      "-pthread",
+      "-o",
+      "c1521_conc_017"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "capacity-one",
+          "argv": [
+            "./c1521_conc_017",
+            "1",
+            "1",
+            "2",
+            "-3"
+          ],
+          "expected_stdout": "0 square=4\n1 square=9\ntotal=13\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000
+        },
+        {
+          "id": "more-consumers",
+          "argv": [
+            "./c1521_conc_017",
+            "2",
+            "3",
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_stdout": "0 square=0\n1 square=1\n2 square=4\n3 square=9\ntotal=14\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "three-tasks",
+          "argv": [
+            "./c1521_conc_017",
+            "3",
+            "2",
+            "-5",
+            "4",
+            "6"
+          ],
+          "expected_stdout": "0 square=25\n1 square=16\n2 square=36\ntotal=77\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000
+        },
+        {
+          "id": "wide-queue",
+          "argv": [
+            "./c1521_conc_017",
+            "8",
+            "4",
+            "10",
+            "-10",
+            "7",
+            "1"
+          ],
+          "expected_stdout": "0 square=100\n1 square=100\n2 square=49\n3 square=1\ntotal=250\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-033",
+  "title": "Component stock ledger",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "whole-program",
+    "structs",
+    "strings",
+    "io",
+    "conditionals"
+  ],
+  "weeks": [
+    4,
+    9
+  ],
+  "slots": [
+    "whole_program"
+  ],
+  "estimated_minutes": 34,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_033.c"
+  ],
+  "submission_files": [
+    "c1511_adv_033.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_033.c",
+      "-o",
+      "c1511_adv_033"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_033"
+          ],
+          "stdin": "ADD bolts 5\nTAKE bolts 2\nSHOW\nEND\n",
+          "expected_stdout": "TAKEN bolts 3\nbolts 3\n--\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_033"
+          ],
+          "stdin": "TAKE wire 1\nSHOW\nEND\n",
+          "expected_stdout": "REJECTED wire\nEMPTY\n--\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "hidden_state",
+          "argv": [
+            "./c1511_adv_033"
+          ],
+          "stdin": "ADD bead 2\nADD bead 3\nSHOW\nEND\n",
+          "expected_stdout": "bead 5\n--\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_033"
+          ],
+          "stdin": "ADD x 1\nTAKE x 2\nSHOW\nEND\n",
+          "expected_stdout": "REJECTED x\nx 1\n--\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-010",
+  "title": "Joined Range Sum",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "threads"
+  ],
+  "weeks": [
+    9,
+    10
+  ],
+  "slots": [
+    "processes_threads"
+  ],
+  "estimated_minutes": 25,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_010.c"
+  ],
+  "submission_files": [
+    "c1521_conc_010.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_010.c",
+      "-pthread",
+      "-o",
+      "c1521_conc_010"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "ten-two",
+          "argv": [
+            "./c1521_conc_010",
+            "10",
+            "2"
+          ],
+          "expected_stdout": "sum=55\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "three-five",
+          "argv": [
+            "./c1521_conc_010",
+            "3",
+            "5"
+          ],
+          "expected_stdout": "sum=6\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "zero",
+          "argv": [
+            "./c1521_conc_010",
+            "0",
+            "4"
+          ],
+          "expected_stdout": "sum=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "thousand",
+          "argv": [
+            "./c1521_conc_010",
+            "1000",
+            "7"
+          ],
+          "expected_stdout": "sum=500500\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

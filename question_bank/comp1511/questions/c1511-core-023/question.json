@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-023",
+  "title": "Same-Day Elapsed Minutes",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "structs",
+    "functions",
+    "io"
+  ],
+  "weeks": [
+    3
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 14,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_023.c"
+  ],
+  "submission_files": [
+    "c1511_core_023.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_023.c",
+      "-o",
+      "c1511_core_023"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "normal",
+          "argv": [
+            "./c1511_core_023"
+          ],
+          "stdin": "9 45 11 10\n",
+          "expected_stdout": "elapsed: 85 minutes\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "same",
+          "argv": [
+            "./c1511_core_023"
+          ],
+          "stdin": "7 30 7 30\n",
+          "expected_stdout": "elapsed: 0 minutes\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "almost-day",
+          "argv": [
+            "./c1511_core_023"
+          ],
+          "stdin": "0 0 23 59\n",
+          "expected_stdout": "elapsed: 1439 minutes\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "within-hour",
+          "argv": [
+            "./c1511_core_023"
+          ],
+          "stdin": "14 5 14 50\n",
+          "expected_stdout": "elapsed: 45 minutes\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1, "id": "c1521-fs-019", "title": "Measure recursive tree depth", "kind": "c_program",
+  "difficulty": 4, "track": "challenge", "tags": ["directories", "recursive-traversal", "file-metadata"], "weeks": [8, 9], "slots": ["advanced_systems"],
+  "estimated_minutes": 38, "points": 10, "pass_points": 4, "prompt": "prompt.md", "solution": "solution.md",
+  "starter_files": ["starter/c1521_fs_019.c"], "submission_files": ["c1521_fs_019.c"],
+  "build": {"argv": ["dcc", "-Werror", "c1521_fs_019.c", "-o", "c1521_fs_019"]},
+  "test_groups": [
+    {"id": "public", "visibility": "public", "points": 4, "tests": [
+      {"id": "root-and-child", "argv": ["./c1521_fs_019", "tree"], "expected_stdout": "files=2 bytes=7 max_depth=1\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/aa.txt", "path": "tree/a"}, {"source": "tests/bbb.txt", "path": "tree/sub/b"}]},
+      {"id": "only-root", "argv": ["./c1521_fs_019", "tree"], "expected_stdout": "files=1 bytes=2 max_depth=0\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/z.txt", "path": "tree/a"}]}
+    ]},
+    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
+      {"id": "deep-tree", "argv": ["./c1521_fs_019", "tree"], "expected_stdout": "files=3 bytes=9 max_depth=3\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/aa.txt", "path": "tree/a"}, {"source": "tests/aa.txt", "path": "tree/x/y/b"}, {"source": "tests/aa.txt", "path": "tree/x/y/z/c"}]},
+      {"id": "empty-directories", "argv": ["./c1521_fs_019", "tree"], "expected_stdout": "files=1 bytes=2 max_depth=2\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/z.txt", "path": "tree/a/b/file"}]}
+    ]}
+  ]
+}

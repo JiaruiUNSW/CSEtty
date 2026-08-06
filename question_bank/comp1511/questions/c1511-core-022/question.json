@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-022",
+  "title": "Compass Quarter Turns",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "enums",
+    "functions",
+    "conditionals"
+  ],
+  "weeks": [
+    3
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 16,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_022.c"
+  ],
+  "submission_files": [
+    "c1511_core_022.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_022.c",
+      "-o",
+      "c1511_core_022"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "clockwise",
+          "argv": [
+            "./c1511_core_022"
+          ],
+          "stdin": "N 1\n",
+          "expected_stdout": "direction: E\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "anticlockwise",
+          "argv": [
+            "./c1511_core_022"
+          ],
+          "stdin": "S -1\n",
+          "expected_stdout": "direction: E\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "half-turn",
+          "argv": [
+            "./c1511_core_022"
+          ],
+          "stdin": "W 2\n",
+          "expected_stdout": "direction: E\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "negative-wrap",
+          "argv": [
+            "./c1511_core_022"
+          ],
+          "stdin": "E -5\n",
+          "expected_stdout": "direction: N\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

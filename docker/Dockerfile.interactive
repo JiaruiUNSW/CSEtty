@@ -1,0 +1,101 @@
+# syntax=docker/dockerfile:1.7
+
+ARG DEBIAN_IMAGE=debian:12-slim@sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241
+
+FROM ${DEBIAN_IMAGE} AS dcc-builder
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git make python3 zip \
+    && rm -rf /var/lib/apt/lists/*
+
+ADD --checksum=sha256:7cd659bd559e178950b05bf85feabeeacac4bd5ecf0f00528bf808a8e5c18762 \
+    https://github.com/COMP1511UNSW/dcc/archive/refs/tags/2.37.tar.gz \
+    /tmp/dcc-source.tar.gz
+COPY docker/build-dcc.sh /tmp/build-dcc.sh
+RUN DCC_VERSION=2.37 \
+    DCC_SOURCE_URL=https://github.com/COMP1511UNSW/dcc/archive/refs/tags/2.37.tar.gz \
+    DCC_SOURCE_SHA256=7cd659bd559e178950b05bf85feabeeacac4bd5ecf0f00528bf808a8e5c18762 \
+    DCC_SOURCE_COMMIT=0a888fdb2bfe130c611fb84514fdbf52d3efe149 \
+    sh /tmp/build-dcc.sh
+
+FROM ${DEBIAN_IMAGE} AS common
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONPATH=/opt/csetty \
+    PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        clang \
+        coreutils \
+        diffutils \
+        findutils \
+        gcc \
+        gdb \
+        libc6-dev \
+        libclang-rt-14-dev \
+        make \
+        man-db \
+        manpages-dev \
+        nano \
+        passwd \
+        procps \
+        python3 \
+        valgrind \
+        vim-tiny \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 1000 --shell /bin/bash student \
+    && printf 'export PS1="[CSEExamTTY \\u@\\h \\W]\\$ "\nexport HISTFILE="$HOME/exam/.csetty_history"\n' \
+       > /etc/profile.d/csetty.sh
+
+COPY --from=dcc-builder /out/ /
+COPY src/csetty /opt/csetty/csetty
+COPY docker/exam-command /usr/local/lib/csetty/exam-command
+COPY THIRD_PARTY_NOTICES.md /usr/share/doc/csetty/THIRD_PARTY_NOTICES.md
+COPY LICENSE /usr/share/doc/csetty/LICENSE
+COPY NOTICE /usr/share/doc/csetty/NOTICE
+
+RUN chmod 0755 /usr/local/lib/csetty/exam-command \
+    && mkdir -p /run/csetty-bridge/requests /run/csetty-bridge/responses \
+    && chmod 0755 /run/csetty-bridge /run/csetty-bridge/requests /run/csetty-bridge/responses \
+    && for command in exam 1511 1521 autotest submit check; do \
+        ln -s /usr/local/lib/csetty/exam-command "/usr/local/bin/$command"; \
+    done \
+    && dcc --version | grep -F 'dcc version 2.37'
+
+LABEL org.opencontainers.image.title="CSEExamTTY local interactive environment" \
+      org.opencontainers.image.description="Locally source-built COMP1511/COMP1521-style environment" \
+      io.csetty.image.role="interactive" \
+      io.csetty.dcc.version="2.37" \
+      io.csetty.dcc.build="verified-source" \
+      io.csetty.dcc.license="GPL-3.0-only" \
+      io.csetty.dcc.source="https://github.com/COMP1511UNSW/dcc/tree/0a888fdb2bfe130c611fb84514fdbf52d3efe149"
+
+USER student
+WORKDIR /home/student/exam
+CMD ["sleep", "infinity"]
+
+FROM common AS comp1511
+LABEL io.csetty.profile="comp1511"
+
+FROM common AS comp1521
+USER root
+COPY build-inputs/csetty-mips/csetty_mips /opt/csetty/csetty_mips
+COPY docker/mipsy-command /usr/local/bin/mipsy
+COPY build-inputs/csetty-mips/NOTICE /usr/share/doc/csetty-mips/NOTICE
+COPY build-inputs/csetty-mips/LICENSE /usr/share/doc/csetty-mips/LICENSE
+RUN chmod 0755 /usr/local/bin/mipsy \
+    && find /opt/csetty/csetty_mips -type d -exec chmod 0755 {} + \
+    && find /opt/csetty/csetty_mips -type f -exec chmod 0644 {} + \
+    && python3 -m compileall -q /opt/csetty/csetty_mips \
+    && mipsy --version
+USER student
+LABEL io.csetty.profile="comp1521" \
+      io.csetty.mips.engine="csetty-mips" \
+      io.csetty.mips.version="0.1.1" \
+      io.csetty.mips.source="https://github.com/JiaruiUNSW/CSEtty-MIPS/tree/33410078667ad67942c6700d73411fc31be00c8f" \
+      io.csetty.mips.license="MPL-2.0"

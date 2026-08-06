@@ -1,0 +1,35 @@
+# CSEExamTTY local source-build toolchain lock
+# Values are intentionally explicit so attempt reports can record provenance.
+
+[base]
+image = "debian:12-slim@sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241"
+platforms = ["linux/amd64", "linux/arm64"]
+
+[dcc]
+version = "2.37"
+license = "GPL-3.0-only"
+tag_object = "ae01f91688d25ef0e81452d7b5eb3d156dd57175"
+source_commit = "0a888fdb2bfe130c611fb84514fdbf52d3efe149"
+source_url = "https://github.com/COMP1511UNSW/dcc/archive/refs/tags/2.37.tar.gz"
+source_sha256 = "7cd659bd559e178950b05bf85feabeeacac4bd5ecf0f00528bf808a8e5c18762"
+build = "make dcc"
+
+[vscode]
+host_extensions = ["ms-vscode-remote.remote-containers"]
+comp1511_extensions = ["ms-vscode.cpptools"]
+comp1521_extensions = ["ms-vscode.cpptools", "xavc.xavc-mipsy-features"]
+
+[csetty_mips]
+version = "0.1.1"
+source = "https://github.com/JiaruiUNSW/CSEtty-MIPS.git"
+tag = "v0.1.1"
+commit = "33410078667ad67942c6700d73411fc31be00c8f"
+package_tree_sha256 = "2f96c71a9c7384327bd89d9addc055976183ba8b58b5d0597fe3a10d8800fdcb"
+license = "MPL-2.0"
+entrypoint = "python3 -m csetty_mips"
+
+[mipsy_oracle]
+# Optional private black-box comparison only. It is not included in course images.
+redistribution = false
+commit = "61f96b38626c30c2ead7925486304f163ec56b2b"
+rust_image = "rust:1.85-bookworm"

@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-017",
+  "title": "Order the endpoint values",
+  "kind": "c_function",
+  "difficulty": 1,
+  "track": "normal",
+  "tags": [
+    "pointers",
+    "functions",
+    "arrays-1d"
+  ],
+  "weeks": [
+    5,
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 9,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_017.c"
+  ],
+  "submission_files": [
+    "c1511_adv_017.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_017.c",
+      "-o",
+      "c1511_adv_017"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_017",
+            "9",
+            "2",
+            "4"
+          ],
+          "expected_stdout": "4 2 9\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_017"
+          ],
+          "expected_stdout": "EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_017",
+            "7"
+          ],
+          "expected_stdout": "7\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_017",
+            "1",
+            "5"
+          ],
+          "expected_stdout": "1 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

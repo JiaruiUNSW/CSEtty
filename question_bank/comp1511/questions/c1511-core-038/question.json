@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-038",
+  "title": "Fleet Components",
+  "kind": "c_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "arrays-2d",
+    "recursion",
+    "functions",
+    "loops"
+  ],
+  "weeks": [
+    5,
+    9
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 42,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_038.c"
+  ],
+  "submission_files": [
+    "c1511_core_038.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_038.c",
+      "-o",
+      "c1511_core_038"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two-components",
+          "argv": [
+            "./c1511_core_038"
+          ],
+          "stdin": "3 5\n##...\n.#..#\n....#\n",
+          "expected_stdout": "components: 2\nlargest: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1511_core_038"
+          ],
+          "stdin": "2 2\n..\n..\n",
+          "expected_stdout": "components: 0\nlargest: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "checkerboard",
+          "argv": [
+            "./c1511_core_038"
+          ],
+          "stdin": "4 4\n#.#.\n.#.#\n#.#.\n.#.#\n",
+          "expected_stdout": "components: 8\nlargest: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "one-shape",
+          "argv": [
+            "./c1511_core_038"
+          ],
+          "stdin": "4 5\n###..\n..#..\n..###\n.....\n",
+          "expected_stdout": "components: 1\nlargest: 7\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

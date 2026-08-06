@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-020",
+  "title": "Forked Threaded Parity Scan",
+  "kind": "c_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "processes",
+    "pipes",
+    "threads",
+    "synchronisation",
+    "file-io"
+  ],
+  "weeks": [
+    7,
+    9,
+    10
+  ],
+  "slots": [
+    "challenge_combo"
+  ],
+  "estimated_minutes": 70,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_020.c"
+  ],
+  "submission_files": [
+    "c1521_conc_020.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_020.c",
+      "-pthread",
+      "-o",
+      "c1521_conc_020"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "positive",
+          "argv": [
+            "./c1521_conc_020",
+            "input.txt"
+          ],
+          "expected_stdout": "count=4 even=2 even_sum=6 odd=2 odd_sum=4 min=1 max=4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/positive.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "signed",
+          "argv": [
+            "./c1521_conc_020",
+            "input.txt"
+          ],
+          "expected_stdout": "count=4 even=2 even_sum=-2 odd=2 odd_sum=4 min=-2 max=5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/signed.txt",
+              "path": "input.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "single",
+          "argv": [
+            "./c1521_conc_020",
+            "input.txt"
+          ],
+          "expected_stdout": "count=1 even=0 even_sum=0 odd=1 odd_sum=7 min=7 max=7\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/single.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "duplicates",
+          "argv": [
+            "./c1521_conc_020",
+            "input.txt"
+          ],
+          "expected_stdout": "count=5 even=3 even_sum=22 odd=2 odd_sum=-6 min=-3 max=10\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/duplicates.txt",
+              "path": "input.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

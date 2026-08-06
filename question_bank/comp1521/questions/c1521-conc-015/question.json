@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-015",
+  "title": "Indexed Pipe Worker Farm",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "processes",
+    "pipes"
+  ],
+  "weeks": [
+    10
+  ],
+  "slots": [
+    "challenge_combo"
+  ],
+  "estimated_minutes": 55,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_015.c"
+  ],
+  "submission_files": [
+    "c1521_conc_015.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_015.c",
+      "-o",
+      "c1521_conc_015"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two-workers",
+          "argv": [
+            "./c1521_conc_015",
+            "2",
+            "2",
+            "-3",
+            "4"
+          ],
+          "expected_stdout": "0 value=2 square=4 cube=8\n1 value=-3 square=9 cube=-27\n2 value=4 square=16 cube=64\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000
+        },
+        {
+          "id": "idle-workers",
+          "argv": [
+            "./c1521_conc_015",
+            "4",
+            "5"
+          ],
+          "expected_stdout": "0 value=5 square=25 cube=125\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "three-workers",
+          "argv": [
+            "./c1521_conc_015",
+            "3",
+            "-2",
+            "0",
+            "7"
+          ],
+          "expected_stdout": "0 value=-2 square=4 cube=-8\n1 value=0 square=0 cube=0\n2 value=7 square=49 cube=343\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000
+        },
+        {
+          "id": "one-worker",
+          "argv": [
+            "./c1521_conc_015",
+            "1",
+            "10",
+            "-10"
+          ],
+          "expected_stdout": "0 value=10 square=100 cube=1000\n1 value=-10 square=100 cube=-1000\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000
+        }
+      ]
+    }
+  ]
+}

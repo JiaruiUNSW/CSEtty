@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "id": "c1521-fs-013",
+  "title": "Repair invalid UTF-8 bytes",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": ["unicode", "binary-data"],
+  "weeks": [9],
+  "slots": ["unicode"],
+  "estimated_minutes": 35,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": ["starter/c1521_fs_013.c"],
+  "submission_files": ["c1521_fs_013.c"],
+  "build": {"argv": ["dcc", "-Werror", "c1521_fs_013.c", "-o", "c1521_fs_013"]},
+  "test_groups": [
+    {"id": "public", "visibility": "public", "points": 4, "tests": [
+      {"id": "already-valid", "argv": ["./c1521_fs_013", "41c3a9"], "expected_stdout": "41c3a9\n", "expected_stderr": "", "expected_exit": 0},
+      {"id": "stray-byte", "argv": ["./c1521_fs_013", "41bf42"], "expected_stdout": "41efbfbd42\n", "expected_stderr": "", "expected_exit": 0}
+    ]},
+    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
+      {"id": "overlong-pair", "argv": ["./c1521_fs_013", "c0af"], "expected_stdout": "efbfbdefbfbd\n", "expected_stderr": "", "expected_exit": 0},
+      {"id": "truncated-sequence", "argv": ["./c1521_fs_013", "61e282"], "expected_stdout": "61efbfbdefbfbd\n", "expected_stderr": "", "expected_exit": 0}
+    ]}
+  ]
+}

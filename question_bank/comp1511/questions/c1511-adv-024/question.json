@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-024",
+  "title": "Append a dynamic checksum",
+  "kind": "c_function",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "dynamic-memory",
+    "pointers",
+    "arrays-1d",
+    "functions"
+  ],
+  "weeks": [
+    5,
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 16,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_024.c"
+  ],
+  "submission_files": [
+    "c1511_adv_024.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_024.c",
+      "-o",
+      "c1511_adv_024"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_024",
+            "1",
+            "2",
+            "3"
+          ],
+          "expected_stdout": "1 2 3 6\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_024"
+          ],
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_024",
+            "-2",
+            "5"
+          ],
+          "expected_stdout": "-2 5 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_024",
+            "7"
+          ],
+          "expected_stdout": "7 7\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

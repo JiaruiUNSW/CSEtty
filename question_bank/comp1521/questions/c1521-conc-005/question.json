@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-005",
+  "title": "Child-Built Line Index",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "file-io",
+    "processes",
+    "pipes"
+  ],
+  "weeks": [
+    7,
+    10
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 35,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_005.c"
+  ],
+  "submission_files": [
+    "c1521_conc_005.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_005.c",
+      "-o",
+      "c1521_conc_005"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two-lines-trailing-newline",
+          "argv": [
+            "./c1521_conc_005",
+            "input.txt"
+          ],
+          "expected_stdout": "lines=2\n1:0\n2:6\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/two.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "one-unterminated-line",
+          "argv": [
+            "./c1521_conc_005",
+            "input.txt"
+          ],
+          "expected_stdout": "lines=1\n1:0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/one.txt",
+              "path": "input.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "empty-file",
+          "argv": [
+            "./c1521_conc_005",
+            "input.txt"
+          ],
+          "expected_stdout": "lines=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/empty.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "blank-lines",
+          "argv": [
+            "./c1521_conc_005",
+            "input.txt"
+          ],
+          "expected_stdout": "lines=3\n1:0\n2:1\n3:2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/blanks.txt",
+              "path": "input.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

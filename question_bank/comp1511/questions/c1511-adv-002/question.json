@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-002",
+  "title": "Record-high counter",
+  "kind": "c_function",
+  "difficulty": 1,
+  "track": "normal",
+  "tags": [
+    "linked-lists",
+    "conditionals",
+    "functions"
+  ],
+  "weeks": [
+    6
+  ],
+  "slots": [
+    "list_hurdle"
+  ],
+  "estimated_minutes": 14,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_002.c"
+  ],
+  "submission_files": [
+    "c1511_adv_002.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_002.c",
+      "-o",
+      "c1511_adv_002"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_002",
+            "3",
+            "1",
+            "4",
+            "4",
+            "7"
+          ],
+          "expected_stdout": "3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_002"
+          ],
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_002",
+            "-5",
+            "-4",
+            "-10",
+            "-3"
+          ],
+          "expected_stdout": "3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_002",
+            "9",
+            "8",
+            "7"
+          ],
+          "expected_stdout": "1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

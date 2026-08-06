@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-035",
+  "title": "Race Split Awards",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "structs",
+    "arrays-1d",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    6
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 38,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_035.c"
+  ],
+  "submission_files": [
+    "c1511_core_035.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_035.c",
+      "-o",
+      "c1511_core_035"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "same-winner",
+          "argv": [
+            "./c1511_core_035"
+          ],
+          "stdin": "3\n12 10 11 12\n5 12 10 10\n8 9 15 9\n",
+          "expected_stdout": "fastest: 5 32\nconsistent: 5 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "different",
+          "argv": [
+            "./c1511_core_035"
+          ],
+          "stdin": "2\n9 5 5 5\n2 4 6 5\n",
+          "expected_stdout": "fastest: 2 15\nconsistent: 9 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "clear",
+          "argv": [
+            "./c1511_core_035"
+          ],
+          "stdin": "3\n4 20 19 21\n7 18 18 25\n1 22 20 19\n",
+          "expected_stdout": "fastest: 4 60\nconsistent: 4 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_core_035"
+          ],
+          "stdin": "1\n33 7 8 9\n",
+          "expected_stdout": "fastest: 33 24\nconsistent: 33 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

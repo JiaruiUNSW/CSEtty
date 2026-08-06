@@ -1,0 +1,170 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-contract:
+    name: Host ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.11"
+          - os: ubuntu-latest
+            python: "3.12"
+          - os: ubuntu-latest
+            python: "3.13"
+          - os: ubuntu-24.04-arm
+            python: "3.11"
+          - os: windows-latest
+            python: "3.11"
+          - os: macos-15-intel
+            python: "3.11"
+          - os: macos-latest
+            python: "3.11"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install development environment
+        run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - name: Ruff
+        run: ruff check src tests scripts
+      - name: Mypy
+        run: mypy src/csetty
+      - name: Pytest
+        run: pytest -q
+      - name: Build wheel
+        run: python -m pip wheel --no-deps --wheel-dir dist .
+      - name: Smoke-test installed wheel
+        run: python scripts/smoke_wheel.py dist
+
+  docker-comp1511:
+    name: COMP1511 local source build and multi-architecture verification
+    runs-on: ubuntu-latest
+    env:
+      CSETTY_STATE_DIR: ${{ runner.temp }}/csetty-state
+      CSETTY_BUILD_CONTEXT: ${{ runner.temp }}/csetty-source-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install host package
+        run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build and record local COMP1511 interactive and judge images
+        run: python scripts/build_local_images.py --profile comp1511
+      - name: Verify all COMP1511 reference tests
+        run: >-
+          csetty pack verify packs/comp1511-original-a
+          --reference packs/comp1511-original-a/solutions/reference
+      - name: Verify every COMP1511 question-bank reference
+        run: csetty bank verify comp1511
+      - name: Live COMP1511 container acceptance
+        run: python scripts/docker_acceptance.py --profile comp1511
+      - name: Stage pinned multi-architecture source context
+        run: python scripts/stage_source_build.py "$CSETTY_BUILD_CONTEXT"
+      - name: Build interactive amd64 and arm64 OCI archive without publishing
+        run: >-
+          docker buildx build --platform linux/amd64,linux/arm64
+          --target comp1511 --file "$CSETTY_BUILD_CONTEXT/docker/Dockerfile.interactive"
+          --sbom=true --provenance=mode=max
+          --output "type=oci,dest=$RUNNER_TEMP/csetty-comp1511-interactive.oci"
+          "$CSETTY_BUILD_CONTEXT"
+      - name: Build judge amd64 and arm64 OCI archive without publishing
+        run: >-
+          docker buildx build --platform linux/amd64,linux/arm64
+          --target comp1511 --file "$CSETTY_BUILD_CONTEXT/docker/Dockerfile.judge"
+          --sbom=true --provenance=mode=max
+          --output "type=oci,dest=$RUNNER_TEMP/csetty-comp1511-judge.oci"
+          "$CSETTY_BUILD_CONTEXT"
+      - name: Verify interactive and judge OCI platforms, labels, SBOM, and provenance
+        run: |
+          python scripts/verify_oci.py "$RUNNER_TEMP/csetty-comp1511-interactive.oci" --profile comp1511 --role interactive
+          python scripts/verify_oci.py "$RUNNER_TEMP/csetty-comp1511-judge.oci" --profile comp1511 --role judge
+
+  docker-comp1521:
+    name: COMP1521 local source build and multi-architecture verification
+    runs-on: ubuntu-latest
+    env:
+      CSETTY_STATE_DIR: ${{ runner.temp }}/csetty-state
+      CSETTY_BUILD_CONTEXT: ${{ runner.temp }}/csetty-source-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install host package
+        run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build and record local COMP1521 interactive and judge images
+        run: python scripts/build_local_images.py --profile comp1521
+      - name: Verify all COMP1521 reference tests
+        run: >-
+          csetty pack verify packs/comp1521-original-a
+          --reference packs/comp1521-original-a/solutions/reference
+      - name: Verify every COMP1521 question-bank reference
+        run: csetty bank verify comp1521
+      - name: Live COMP1521 container acceptance
+        run: python scripts/docker_acceptance.py --profile comp1521
+      - name: Stage pinned multi-architecture source context
+        run: python scripts/stage_source_build.py "$CSETTY_BUILD_CONTEXT"
+      - name: Build interactive amd64 and arm64 OCI archive without publishing
+        run: >-
+          docker buildx build --platform linux/amd64,linux/arm64
+          --target comp1521 --file "$CSETTY_BUILD_CONTEXT/docker/Dockerfile.interactive"
+          --sbom=true --provenance=mode=max
+          --output "type=oci,dest=$RUNNER_TEMP/csetty-comp1521-interactive.oci"
+          "$CSETTY_BUILD_CONTEXT"
+      - name: Build judge amd64 and arm64 OCI archive without publishing
+        run: >-
+          docker buildx build --platform linux/amd64,linux/arm64
+          --target comp1521 --file "$CSETTY_BUILD_CONTEXT/docker/Dockerfile.judge"
+          --sbom=true --provenance=mode=max
+          --output "type=oci,dest=$RUNNER_TEMP/csetty-comp1521-judge.oci"
+          "$CSETTY_BUILD_CONTEXT"
+      - name: Verify interactive and judge OCI platforms, labels, SBOM, and provenance
+        run: |
+          python scripts/verify_oci.py "$RUNNER_TEMP/csetty-comp1521-interactive.oci" --profile comp1521 --role interactive
+          python scripts/verify_oci.py "$RUNNER_TEMP/csetty-comp1521-judge.oci" --profile comp1521 --role judge
+
+  docker-arm64-live:
+    name: Native arm64 local source build / ${{ matrix.profile }}
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [comp1511, comp1521]
+    env:
+      CSETTY_STATE_DIR: ${{ runner.temp }}/csetty-state
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install host package
+        run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - name: Build and record native arm64 interactive and judge images
+        run: python scripts/build_local_images.py --profile ${{ matrix.profile }}
+      - name: Verify fixed-pack reference solutions on native arm64
+        run: >-
+          csetty pack verify packs/${{ matrix.profile }}-original-a
+          --reference packs/${{ matrix.profile }}-original-a/solutions/reference
+      - name: Live native arm64 container acceptance
+        run: python scripts/docker_acceptance.py --profile ${{ matrix.profile }}

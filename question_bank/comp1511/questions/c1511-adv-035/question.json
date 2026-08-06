@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-035",
+  "title": "Labelled reading summaries",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "normal",
+  "tags": [
+    "whole-program",
+    "structs",
+    "strings",
+    "io",
+    "testing"
+  ],
+  "weeks": [
+    4,
+    9
+  ],
+  "slots": [
+    "whole_program"
+  ],
+  "estimated_minutes": 39,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_035.c"
+  ],
+  "submission_files": [
+    "c1511_adv_035.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_035.c",
+      "-o",
+      "c1511_adv_035"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_035"
+          ],
+          "stdin": "READ zone 4\nREAD zone 8\nSTATS zone\nEND\n",
+          "expected_stdout": "zone count=2 min=4 max=8 mean=6\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_035"
+          ],
+          "stdin": "STATS none\nEND\n",
+          "expected_stdout": "MISSING none\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "hidden_state",
+          "argv": [
+            "./c1511_adv_035"
+          ],
+          "stdin": "READ p -3\nREAD p 5\nREAD p 1\nSTATS p\nEND\n",
+          "expected_stdout": "p count=3 min=-3 max=5 mean=1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_035"
+          ],
+          "stdin": "READ x 9\nRESET x\nSTATS x\nRESET x\nEND\n",
+          "expected_stdout": "RESET x\nMISSING x\nMISSING x\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

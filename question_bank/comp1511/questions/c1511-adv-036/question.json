@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-036",
+  "title": "Reversible marker chain",
+  "kind": "c_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "whole-program",
+    "linked-lists",
+    "dynamic-memory",
+    "strings",
+    "io"
+  ],
+  "weeks": [
+    7,
+    9
+  ],
+  "slots": [
+    "whole_program"
+  ],
+  "estimated_minutes": 46,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_036.c"
+  ],
+  "submission_files": [
+    "c1511_adv_036.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_036.c",
+      "-o",
+      "c1511_adv_036"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_036"
+          ],
+          "stdin": "APPEND red\nAPPEND blue\nPREPEND green\nPRINT\nEND\n",
+          "expected_stdout": "green -> red -> blue\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_036"
+          ],
+          "stdin": "PRINT\nEND\n",
+          "expected_stdout": "EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "hidden_state",
+          "argv": [
+            "./c1511_adv_036"
+          ],
+          "stdin": "APPEND a\nAPPEND b\nAPPEND c\nREVERSE\nREMOVE b\nPRINT\nEND\n",
+          "expected_stdout": "REMOVED b\nc -> a\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_036"
+          ],
+          "stdin": "APPEND x\nAPPEND x\nREMOVE x\nPRINT\nREMOVE z\nEND\n",
+          "expected_stdout": "REMOVED x\nx\nMISSING z\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

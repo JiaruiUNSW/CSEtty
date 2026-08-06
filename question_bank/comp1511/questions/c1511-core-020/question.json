@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-020",
+  "title": "Temperature Drift",
+  "kind": "c_program",
+  "difficulty": 1,
+  "track": "normal",
+  "tags": [
+    "io",
+    "conditionals"
+  ],
+  "weeks": [
+    2
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 10,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_020.c"
+  ],
+  "submission_files": [
+    "c1511_core_020.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_020.c",
+      "-o",
+      "c1511_core_020"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "rise",
+          "argv": [
+            "./c1511_core_020"
+          ],
+          "stdin": "12 17\n",
+          "expected_stdout": "change: 5\ndirection: rising\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "fall",
+          "argv": [
+            "./c1511_core_020"
+          ],
+          "stdin": "8 -2\n",
+          "expected_stdout": "change: -10\ndirection: falling\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "steady",
+          "argv": [
+            "./c1511_core_020"
+          ],
+          "stdin": "4 4\n",
+          "expected_stdout": "change: 0\ndirection: steady\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "negative-rise",
+          "argv": [
+            "./c1511_core_020"
+          ],
+          "stdin": "-7 -3\n",
+          "expected_stdout": "change: 4\ndirection: rising\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

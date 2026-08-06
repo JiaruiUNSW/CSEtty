@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-006",
+  "title": "Unique Column Beacons",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "arrays-2d",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    5
+  ],
+  "slots": [
+    "array_hurdle"
+  ],
+  "estimated_minutes": 24,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_006.c"
+  ],
+  "submission_files": [
+    "c1511_core_006.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_006.c",
+      "-o",
+      "c1511_core_006"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "ties",
+          "argv": [
+            "./c1511_core_006"
+          ],
+          "stdin": "3 3\n1 5 2\n4 5 3\n0 2 3\n",
+          "expected_stdout": "unique beacons: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "all-unique",
+          "argv": [
+            "./c1511_core_006"
+          ],
+          "stdin": "2 4\n1 2 3 4\n0 1 2 3\n",
+          "expected_stdout": "unique beacons: 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "all-tied",
+          "argv": [
+            "./c1511_core_006"
+          ],
+          "stdin": "4 2\n7 7\n7 7\n7 7\n7 7\n",
+          "expected_stdout": "unique beacons: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "negative-tie",
+          "argv": [
+            "./c1511_core_006"
+          ],
+          "stdin": "3 2\n-1 -5\n-2 -4\n-3 -4\n",
+          "expected_stdout": "unique beacons: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

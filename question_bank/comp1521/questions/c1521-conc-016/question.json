@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-016",
+  "title": "Threaded Byte Histogram Merge",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "threads",
+    "synchronisation",
+    "file-io",
+    "binary-data"
+  ],
+  "weeks": [
+    7,
+    9,
+    10
+  ],
+  "slots": [
+    "challenge_combo"
+  ],
+  "estimated_minutes": 50,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_016.c"
+  ],
+  "submission_files": [
+    "c1521_conc_016.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_016.c",
+      "-pthread",
+      "-o",
+      "c1521_conc_016"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "aba",
+          "argv": [
+            "./c1521_conc_016",
+            "input.bin",
+            "2"
+          ],
+          "expected_stdout": "0A=1\n41=2\n42=1\ntotal=4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/aba.bin",
+              "path": "input.bin"
+            }
+          ]
+        },
+        {
+          "id": "z-line",
+          "argv": [
+            "./c1521_conc_016",
+            "input.bin",
+            "4"
+          ],
+          "expected_stdout": "0A=1\n7A=3\ntotal=4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/z.bin",
+              "path": "input.bin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "mixed-bytes",
+          "argv": [
+            "./c1521_conc_016",
+            "input.bin",
+            "3"
+          ],
+          "expected_stdout": "0A=1\n21=1\n30=1\n41=1\n61=1\ntotal=5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/mixed.bin",
+              "path": "input.bin"
+            }
+          ]
+        },
+        {
+          "id": "whitespace",
+          "argv": [
+            "./c1521_conc_016",
+            "input.bin",
+            "8"
+          ],
+          "expected_stdout": "09=1\n0A=1\n20=1\ntotal=3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/space.bin",
+              "path": "input.bin"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

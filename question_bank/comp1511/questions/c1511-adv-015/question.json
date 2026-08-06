@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-015",
+  "title": "Copy values inside a gate",
+  "kind": "c_function",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "arrays-1d",
+    "pointers",
+    "dynamic-memory",
+    "conditionals"
+  ],
+  "weeks": [
+    5
+  ],
+  "slots": [
+    "array_hurdle"
+  ],
+  "estimated_minutes": 24,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_015.c"
+  ],
+  "submission_files": [
+    "c1511_adv_015.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_015.c",
+      "-o",
+      "c1511_adv_015"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_015",
+            "2",
+            "5",
+            "1",
+            "2",
+            "5",
+            "7"
+          ],
+          "expected_stdout": "2 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_015",
+            "0",
+            "1"
+          ],
+          "expected_stdout": "EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_015",
+            "-3",
+            "-1",
+            "-4",
+            "-3",
+            "-2",
+            "0"
+          ],
+          "expected_stdout": "-3 -2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_015",
+            "4",
+            "4",
+            "4",
+            "1",
+            "4"
+          ],
+          "expected_stdout": "4 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

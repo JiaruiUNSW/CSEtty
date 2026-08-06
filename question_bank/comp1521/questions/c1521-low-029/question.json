@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "id": "c1521-low-029",
+  "title": "Recursive Binary Search",
+  "kind": "mips_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "mips-functions",
+    "mips-data",
+    "mips-control"
+  ],
+  "weeks": [
+    2,
+    3
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 40,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_low_029.s"
+  ],
+  "submission_files": [
+    "c1521_low_029.s"
+  ],
+  "build": {
+    "argv": []
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "present",
+          "argv": [
+            "mipsy",
+            "c1521_low_029.s"
+          ],
+          "stdin": "6\n8\n-3\n0\n4\n8\n12\n20\n",
+          "expected_stdout": "3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "mipsy",
+            "c1521_low_029.s"
+          ],
+          "stdin": "0\n5\n",
+          "expected_stdout": "-1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "absent",
+          "argv": [
+            "mipsy",
+            "c1521_low_029.s"
+          ],
+          "stdin": "5\n6\n1\n3\n5\n7\n9\n",
+          "expected_stdout": "-1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "end",
+          "argv": [
+            "mipsy",
+            "c1521_low_029.s"
+          ],
+          "stdin": "4\n10\n-2\n0\n4\n10\n",
+          "expected_stdout": "3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

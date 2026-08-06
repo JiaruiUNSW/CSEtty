@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-016",
+  "title": "Parcel Classifier",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "structs",
+    "conditionals",
+    "io"
+  ],
+  "weeks": [
+    3
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 15,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_016.c"
+  ],
+  "submission_files": [
+    "c1511_core_016.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_016.c",
+      "-o",
+      "c1511_core_016"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "compact",
+          "argv": [
+            "./c1511_core_016"
+          ],
+          "stdin": "4 10 10 8\n",
+          "expected_stdout": "class: compact\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "standard",
+          "argv": [
+            "./c1511_core_016"
+          ],
+          "stdin": "8 10 10 10\n",
+          "expected_stdout": "class: standard\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "long-thin",
+          "argv": [
+            "./c1511_core_016"
+          ],
+          "stdin": "2 51 2 2\n",
+          "expected_stdout": "class: oversized\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "large-volume",
+          "argv": [
+            "./c1511_core_016"
+          ],
+          "stdin": "10 50 50 21\n",
+          "expected_stdout": "class: oversized\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

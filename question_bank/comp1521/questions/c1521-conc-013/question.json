@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-013",
+  "title": "Concurrent Account Ledger",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "threads",
+    "synchronisation",
+    "file-io"
+  ],
+  "weeks": [
+    7,
+    9,
+    10
+  ],
+  "slots": [
+    "processes_threads"
+  ],
+  "estimated_minutes": 50,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_013.c"
+  ],
+  "submission_files": [
+    "c1521_conc_013.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_013.c",
+      "-pthread",
+      "-o",
+      "c1521_conc_013"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two-accounts",
+          "argv": [
+            "./c1521_conc_013",
+            "ledger.txt",
+            "2"
+          ],
+          "expected_stdout": "alice=3\nbob=3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/two_accounts.txt",
+              "path": "ledger.txt"
+            }
+          ]
+        },
+        {
+          "id": "zero-balance",
+          "argv": [
+            "./c1521_conc_013",
+            "ledger.txt",
+            "3"
+          ],
+          "expected_stdout": "x=0\ny=1\nz=7\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/zero_balance.txt",
+              "path": "ledger.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "sorted-output",
+          "argv": [
+            "./c1521_conc_013",
+            "ledger.txt",
+            "4"
+          ],
+          "expected_stdout": "alpha=10\nbeta=-5\ndelta=4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/sorted.txt",
+              "path": "ledger.txt"
+            }
+          ]
+        },
+        {
+          "id": "one-account-many-threads",
+          "argv": [
+            "./c1521_conc_013",
+            "ledger.txt",
+            "6"
+          ],
+          "expected_stdout": "solo=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/solo.txt",
+              "path": "ledger.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

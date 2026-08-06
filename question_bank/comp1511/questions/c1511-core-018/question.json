@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-018",
+  "title": "Vowel Bookends",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "strings",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 15,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_018.c"
+  ],
+  "submission_files": [
+    "c1511_core_018.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_018.c",
+      "-o",
+      "c1511_core_018"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "apple",
+          "argv": [
+            "./c1511_core_018"
+          ],
+          "stdin": "apple\n",
+          "expected_stdout": "vowels: 2\nbookended: yes\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "rhythm",
+          "argv": [
+            "./c1511_core_018"
+          ],
+          "stdin": "rhythm\n",
+          "expected_stdout": "vowels: 0\nbookended: no\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "idea",
+          "argv": [
+            "./c1511_core_018"
+          ],
+          "stdin": "idea\n",
+          "expected_stdout": "vowels: 3\nbookended: yes\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "unit",
+          "argv": [
+            "./c1511_core_018"
+          ],
+          "stdin": "unit\n",
+          "expected_stdout": "vowels: 2\nbookended: no\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

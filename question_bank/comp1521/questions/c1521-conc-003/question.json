@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-003",
+  "title": "Deterministic Build Waves",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "make",
+    "file-io"
+  ],
+  "weeks": [
+    6,
+    7
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 50,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_003.c"
+  ],
+  "submission_files": [
+    "c1521_conc_003.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_003.c",
+      "-o",
+      "c1521_conc_003"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "diamond",
+          "argv": [
+            "./c1521_conc_003",
+            "deps.txt"
+          ],
+          "expected_stdout": "wave 0: lexer parser\nwave 1: object\nwave 2: app\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/diamond.txt",
+              "path": "deps.txt"
+            }
+          ]
+        },
+        {
+          "id": "independent",
+          "argv": [
+            "./c1521_conc_003",
+            "deps.txt"
+          ],
+          "expected_stdout": "wave 0: alpha beta gamma\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/independent.txt",
+              "path": "deps.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "four-waves",
+          "argv": [
+            "./c1521_conc_003",
+            "deps.txt"
+          ],
+          "expected_stdout": "wave 0: base\nwave 1: left right\nwave 2: join\nwave 3: package\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/four_waves.txt",
+              "path": "deps.txt"
+            }
+          ]
+        },
+        {
+          "id": "cycle",
+          "argv": [
+            "./c1521_conc_003",
+            "deps.txt"
+          ],
+          "expected_stdout": "cycle\n",
+          "expected_stderr": "",
+          "expected_exit": 2,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/cycle.txt",
+              "path": "deps.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

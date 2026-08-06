@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-032",
+  "title": "Recursive even-prefix filter",
+  "kind": "c_function",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "linked-lists",
+    "recursion",
+    "dynamic-memory",
+    "pointers"
+  ],
+  "weeks": [
+    7,
+    8
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 29,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_032.c"
+  ],
+  "submission_files": [
+    "c1511_adv_032.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_032.c",
+      "-o",
+      "c1511_adv_032"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_032",
+            "1",
+            "1",
+            "2",
+            "3",
+            "1"
+          ],
+          "expected_stdout": "1 2 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_032"
+          ],
+          "expected_stdout": "EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_032",
+            "2",
+            "2"
+          ],
+          "expected_stdout": "2 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_032",
+            "1",
+            "2",
+            "4",
+            "1"
+          ],
+          "expected_stdout": "1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

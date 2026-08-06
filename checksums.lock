@@ -1,0 +1,25 @@
+# Integrity lock for network-fetched source-build inputs.
+# Values are duplicated in the Dockerfiles intentionally and are checked by
+# tests/release gates so a build-definition change cannot silently bypass them.
+
+schema_version = 1
+
+[debian]
+tag = "debian:12-slim"
+index_digest = "sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241"
+amd64_manifest_digest = "sha256:362e64223cc0da95422b3b13c045186fc0a81250e765d31c025fbddf257f6143"
+arm64_manifest_digest = "sha256:817e6cf99d6fc127ff4ffe8580049b60deba0adfbbb2bd65ddc3ef8fbb7aade0"
+
+[dcc_source]
+version = "2.37"
+url = "https://github.com/COMP1511UNSW/dcc/archive/refs/tags/2.37.tar.gz"
+sha256 = "7cd659bd559e178950b05bf85feabeeacac4bd5ecf0f00528bf808a8e5c18762"
+commit = "0a888fdb2bfe130c611fb84514fdbf52d3efe149"
+license = "GPL-3.0-only"
+
+[csetty_mips_source]
+version = "0.1.1"
+repository = "https://github.com/JiaruiUNSW/CSEtty-MIPS.git"
+commit = "33410078667ad67942c6700d73411fc31be00c8f"
+package_tree_sha256 = "2f96c71a9c7384327bd89d9addc055976183ba8b58b5d0597fe3a10d8800fdcb"
+license = "MPL-2.0"

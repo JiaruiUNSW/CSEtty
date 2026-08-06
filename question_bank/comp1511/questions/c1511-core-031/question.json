@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-031",
+  "title": "Row Champion",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "arrays-2d",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    5
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 34,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_031.c"
+  ],
+  "submission_files": [
+    "c1511_core_031.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_031.c",
+      "-o",
+      "c1511_core_031"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "sum-wins",
+          "argv": [
+            "./c1511_core_031"
+          ],
+          "stdin": "3 3\n1 2 3\n4 0 2\n-1 10 -1\n",
+          "expected_stdout": "row: 2\nsum: 8\nrange: 11\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "range-tie",
+          "argv": [
+            "./c1511_core_031"
+          ],
+          "stdin": "2 2\n1 3\n2 2\n",
+          "expected_stdout": "row: 1\nsum: 4\nrange: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "one-row",
+          "argv": [
+            "./c1511_core_031"
+          ],
+          "stdin": "1 4\n5 1 5 1\n",
+          "expected_stdout": "row: 0\nsum: 12\nrange: 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "negative",
+          "argv": [
+            "./c1511_core_031"
+          ],
+          "stdin": "3 2\n-5 -1\n-2 -2\n-3 0\n",
+          "expected_stdout": "row: 2\nsum: -3\nrange: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

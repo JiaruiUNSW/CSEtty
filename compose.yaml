@@ -1,0 +1,40 @@
+name: csetty-source-build
+
+# Build definitions only. csetty starts exam containers itself with the
+# security and workspace options recorded for each attempt.
+services:
+  comp1511-interactive:
+    image: csetty/comp1511:dev
+    pull_policy: never
+    profiles: [build]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.interactive
+      target: comp1511
+
+  comp1521-interactive:
+    image: csetty/comp1521:dev
+    pull_policy: never
+    profiles: [build]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.interactive
+      target: comp1521
+
+  comp1511-judge:
+    image: csetty/comp1511-judge:dev
+    pull_policy: never
+    profiles: [build]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.judge
+      target: comp1511
+
+  comp1521-judge:
+    image: csetty/comp1521-judge:dev
+    pull_policy: never
+    profiles: [build]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.judge
+      target: comp1521

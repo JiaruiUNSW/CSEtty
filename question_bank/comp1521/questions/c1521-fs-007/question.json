@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "id": "c1521-fs-007",
+  "title": "Count strict UTF-8 code points",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": ["unicode", "file-io"],
+  "weeks": [9],
+  "slots": ["unicode"],
+  "estimated_minutes": 22,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": ["starter/c1521_fs_007.c"],
+  "submission_files": ["c1521_fs_007.c"],
+  "build": {"argv": ["dcc", "-Werror", "c1521_fs_007.c", "-o", "c1521_fs_007"]},
+  "test_groups": [
+    {"id": "public", "visibility": "public", "points": 4, "tests": [
+      {"id": "ascii", "argv": ["./c1521_fs_007"], "stdin": "abc", "expected_stdout": "3\n", "expected_stderr": "", "expected_exit": 0},
+      {"id": "mixed-width", "argv": ["./c1521_fs_007"], "stdin": "é猫", "expected_stdout": "2\n", "expected_stderr": "", "expected_exit": 0}
+    ]},
+    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
+      {"id": "four-byte", "argv": ["./c1521_fs_007"], "stdin": "🚀Z", "expected_stdout": "2\n", "expected_stderr": "", "expected_exit": 0},
+      {"id": "empty", "argv": ["./c1521_fs_007"], "stdin": "", "expected_stdout": "0\n", "expected_stderr": "", "expected_exit": 0}
+    ]}
+  ]
+}

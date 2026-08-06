@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-026",
+  "title": "Repair the Clock Wrap",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "debugging",
+    "conditionals",
+    "functions"
+  ],
+  "weeks": [
+    3
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 20,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_026.c"
+  ],
+  "submission_files": [
+    "c1511_core_026.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_026.c",
+      "-o",
+      "c1511_core_026"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "forward",
+          "argv": [
+            "./c1511_core_026"
+          ],
+          "stdin": "10 30 45\n",
+          "expected_stdout": "11:15\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "midnight",
+          "argv": [
+            "./c1511_core_026"
+          ],
+          "stdin": "23 50 20\n",
+          "expected_stdout": "00:10\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "negative",
+          "argv": [
+            "./c1511_core_026"
+          ],
+          "stdin": "0 5 -10\n",
+          "expected_stdout": "23:55\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "half-day",
+          "argv": [
+            "./c1511_core_026"
+          ],
+          "stdin": "12 0 -720\n",
+          "expected_stdout": "00:00\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

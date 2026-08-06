@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "id": "c1521-low-011",
+  "title": "Range Width Function",
+  "kind": "mips_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "mips-functions",
+    "mips-control"
+  ],
+  "weeks": [
+    2,
+    3
+  ],
+  "slots": [
+    "foundation"
+  ],
+  "estimated_minutes": 18,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_low_011.s"
+  ],
+  "submission_files": [
+    "c1521_low_011.s"
+  ],
+  "build": {
+    "argv": []
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "mipsy",
+            "c1521_low_011.s"
+          ],
+          "stdin": "-2\n8\n3\n",
+          "expected_stdout": "10\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "equal",
+          "argv": [
+            "mipsy",
+            "c1521_low_011.s"
+          ],
+          "stdin": "5\n5\n5\n",
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "descending",
+          "argv": [
+            "mipsy",
+            "c1521_low_011.s"
+          ],
+          "stdin": "9\n1\n-4\n",
+          "expected_stdout": "13\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "negative",
+          "argv": [
+            "mipsy",
+            "c1521_low_011.s"
+          ],
+          "stdin": "-8\n-2\n-5\n",
+          "expected_stdout": "6\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-013",
+  "title": "Metro Fare Band",
+  "kind": "c_program",
+  "difficulty": 1,
+  "track": "normal",
+  "tags": [
+    "io",
+    "conditionals"
+  ],
+  "weeks": [
+    2
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 10,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_013.c"
+  ],
+  "submission_files": [
+    "c1511_core_013.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_013.c",
+      "-o",
+      "c1511_core_013"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "local-offpeak",
+          "argv": [
+            "./c1511_core_013"
+          ],
+          "stdin": "4 0\n",
+          "expected_stdout": "fare: $4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "middle-peak",
+          "argv": [
+            "./c1511_core_013"
+          ],
+          "stdin": "10 1\n",
+          "expected_stdout": "fare: $9\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "long-offpeak",
+          "argv": [
+            "./c1511_core_013"
+          ],
+          "stdin": "20 0\n",
+          "expected_stdout": "fare: $11\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "boundary-peak",
+          "argv": [
+            "./c1511_core_013"
+          ],
+          "stdin": "5 1\n",
+          "expected_stdout": "fare: $6\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

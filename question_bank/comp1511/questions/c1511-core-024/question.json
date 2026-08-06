@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-024",
+  "title": "Trim and Collapse Spacing",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "char-streams",
+    "loops",
+    "conditionals"
+  ],
+  "weeks": [
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 20,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_024.c"
+  ],
+  "submission_files": [
+    "c1511_core_024.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_024.c",
+      "-o",
+      "c1511_core_024"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "spaces",
+          "argv": [
+            "./c1511_core_024"
+          ],
+          "stdin": "  hello   world \n",
+          "expected_stdout": "hello world\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "tabs",
+          "argv": [
+            "./c1511_core_024"
+          ],
+          "stdin": "a\t\tb c\n",
+          "expected_stdout": "a b c\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "blank",
+          "argv": [
+            "./c1511_core_024"
+          ],
+          "stdin": " \t  \n",
+          "expected_stdout": "\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "punctuation",
+          "argv": [
+            "./c1511_core_024"
+          ],
+          "stdin": " x,   y! \n",
+          "expected_stdout": "x, y!\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

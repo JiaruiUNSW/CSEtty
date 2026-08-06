@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-012",
+  "title": "Shifted Signal Mismatches",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "arrays-1d",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    4,
+    5
+  ],
+  "slots": [
+    "array_hurdle"
+  ],
+  "estimated_minutes": 28,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_012.c"
+  ],
+  "submission_files": [
+    "c1511_core_012.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_012.c",
+      "-o",
+      "c1511_core_012"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "perfect-rotation",
+          "argv": [
+            "./c1511_core_012"
+          ],
+          "stdin": "4 1\n1 2 3 4\n2 3 4 1\n",
+          "expected_stdout": "mismatches: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "direct-one",
+          "argv": [
+            "./c1511_core_012"
+          ],
+          "stdin": "4 0\n1 2 3 4\n1 2 0 4\n",
+          "expected_stdout": "mismatches: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "shift-two",
+          "argv": [
+            "./c1511_core_012"
+          ],
+          "stdin": "5 2\n1 2 3 4 5\n3 4 0 1 2\n",
+          "expected_stdout": "mismatches: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "wrap-one",
+          "argv": [
+            "./c1511_core_012"
+          ],
+          "stdin": "3 1\n9 8 7\n8 0 9\n",
+          "expected_stdout": "mismatches: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

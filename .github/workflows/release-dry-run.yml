@@ -1,0 +1,45 @@
+name: Release dry run (no publishing)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install uv
+        run: python -m pip install --disable-pip-version-check uv==0.12.1
+      - name: Recreate locked development environment
+        run: uv sync --extra dev --locked
+      - name: Verify source
+        run: |
+          uv run ruff check src tests scripts
+          uv run mypy src/csetty
+          uv run pytest -q
+      - name: Build distributions
+        run: uv build
+      - name: Create Python dependency SBOM
+        run: >-
+          uv export --preview-features sbom-export
+          --format cyclonedx1.5 --no-dev --locked
+          --output-file dist/cseexamtty-python.cdx.json
+      - name: Smoke-test wheel
+        run: uv run python scripts/smoke_wheel.py dist
+      - name: Fetch pinned DCC corresponding source
+        run: uv run python scripts/fetch_dcc_source.py dist
+      - name: Enforce private release gate
+        run: uv run python scripts/release_gate.py --level private --dist dist
+      - name: Write checksums
+        run: uv run python scripts/write_checksums.py dist
+      - name: Confirm review artifacts remain runner-local
+        run: |
+          test -s dist/SHA256SUMS
+          echo "Dry-run artifacts were verified locally and will not be uploaded."

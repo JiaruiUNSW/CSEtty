@@ -1,0 +1,9 @@
+recursive-include question_bank *.toml *.json *.md *.c *.s *.txt *.bin
+recursive-include docs *.md
+recursive-include packs *.toml *.md *.c *.s *.txt *.bin
+recursive-include docker *
+recursive-include release *.toml
+include README.md CHANGELOG.md LICENSE NOTICE LICENSES.md ASSESSMENT_MATERIALS_LICENSE.md
+include TRADEMARKS.md
+include THIRD_PARTY_NOTICES.md compose.yaml toolchains.lock checksums.lock
+include CONTRIBUTING.md SECURITY.md

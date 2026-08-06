@@ -1,0 +1,35 @@
+schema_version = 1
+id = "comp1511-original-bank"
+title = "COMP1511 Original Practice Question Bank"
+course = "COMP1511"
+profile = "comp1511"
+author = "CSEExamTTY project"
+license = "CC BY-NC-ND 4.0"
+
+allowed_slots = [
+  "list_hurdle",
+  "array_hurdle",
+  "short",
+  "medium",
+  "whole_program",
+]
+
+allowed_tags = [
+  "io",
+  "conditionals",
+  "loops",
+  "enums",
+  "structs",
+  "functions",
+  "arrays-1d",
+  "arrays-2d",
+  "strings",
+  "char-streams",
+  "debugging",
+  "pointers",
+  "dynamic-memory",
+  "linked-lists",
+  "recursion",
+  "whole-program",
+  "testing",
+]

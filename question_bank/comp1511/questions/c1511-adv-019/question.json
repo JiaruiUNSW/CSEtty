@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-019",
+  "title": "Repair running differences",
+  "kind": "c_function",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "debugging",
+    "arrays-1d",
+    "loops"
+  ],
+  "weeks": [
+    5,
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 13,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_019.c"
+  ],
+  "submission_files": [
+    "c1511_adv_019.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_019.c",
+      "-o",
+      "c1511_adv_019"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_019",
+            "5",
+            "9",
+            "12"
+          ],
+          "expected_stdout": "5 4 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_019"
+          ],
+          "expected_stdout": "EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_019",
+            "3"
+          ],
+          "expected_stdout": "3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_019",
+            "-2",
+            "-5",
+            "1"
+          ],
+          "expected_stdout": "-2 -3 6\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

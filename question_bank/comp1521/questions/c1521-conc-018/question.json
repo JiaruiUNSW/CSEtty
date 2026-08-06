@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-018",
+  "title": "Parallel Integer Frequency Merge",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "threads",
+    "synchronisation",
+    "file-io"
+  ],
+  "weeks": [
+    7,
+    9,
+    10
+  ],
+  "slots": [
+    "challenge_combo"
+  ],
+  "estimated_minutes": 50,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_018.c"
+  ],
+  "submission_files": [
+    "c1521_conc_018.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_018.c",
+      "-pthread",
+      "-o",
+      "c1521_conc_018"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two-files",
+          "argv": [
+            "./c1521_conc_018",
+            "a.txt",
+            "b.txt"
+          ],
+          "expected_stdout": "-1=2\n0=1\n1=3\n2=1\nvalues=7\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/a.txt",
+              "path": "a.txt"
+            },
+            {
+              "source": "tests/b.txt",
+              "path": "b.txt"
+            }
+          ]
+        },
+        {
+          "id": "boundaries",
+          "argv": [
+            "./c1521_conc_018",
+            "a.txt"
+          ],
+          "expected_stdout": "-10=2\n10=1\nvalues=3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/bounds.txt",
+              "path": "a.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "three-files",
+          "argv": [
+            "./c1521_conc_018",
+            "a.txt",
+            "b.txt",
+            "c.txt"
+          ],
+          "expected_stdout": "-2=2\n3=4\n5=1\nvalues=7\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/h1.txt",
+              "path": "a.txt"
+            },
+            {
+              "source": "tests/h2.txt",
+              "path": "b.txt"
+            },
+            {
+              "source": "tests/h3.txt",
+              "path": "c.txt"
+            }
+          ]
+        },
+        {
+          "id": "whitespace-file",
+          "argv": [
+            "./c1521_conc_018",
+            "a.txt"
+          ],
+          "expected_stdout": "values=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/space.txt",
+              "path": "a.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

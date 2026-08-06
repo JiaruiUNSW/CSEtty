@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-034",
+  "title": "Undoable event journal",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "whole-program",
+    "structs",
+    "strings",
+    "arrays-1d",
+    "io"
+  ],
+  "weeks": [
+    4,
+    9
+  ],
+  "slots": [
+    "whole_program"
+  ],
+  "estimated_minutes": 36,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_034.c"
+  ],
+  "submission_files": [
+    "c1511_adv_034.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_034.c",
+      "-o",
+      "c1511_adv_034"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_034"
+          ],
+          "stdin": "LOG rain\nLOG wind\nLOG rain\nCOUNT rain\nTOTAL\nEND\n",
+          "expected_stdout": "rain 2\nTOTAL 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_034"
+          ],
+          "stdin": "UNDO\nTOTAL\nEND\n",
+          "expected_stdout": "NOTHING\nTOTAL 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "hidden_state",
+          "argv": [
+            "./c1511_adv_034"
+          ],
+          "stdin": "LOG a\nLOG b\nUNDO\nCOUNT b\nTOTAL\nEND\n",
+          "expected_stdout": "UNDONE b\nb 0\nTOTAL 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_034"
+          ],
+          "stdin": "COUNT z\nLOG z\nCOUNT z\nEND\n",
+          "expected_stdout": "z 0\nz 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

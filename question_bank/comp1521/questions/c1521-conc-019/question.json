@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-019",
+  "title": "Three-Process Run Encoder",
+  "kind": "c_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "processes",
+    "pipes",
+    "file-io",
+    "binary-data"
+  ],
+  "weeks": [
+    7,
+    10
+  ],
+  "slots": [
+    "challenge_combo"
+  ],
+  "estimated_minutes": 65,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_019.c"
+  ],
+  "submission_files": [
+    "c1521_conc_019.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_019.c",
+      "-o",
+      "c1521_conc_019"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "grouped",
+          "argv": [
+            "./c1521_conc_019",
+            "input.bin"
+          ],
+          "expected_stdout": "61 3\n62 2\n63 1\n0A 1\nruns=4 bytes=7\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/grouped.bin",
+              "path": "input.bin"
+            }
+          ]
+        },
+        {
+          "id": "alternating",
+          "argv": [
+            "./c1521_conc_019",
+            "input.bin"
+          ],
+          "expected_stdout": "61 1\n62 1\n61 1\n62 1\n0A 1\nruns=5 bytes=5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/alternating.bin",
+              "path": "input.bin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "single-letter",
+          "argv": [
+            "./c1521_conc_019",
+            "input.bin"
+          ],
+          "expected_stdout": "5A 1\n0A 1\nruns=2 bytes=2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/single.bin",
+              "path": "input.bin"
+            }
+          ]
+        },
+        {
+          "id": "digit-runs",
+          "argv": [
+            "./c1521_conc_019",
+            "input.bin"
+          ],
+          "expected_stdout": "31 4\n30 4\n0A 1\nruns=3 bytes=9\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/digits.bin",
+              "path": "input.bin"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

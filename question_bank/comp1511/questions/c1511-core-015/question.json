@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-015",
+  "title": "Signal State Advances",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "enums",
+    "loops",
+    "conditionals"
+  ],
+  "weeks": [
+    3
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 14,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_015.c"
+  ],
+  "submission_files": [
+    "c1511_core_015.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_015.c",
+      "-o",
+      "c1511_core_015"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "one-step",
+          "argv": [
+            "./c1511_core_015"
+          ],
+          "stdin": "R 1\n",
+          "expected_stdout": "state: G\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "two-steps",
+          "argv": [
+            "./c1511_core_015"
+          ],
+          "stdin": "G 2\n",
+          "expected_stdout": "state: R\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "zero",
+          "argv": [
+            "./c1511_core_015"
+          ],
+          "stdin": "A 0\n",
+          "expected_stdout": "state: A\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "full-plus-one",
+          "argv": [
+            "./c1511_core_015"
+          ],
+          "stdin": "R 4\n",
+          "expected_stdout": "state: G\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

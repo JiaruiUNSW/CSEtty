@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-027",
+  "title": "Deal nodes into two chains",
+  "kind": "c_function",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "linked-lists",
+    "pointers",
+    "functions"
+  ],
+  "weeks": [
+    7,
+    8
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 24,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_027.c"
+  ],
+  "submission_files": [
+    "c1511_adv_027.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_027.c",
+      "-o",
+      "c1511_adv_027"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_027",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "expected_stdout": "A: 1 3 5\nB: 2 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_027"
+          ],
+          "expected_stdout": "A: EMPTY\nB: EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_027",
+            "7"
+          ],
+          "expected_stdout": "A: 7\nB: EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_027",
+            "-1",
+            "-2",
+            "-3",
+            "-4"
+          ],
+          "expected_stdout": "A: -1 -3\nB: -2 -4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

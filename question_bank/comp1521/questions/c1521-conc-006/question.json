@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-006",
+  "title": "Sharded Manifest Statistics",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "normal",
+  "tags": [
+    "file-io",
+    "processes",
+    "pipes",
+    "make"
+  ],
+  "weeks": [
+    7,
+    10
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 45,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_006.c"
+  ],
+  "submission_files": [
+    "c1521_conc_006.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_006.c",
+      "-o",
+      "c1521_conc_006"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two-workers",
+          "argv": [
+            "./c1521_conc_006",
+            "manifest.txt",
+            "2"
+          ],
+          "expected_stdout": "worker 0 lines=1 bytes=9 words=2\nworker 1 lines=1 bytes=4 words=1\ntotal lines=2 bytes=13 words=3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/two_lines.txt",
+              "path": "manifest.txt"
+            }
+          ]
+        },
+        {
+          "id": "three-workers",
+          "argv": [
+            "./c1521_conc_006",
+            "manifest.txt",
+            "3"
+          ],
+          "expected_stdout": "worker 0 lines=2 bytes=9 words=4\nworker 1 lines=1 bytes=0 words=0\nworker 2 lines=1 bytes=14 words=3\ntotal lines=4 bytes=23 words=7\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/four_lines.txt",
+              "path": "manifest.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "single-worker",
+          "argv": [
+            "./c1521_conc_006",
+            "manifest.txt",
+            "1"
+          ],
+          "expected_stdout": "worker 0 lines=2 bytes=12 words=3\ntotal lines=2 bytes=12 words=3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/single_worker.txt",
+              "path": "manifest.txt"
+            }
+          ]
+        },
+        {
+          "id": "idle-worker",
+          "argv": [
+            "./c1521_conc_006",
+            "manifest.txt",
+            "4"
+          ],
+          "expected_stdout": "worker 0 lines=1 bytes=2 words=1\nworker 1 lines=1 bytes=3 words=2\nworker 2 lines=1 bytes=5 words=1\nworker 3 lines=0 bytes=0 words=0\ntotal lines=3 bytes=10 words=4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/three_lines.txt",
+              "path": "manifest.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

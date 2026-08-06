@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-008",
+  "title": "Exec-Squared Workers",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "processes",
+    "pipes"
+  ],
+  "weeks": [
+    10
+  ],
+  "slots": [
+    "processes_threads"
+  ],
+  "estimated_minutes": 35,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_008.c"
+  ],
+  "submission_files": [
+    "c1521_conc_008.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_008.c",
+      "-o",
+      "c1521_conc_008"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "mixed-sign",
+          "argv": [
+            "./c1521_conc_008",
+            "2",
+            "-3",
+            "10"
+          ],
+          "expected_stdout": "0 square=4\n1 square=9\n2 square=100\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "zero",
+          "argv": [
+            "./c1521_conc_008",
+            "0"
+          ],
+          "expected_stdout": "0 square=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "pair",
+          "argv": [
+            "./c1521_conc_008",
+            "-12",
+            "7"
+          ],
+          "expected_stdout": "0 square=144\n1 square=49\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "bounds",
+          "argv": [
+            "./c1521_conc_008",
+            "100",
+            "-100",
+            "1"
+          ],
+          "expected_stdout": "0 square=10000\n1 square=10000\n2 square=1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

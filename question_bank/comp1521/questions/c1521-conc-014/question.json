@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-014",
+  "title": "Two-Stage Word Pipeline",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "processes",
+    "pipes",
+    "file-io"
+  ],
+  "weeks": [
+    7,
+    10
+  ],
+  "slots": [
+    "challenge_combo"
+  ],
+  "estimated_minutes": 50,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_014.c"
+  ],
+  "submission_files": [
+    "c1521_conc_014.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_014.c",
+      "-o",
+      "c1521_conc_014"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "three-words",
+          "argv": [
+            "./c1521_conc_014",
+            "input.txt"
+          ],
+          "expected_stdout": "words=3 chars=11 longest=5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/three.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "whitespace-only",
+          "argv": [
+            "./c1521_conc_014",
+            "input.txt"
+          ],
+          "expected_stdout": "words=0 chars=0 longest=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/space.txt",
+              "path": "input.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "growing",
+          "argv": [
+            "./c1521_conc_014",
+            "input.txt"
+          ],
+          "expected_stdout": "words=4 chars=10 longest=4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/growing.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "mixed-lengths",
+          "argv": [
+            "./c1521_conc_014",
+            "input.txt"
+          ],
+          "expected_stdout": "words=3 chars=15 longest=6\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/mixed.txt",
+              "path": "input.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

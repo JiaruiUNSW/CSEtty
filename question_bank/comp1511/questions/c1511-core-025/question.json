@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-025",
+  "title": "Character Run Count",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "strings",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 18,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_025.c"
+  ],
+  "submission_files": [
+    "c1511_core_025.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_025.c",
+      "-o",
+      "c1511_core_025"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "three-runs",
+          "argv": [
+            "./c1511_core_025"
+          ],
+          "stdin": "aaabbc\n",
+          "expected_stdout": "runs: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_core_025"
+          ],
+          "stdin": "z\n",
+          "expected_stdout": "runs: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "alternating",
+          "argv": [
+            "./c1511_core_025"
+          ],
+          "stdin": "ababa\n",
+          "expected_stdout": "runs: 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "digit-blocks",
+          "argv": [
+            "./c1511_core_025"
+          ],
+          "stdin": "11223311\n",
+          "expected_stdout": "runs: 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

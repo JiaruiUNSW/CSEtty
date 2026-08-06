@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-014",
+  "title": "Compact neighbouring repeats",
+  "kind": "c_function",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "arrays-1d",
+    "pointers",
+    "loops"
+  ],
+  "weeks": [
+    5
+  ],
+  "slots": [
+    "array_hurdle"
+  ],
+  "estimated_minutes": 19,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_014.c"
+  ],
+  "submission_files": [
+    "c1511_adv_014.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_014.c",
+      "-o",
+      "c1511_adv_014"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_014",
+            "1",
+            "1",
+            "2",
+            "2",
+            "2",
+            "3"
+          ],
+          "expected_stdout": "1 2 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_014"
+          ],
+          "expected_stdout": "EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_014",
+            "4"
+          ],
+          "expected_stdout": "4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_014",
+            "1",
+            "2",
+            "1"
+          ],
+          "expected_stdout": "1 2 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

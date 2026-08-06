@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-030",
+  "title": "Line Initials",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "strings",
+    "char-streams",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    7
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 28,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_030.c"
+  ],
+  "submission_files": [
+    "c1511_core_030.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_030.c",
+      "-o",
+      "c1511_core_030"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "three-words",
+          "argv": [
+            "./c1511_core_030"
+          ],
+          "stdin": "hello   wide world\n",
+          "expected_stdout": "initials: HWW\nwords: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_core_030"
+          ],
+          "stdin": "Single\n",
+          "expected_stdout": "initials: S\nwords: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "tabs",
+          "argv": [
+            "./c1511_core_030"
+          ],
+          "stdin": "  alpha\tbeta  gamma\n",
+          "expected_stdout": "initials: ABG\nwords: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "blank",
+          "argv": [
+            "./c1511_core_030"
+          ],
+          "stdin": " \t  \n",
+          "expected_stdout": "initials: \nwords: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

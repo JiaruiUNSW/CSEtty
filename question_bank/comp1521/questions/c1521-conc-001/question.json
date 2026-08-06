@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-001",
+  "title": "Forked File Totals",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "file-io",
+    "processes",
+    "pipes"
+  ],
+  "weeks": [
+    7,
+    10
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 35,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_001.c"
+  ],
+  "submission_files": [
+    "c1521_conc_001.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_001.c",
+      "-o",
+      "c1521_conc_001"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "small-positive",
+          "argv": [
+            "./c1521_conc_001",
+            "left.txt",
+            "right.txt"
+          ],
+          "expected_stdout": "0 count=3 sum=6\n1 count=2 sum=30\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/public_left.txt",
+              "path": "left.txt"
+            },
+            {
+              "source": "tests/public_right.txt",
+              "path": "right.txt"
+            }
+          ]
+        },
+        {
+          "id": "empty-and-mixed",
+          "argv": [
+            "./c1521_conc_001",
+            "empty.txt",
+            "mixed.txt"
+          ],
+          "expected_stdout": "0 count=0 sum=0\n1 count=4 sum=2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/empty.txt",
+              "path": "empty.txt"
+            },
+            {
+              "source": "tests/public_mixed.txt",
+              "path": "mixed.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "whitespace-and-negative",
+          "argv": [
+            "./c1521_conc_001",
+            "a.txt",
+            "b.txt"
+          ],
+          "expected_stdout": "0 count=4 sum=-100\n1 count=5 sum=15\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/hidden_a.txt",
+              "path": "a.txt"
+            },
+            {
+              "source": "tests/hidden_b.txt",
+              "path": "b.txt"
+            }
+          ]
+        },
+        {
+          "id": "single-values",
+          "argv": [
+            "./c1521_conc_001",
+            "x.txt",
+            "y.txt"
+          ],
+          "expected_stdout": "0 count=1 sum=922\n1 count=1 sum=-17\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/hidden_x.txt",
+              "path": "x.txt"
+            },
+            {
+              "source": "tests/hidden_y.txt",
+              "path": "y.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

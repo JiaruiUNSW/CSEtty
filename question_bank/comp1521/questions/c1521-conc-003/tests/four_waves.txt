@@ -1,0 +1,6 @@
+package: join
+right: base
+join: left right
+base:
+left: base
+

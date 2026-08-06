@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-022",
+  "title": "Find the first signed decimal",
+  "kind": "c_function",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "strings",
+    "char-streams",
+    "pointers",
+    "conditionals"
+  ],
+  "weeks": [
+    5,
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 17,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_022.c"
+  ],
+  "submission_files": [
+    "c1511_adv_022.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_022.c",
+      "-o",
+      "c1511_adv_022"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_022",
+            "abc -42x"
+          ],
+          "expected_stdout": "-42\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_022",
+            "none"
+          ],
+          "expected_stdout": "NONE\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_022",
+            "+x 17"
+          ],
+          "expected_stdout": "17\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_022",
+            "v=+005"
+          ],
+          "expected_stdout": "5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

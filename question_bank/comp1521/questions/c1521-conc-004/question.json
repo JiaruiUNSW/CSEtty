@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-004",
+  "title": "Parallel Chunk Checksum",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "binary-data",
+    "file-io",
+    "processes",
+    "pipes"
+  ],
+  "weeks": [
+    7,
+    10
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 50,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_004.c"
+  ],
+  "submission_files": [
+    "c1521_conc_004.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_004.c",
+      "-o",
+      "c1521_conc_004"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "three-bytes-one-worker",
+          "argv": [
+            "./c1521_conc_004",
+            "data.bin",
+            "1"
+          ],
+          "expected_stdout": "bytes=4 sum=208 weighted=438\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/abc.bin",
+              "path": "data.bin"
+            }
+          ]
+        },
+        {
+          "id": "same-three-four-workers",
+          "argv": [
+            "./c1521_conc_004",
+            "data.bin",
+            "4"
+          ],
+          "expected_stdout": "bytes=4 sum=208 weighted=438\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/abc.bin",
+              "path": "data.bin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "text-with-newline",
+          "argv": [
+            "./c1521_conc_004",
+            "data.bin",
+            "3"
+          ],
+          "expected_stdout": "bytes=8 sum=617 weighted=2257\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/abcdef.bin",
+              "path": "data.bin"
+            }
+          ]
+        },
+        {
+          "id": "ten-digits",
+          "argv": [
+            "./c1521_conc_004",
+            "data.bin",
+            "8"
+          ],
+          "expected_stdout": "bytes=11 sum=535 weighted=3080\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/digits.bin",
+              "path": "data.bin"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

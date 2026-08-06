@@ -1,0 +1,399 @@
+schema_version = 1
+id = "comp1521-original-a"
+version = "1.0.0"
+title = "COMP1521-style Original Practice Paper A"
+course = "COMP1521"
+profile = "comp1521"
+author = "CSEExamTTY project"
+license = "CC BY-NC-ND 4.0"
+paper = "paper/index.md"
+reading_time_seconds = 600
+working_time_seconds = 10800
+
+[environment]
+image = "csetty/comp1521:dev"
+network = "none"
+cpus = 2
+memory_mb = 1024
+pids = 128
+output_limit_kb = 256
+
+[[resources]]
+path = "resources/mips-c-reference.md"
+label = "C and MIPS quick reference"
+
+[[questions]]
+id = "final_q1"
+title = "Rotate a 32-bit value right"
+kind = "c_program"
+prompt = "paper/questions/final_q1.md"
+difficulty = 2
+track = "normal"
+tags = ["bitwise", "integer-representation", "c-revision"]
+estimated_minutes = 12
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q1.c"]
+submission_files = ["final_q1.c"]
+[questions.build]
+argv = ["dcc", "-Werror", "final_q1.c", "-o", "final_q1"]
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "one-bit"
+argv = ["./final_q1", "1", "1"]
+expected_stdout = "2147483648\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "one-byte"
+argv = ["./final_q1", "305419896", "8"]
+expected_stdout = "2014458966\n"
+expected_stderr = ""
+expected_exit = 0
+
+[[questions]]
+id = "final_q2"
+title = "Translate integer subtraction to MIPS"
+kind = "mips_program"
+prompt = "paper/questions/final_q2.md"
+difficulty = 1
+track = "normal"
+tags = ["mips-basics", "mips-data", "integer-arithmetic"]
+estimated_minutes = 10
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q2.s"]
+submission_files = ["final_q2.s"]
+[questions.build]
+argv = []
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "positive"
+argv = ["mipsy", "final_q2.s"]
+stdin = "9\n4\n"
+expected_stdout = "5\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "signed"
+argv = ["mipsy", "final_q2.s"]
+stdin = "-2\n5\n"
+expected_stdout = "-7\n"
+expected_stderr = ""
+expected_exit = 0
+
+[[questions]]
+id = "final_q3"
+title = "Count logical lines with POSIX file I/O"
+kind = "c_program"
+prompt = "paper/questions/final_q3.md"
+difficulty = 3
+track = "normal"
+tags = ["file-io", "posix", "boundary-cases"]
+estimated_minutes = 20
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q3.c"]
+submission_files = ["final_q3.c"]
+[questions.build]
+argv = ["dcc", "-Werror", "final_q3.c", "-o", "final_q3"]
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "newline-terminated"
+argv = ["./final_q3", "input.txt"]
+expected_stdout = "2\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups.tests.fixtures]]
+source = "tests/q3/public.txt"
+path = "input.txt"
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "unterminated-last-line"
+argv = ["./final_q3", "input.txt"]
+expected_stdout = "2\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups.tests.fixtures]]
+source = "tests/q3/hidden.txt"
+path = "input.txt"
+
+[[questions]]
+id = "final_q4"
+title = "Sum one through n in MIPS"
+kind = "mips_program"
+prompt = "paper/questions/final_q4.md"
+difficulty = 2
+track = "normal"
+tags = ["mips-control", "loops", "integer-arithmetic"]
+estimated_minutes = 14
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q4.s"]
+submission_files = ["final_q4.s"]
+[questions.build]
+argv = []
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "five"
+argv = ["mipsy", "final_q4.s"]
+stdin = "5\n"
+expected_stdout = "15\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "ten"
+argv = ["mipsy", "final_q4.s"]
+stdin = "10\n"
+expected_stdout = "55\n"
+expected_stderr = ""
+expected_exit = 0
+
+[[questions]]
+id = "final_q5"
+title = "Count UTF-8 code points"
+kind = "c_program"
+prompt = "paper/questions/final_q5.md"
+difficulty = 3
+track = "normal"
+tags = ["unicode", "utf-8", "bitwise"]
+estimated_minutes = 18
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q5.c"]
+submission_files = ["final_q5.c"]
+[questions.build]
+argv = ["dcc", "-Werror", "final_q5.c", "-o", "final_q5"]
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "ascii"
+argv = ["./final_q5"]
+stdin = "hello"
+expected_stdout = "5\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "multibyte"
+argv = ["./final_q5"]
+stdin = "é猫\n"
+expected_stdout = "3\n"
+expected_stderr = ""
+expected_exit = 0
+
+[[questions]]
+id = "final_q6"
+title = "Count set bits in MIPS"
+kind = "mips_program"
+prompt = "paper/questions/final_q6.md"
+difficulty = 3
+track = "challenge"
+tags = ["mips-control", "bitwise", "integer-representation"]
+estimated_minutes = 18
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q6.s"]
+submission_files = ["final_q6.s"]
+[questions.build]
+argv = []
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "fifteen"
+argv = ["mipsy", "final_q6.s"]
+stdin = "15\n"
+expected_stdout = "4\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "all-bits"
+argv = ["mipsy", "final_q6.s"]
+stdin = "-1\n"
+expected_stdout = "32\n"
+expected_stderr = ""
+expected_exit = 0
+
+[[questions]]
+id = "final_q7"
+title = "Inspect a child process exit status"
+kind = "c_program"
+prompt = "paper/questions/final_q7.md"
+difficulty = 4
+track = "challenge"
+tags = ["processes", "wait-status", "posix"]
+estimated_minutes = 22
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q7.c"]
+submission_files = ["final_q7.c"]
+[questions.build]
+argv = ["dcc", "-Werror", "final_q7.c", "-o", "final_q7"]
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "seven"
+argv = ["./final_q7", "7"]
+expected_stdout = "7\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "zero"
+argv = ["./final_q7", "0"]
+expected_stdout = "0\n"
+expected_stderr = ""
+expected_exit = 0
+
+[[questions]]
+id = "final_q8"
+title = "Find the maximum of five integers in MIPS"
+kind = "mips_program"
+prompt = "paper/questions/final_q8.md"
+difficulty = 3
+track = "challenge"
+tags = ["mips-control", "loops", "signed-integers"]
+estimated_minutes = 18
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q8.s"]
+submission_files = ["final_q8.s"]
+[questions.build]
+argv = []
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "mixed"
+argv = ["mipsy", "final_q8.s"]
+stdin = "3\n9\n-2\n7\n4\n"
+expected_stdout = "9\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "negative"
+argv = ["mipsy", "final_q8.s"]
+stdin = "-8\n-3\n-11\n-4\n-6\n"
+expected_stdout = "-3\n"
+expected_stderr = ""
+expected_exit = 0
+
+[[questions]]
+id = "final_q9"
+title = "Sum a range with two POSIX threads"
+kind = "c_program"
+prompt = "paper/questions/final_q9.md"
+difficulty = 4
+track = "challenge"
+tags = ["threads", "pthread", "partitioning"]
+estimated_minutes = 24
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q9.c"]
+submission_files = ["final_q9.c"]
+[questions.build]
+argv = ["dcc", "-Werror", "final_q9.c", "-pthread", "-o", "final_q9"]
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "ten"
+argv = ["./final_q9", "10"]
+expected_stdout = "55\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "hundred"
+argv = ["./final_q9", "100"]
+expected_stdout = "5050\n"
+expected_stderr = ""
+expected_exit = 0
+
+[[questions]]
+id = "final_q10"
+title = "Transfer a range sum through a process pipe"
+kind = "c_program"
+prompt = "paper/questions/final_q10.md"
+difficulty = 5
+track = "challenge"
+tags = ["processes", "pipes", "file-io", "wait-status"]
+estimated_minutes = 28
+points = 10
+pass_points = 5
+starter_files = ["starter/final_q10.c"]
+submission_files = ["final_q10.c"]
+[questions.build]
+argv = ["dcc", "-Werror", "final_q10.c", "-o", "final_q10"]
+[[questions.test_groups]]
+id = "public"
+visibility = "public"
+points = 5
+[[questions.test_groups.tests]]
+id = "ten"
+argv = ["./final_q10", "10"]
+expected_stdout = "55\n"
+expected_stderr = ""
+expected_exit = 0
+[[questions.test_groups]]
+id = "marking"
+visibility = "after_finish"
+points = 5
+[[questions.test_groups.tests]]
+id = "hundred"
+argv = ["./final_q10", "100"]
+expected_stdout = "5050\n"
+expected_stderr = ""
+expected_exit = 0

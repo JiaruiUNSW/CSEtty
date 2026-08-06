@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-011",
+  "title": "Joined Vowel Workers",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "threads",
+    "c-revision"
+  ],
+  "weeks": [
+    9
+  ],
+  "slots": [
+    "processes_threads"
+  ],
+  "estimated_minutes": 25,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_011.c"
+  ],
+  "submission_files": [
+    "c1521_conc_011.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_011.c",
+      "-pthread",
+      "-o",
+      "c1521_conc_011"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two-strings",
+          "argv": [
+            "./c1521_conc_011",
+            "apple",
+            "SKY"
+          ],
+          "expected_stdout": "0 vowels=2\n1 vowels=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "all-vowels",
+          "argv": [
+            "./c1521_conc_011",
+            "AEIOU"
+          ],
+          "expected_stdout": "0 vowels=5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "course-words",
+          "argv": [
+            "./c1521_conc_011",
+            "Concurrency",
+            "threads",
+            "xyz"
+          ],
+          "expected_stdout": "0 vowels=3\n1 vowels=2\n2 vowels=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "repeated-vowels",
+          "argv": [
+            "./c1521_conc_011",
+            "queue",
+            "rhythm"
+          ],
+          "expected_stdout": "0 vowels=4\n1 vowels=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

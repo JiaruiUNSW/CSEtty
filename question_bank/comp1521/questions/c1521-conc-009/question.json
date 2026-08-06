@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "id": "c1521-conc-009",
+  "title": "Pipe Sequence Reduction",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "processes",
+    "pipes"
+  ],
+  "weeks": [
+    10
+  ],
+  "slots": [
+    "processes_threads"
+  ],
+  "estimated_minutes": 25,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_conc_009.c"
+  ],
+  "submission_files": [
+    "c1521_conc_009.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_conc_009.c",
+      "-o",
+      "c1521_conc_009"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "ascending",
+          "argv": [
+            "./c1521_conc_009",
+            "1",
+            "1",
+            "5"
+          ],
+          "expected_stdout": "count=5 sum=15 min=1 max=5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "descending",
+          "argv": [
+            "./c1521_conc_009",
+            "10",
+            "-2",
+            "4"
+          ],
+          "expected_stdout": "count=4 sum=28 min=4 max=10\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "after-finish",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "cross-zero",
+          "argv": [
+            "./c1521_conc_009",
+            "-3",
+            "3",
+            "5"
+          ],
+          "expected_stdout": "count=5 sum=15 min=-3 max=9\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "single",
+          "argv": [
+            "./c1521_conc_009",
+            "5",
+            "0",
+            "1"
+          ],
+          "expected_stdout": "count=1 sum=5 min=5 max=5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

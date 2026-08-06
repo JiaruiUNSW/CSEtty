@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cseexamtty"
+version = "0.1.0a1"
+description = "A local COMP1511/COMP1521-style programming exam simulator"
+readme = "README.md"
+authors = [
+  { name = "Jiarui WANG" },
+]
+license = "Apache-2.0 AND CC-BY-NC-ND-4.0"
+license-files = [
+  "LICENSE",
+  "NOTICE",
+  "ASSESSMENT_MATERIALS_LICENSE.md",
+  "LICENSES.md",
+]
+requires-python = ">=3.11"
+dependencies = [
+  "csetty-mips==0.1.1",
+  "platformdirs>=4.2",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Education",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Education :: Testing",
+  "Typing :: Typed",
+]
+keywords = ["assessment", "c", "education", "exam", "mips"]
+
+[project.urls]
+Homepage = "https://github.com/JiaruiUNSW/CSEtty"
+Documentation = "https://github.com/JiaruiUNSW/CSEtty#readme"
+Issues = "https://github.com/JiaruiUNSW/CSEtty/issues"
+Source = "https://github.com/JiaruiUNSW/CSEtty"
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.10",
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.5",
+]
+
+[project.scripts]
+csetty = "csetty.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+csetty = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["csetty"]

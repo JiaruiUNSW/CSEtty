@@ -1,0 +1,6 @@
+#!/usr/bin/python3
+from __future__ import annotations
+
+from csetty_mips.cli import main
+
+raise SystemExit(main())

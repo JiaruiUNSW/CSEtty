@@ -1,0 +1,37 @@
+schema_version = 1
+id = "comp1521-original-bank"
+title = "COMP1521 Original Practice Question Bank"
+course = "COMP1521"
+profile = "comp1521"
+author = "CSEExamTTY project"
+license = "CC BY-NC-ND 4.0"
+
+allowed_slots = [
+  "foundation",
+  "unicode",
+  "advanced_systems",
+  "processes_threads",
+  "challenge_combo",
+]
+
+allowed_tags = [
+  "c-revision",
+  "mips-basics",
+  "mips-control",
+  "mips-data",
+  "mips-functions",
+  "integer-representation",
+  "bitwise",
+  "floating-point",
+  "file-io",
+  "binary-data",
+  "file-metadata",
+  "directories",
+  "recursive-traversal",
+  "unicode",
+  "processes",
+  "pipes",
+  "threads",
+  "synchronisation",
+  "make",
+]

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-023",
+  "title": "Recursive character tally",
+  "kind": "c_function",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "recursion",
+    "strings",
+    "functions"
+  ],
+  "weeks": [
+    5,
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 13,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_023.c"
+  ],
+  "submission_files": [
+    "c1511_adv_023.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_023.c",
+      "-o",
+      "c1511_adv_023"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_023",
+            "a",
+            "banana"
+          ],
+          "expected_stdout": "3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_023",
+            "x",
+            "abc"
+          ],
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_023",
+            "A",
+            "banana"
+          ],
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_023",
+            "!",
+            "!!a!"
+          ],
+          "expected_stdout": "3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

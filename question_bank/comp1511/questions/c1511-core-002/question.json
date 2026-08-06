@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-002",
+  "title": "Longest Gentle Climb",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "arrays-1d",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    4
+  ],
+  "slots": [
+    "array_hurdle"
+  ],
+  "estimated_minutes": 18,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_002.c"
+  ],
+  "submission_files": [
+    "c1511_core_002.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_002.c",
+      "-o",
+      "c1511_core_002"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "two-best",
+          "argv": [
+            "./c1511_core_002"
+          ],
+          "stdin": "6\n1 2 2 0 3 4\n",
+          "expected_stdout": "longest: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "descending",
+          "argv": [
+            "./c1511_core_002"
+          ],
+          "stdin": "5\n5 4 3 2 1\n",
+          "expected_stdout": "longest: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "tied-runs",
+          "argv": [
+            "./c1511_core_002"
+          ],
+          "stdin": "8\n-2 -2 -1 4 3 3 3 5\n",
+          "expected_stdout": "longest: 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "all-equal",
+          "argv": [
+            "./c1511_core_002"
+          ],
+          "stdin": "3\n7 7 7\n",
+          "expected_stdout": "longest: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-028",
+  "title": "Weighted Letter Checksum",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "char-streams",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    7
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 22,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_028.c"
+  ],
+  "submission_files": [
+    "c1511_core_028.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_028.c",
+      "-o",
+      "c1511_core_028"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_core_028"
+          ],
+          "stdin": "A-bC!\n",
+          "expected_stdout": "checksum: 14\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "last-letter",
+          "argv": [
+            "./c1511_core_028"
+          ],
+          "stdin": "Z\n",
+          "expected_stdout": "checksum: 26\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "case-and-space",
+          "argv": [
+            "./c1511_core_028"
+          ],
+          "stdin": "a A\n",
+          "expected_stdout": "checksum: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "no-letters",
+          "argv": [
+            "./c1511_core_028"
+          ],
+          "stdin": "123\n",
+          "expected_stdout": "checksum: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

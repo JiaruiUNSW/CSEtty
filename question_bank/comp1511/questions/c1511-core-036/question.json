@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "id": "c1511-core-036",
+  "title": "Digit-Run Redactor",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "strings",
+    "char-streams",
+    "loops",
+    "conditionals"
+  ],
+  "weeks": [
+    7
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 32,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_core_036.c"
+  ],
+  "submission_files": [
+    "c1511_core_036.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_core_036.c",
+      "-o",
+      "c1511_core_036"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "two-runs",
+          "argv": [
+            "./c1511_core_036"
+          ],
+          "stdin": "Room 12, shelf 003.\n",
+          "expected_stdout": "Room #, shelf #.\nredactions: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "none",
+          "argv": [
+            "./c1511_core_036"
+          ],
+          "stdin": "no digits here\n",
+          "expected_stdout": "no digits here\nredactions: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "edge-runs",
+          "argv": [
+            "./c1511_core_036"
+          ],
+          "stdin": "123abc45\n",
+          "expected_stdout": "#abc#\nredactions: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "single-digits",
+          "argv": [
+            "./c1511_core_036"
+          ],
+          "stdin": "a1b2c3\n",
+          "expected_stdout": "a#b#c#\nredactions: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
+

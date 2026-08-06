@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "id": "c1521-fs-012",
+  "title": "Profile UTF-8 sequence widths",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": ["unicode", "integer-representation"],
+  "weeks": [9],
+  "slots": ["unicode"],
+  "estimated_minutes": 24,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": ["starter/c1521_fs_012.c"],
+  "submission_files": ["c1521_fs_012.c"],
+  "build": {"argv": ["dcc", "-Werror", "c1521_fs_012.c", "-o", "c1521_fs_012"]},
+  "test_groups": [
+    {"id": "public", "visibility": "public", "points": 4, "tests": [
+      {"id": "only-ascii", "argv": ["./c1521_fs_012", "414243"], "expected_stdout": "one=3 two=0 three=0 four=0\n", "expected_stderr": "", "expected_exit": 0},
+      {"id": "all-widths", "argv": ["./c1521_fs_012", "41c3a9e78cabf09f9a80"], "expected_stdout": "one=1 two=1 three=1 four=1\n", "expected_stderr": "", "expected_exit": 0}
+    ]},
+    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
+      {"id": "boundary-valid", "argv": ["./c1521_fs_012", "7fc280e0a080f48fbfbf"], "expected_stdout": "one=1 two=1 three=1 four=1\n", "expected_stderr": "", "expected_exit": 0},
+      {"id": "surrogate-invalid", "argv": ["./c1521_fs_012", "eda080"], "expected_stdout": "invalid 0\n", "expected_stderr": "", "expected_exit": 0}
+    ]}
+  ]
+}

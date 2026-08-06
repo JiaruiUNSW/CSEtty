@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "id": "c1511-adv-025",
+  "title": "Recursive neighbouring totals",
+  "kind": "c_function",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "linked-lists",
+    "recursion",
+    "dynamic-memory",
+    "functions"
+  ],
+  "weeks": [
+    7,
+    8
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 24,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_adv_025.c"
+  ],
+  "submission_files": [
+    "c1511_adv_025.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_adv_025.c",
+      "-o",
+      "c1511_adv_025"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "basic",
+          "argv": [
+            "./c1511_adv_025",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "expected_stdout": "3 7 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "edge",
+          "argv": [
+            "./c1511_adv_025"
+          ],
+          "expected_stdout": "EMPTY\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "hidden_boundary",
+          "argv": [
+            "./c1511_adv_025",
+            "4"
+          ],
+          "expected_stdout": "4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "hidden_mixed",
+          "argv": [
+            "./c1511_adv_025",
+            "-2",
+            "7",
+            "1"
+          ],
+          "expected_stdout": "5 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
