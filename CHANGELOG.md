@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Adds a protected, tokenless PyPI Trusted Publishing workflow triggered only
+  by a published GitHub Release. The isolated OIDC job downloads no source and
+  publishes only tag-matched, checksum-verified wheel/sdist assets.
+- Restricts release checksums to the public wheel, sdist, and Python SBOM so the
+  local DCC corresponding-source verification copy cannot become a release
+  asset accidentally.
+
 ## 0.1.0a1 — 2026-08-06
 
 First source-only public alpha.
@@ -21,4 +30,3 @@ Known alpha limitation: full offline VS Code and Docker Desktop/WSL2 acceptance
 has only been completed locally on Apple Silicon. Public CI covers the host
 contract across Windows/Linux/macOS plus native Linux amd64/arm64 container
 acceptance; broader desktop acceptance remains a stable-release gate.
-

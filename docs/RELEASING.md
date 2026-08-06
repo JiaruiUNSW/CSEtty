@@ -10,7 +10,7 @@ review and set `owner_approved = true`; the script never infers approval.
 
 ## Local release dry run
 
-From a clean checkout:
+From a clean checkout with an empty `dist/` directory:
 
 ```sh
 uv sync --extra dev --locked
@@ -68,9 +68,15 @@ contains no upstream mipsy binary.
 The wheel smoke then proves that
 student pack snapshots and Docker build contexts exclude those author materials.
 It also downloads the exact DCC source archive as a local hash-verification
-input and checks that workflows contain no package/image publishing command.
+input and checks that no workflow publishes images or runner artifacts. The
+only permitted package publisher is the dedicated, full-SHA-pinned
+`.github/workflows/publish-pypi.yml` Trusted Publishing workflow.
 That DCC archive is not a CSEExamTTY release artifact because CSEExamTTY does
 not convey a DCC binary or locally built course image.
+
+`scripts/write_checksums.py` deliberately records only the wheel, sdist, and
+Python SBOM. The local DCC corresponding-source verification copy must not be
+listed in `SHA256SUMS` or attached to the GitHub Release.
 
 The COMP1521 multi-architecture build must identify
 `io.csetty.mips.engine=csetty-mips`, version `0.1.1`, and license `MPL-2.0`.
@@ -104,31 +110,63 @@ uv run python scripts/release_gate.py --level public --dist dist \
 The script deliberately fails if evidence is blank/weak/pending, versions or
 licence metadata differ, the wheel/sdist omits required licence files, pack or
 bank labels differ from CC BY-NC-ND 4.0, legacy upstream-private image metadata
-remains, a workflow publishes artifacts, or the local DCC verification copy is
-absent or has the wrong hash.
+remains, a workflow publishes forbidden artifacts or weakens the dedicated PyPI
+OIDC job, or the local DCC verification copy is absent or has the wrong hash.
 
-## Bootstrap and publish sequence
+## Trusted Publisher configuration
 
-For an empty public repository, use this order so the first CI run itself can
-become release evidence:
+Create a GitHub environment named exactly `pypi`. Protect it with a required
+reviewer and restrict deployments to release tags accepted by the project. Do
+not add a PyPI token, username, or password as a repository/environment secret.
+
+In the existing `cseexamtty` project on PyPI, open **Manage > Publishing** and
+add a GitHub publisher with these exact identity fields:
+
+```text
+Owner: JiaruiUNSW
+Repository: CSEtty
+Workflow name: publish-pypi.yml
+Environment name: pypi
+```
+
+PyPI binds the OIDC identity to this workflow filename and environment. The
+publish job alone receives `id-token: write`; it has no checkout and never
+builds or installs project code. It downloads only the allowed assets from the
+published GitHub Release, verifies their names, SHA-256 values, archive paths,
+project name, and version, and then invokes the PyPA publisher pinned to a full
+commit SHA. PyPI attestations remain enabled.
+
+## Repeatable publish sequence
+
+Use this order for each new version:
 
 1. run the local checks and distribution dry-run;
 2. scan the intended Git tree for credentials and prebuilt/forbidden artifacts;
-3. push the untagged release candidate to `main`;
-4. wait for every job in the public CI run to pass;
-5. replace both pending platform values in `release/public-release.toml` with
+3. push the untagged release candidate to `main` and wait for every required CI
+   job to pass;
+4. replace both platform values in `release/public-release.toml` with
    that exact Actions run URL and update the evidence record;
-6. commit/push the evidence, wait for the new CI run, and use the newer passing
+5. commit/push the evidence, wait for the new CI run, and use the newer passing
    run URL if the evidence-only commit generated it;
-7. rebuild from the exact clean commit and run the public gate;
-8. create and push signed/annotated tag `v0.1.0a1`; and
-9. upload only the checked wheel and sdist to PyPI, then fresh-install from
-   PyPI and repeat the wheel smoke test.
+6. rebuild from the exact clean commit, run the public gate, and generate
+   `SHA256SUMS`;
+7. create and push a signed/annotated `vVERSION` tag;
+8. create a **draft** GitHub Release for that exact tag and attach exactly the
+   wheel, sdist, `cseexamtty-python.cdx.json`, and `SHA256SUMS`;
+9. independently inspect the four asset names and hashes, then publish the draft
+   release; and
+10. approve the protected `pypi` environment deployment, wait for the workflow
+    to publish with OIDC, then fresh-install from PyPI and repeat the wheel smoke
+    test.
 
-Do not use a credential pasted into chat or committed in any file. Prefer PyPI
-Trusted Publishing. If the first project upload must use a token, create a new
-short-lived account token, pass it only through process environment/stdin, then
-revoke it and replace it with a project-scoped token or Trusted Publisher.
+The release must remain a draft until all four assets are present. Publishing
+the draft emits the `release.published` event; attaching assets afterwards is
+too late and is not an accepted workflow. Do not enable `skip-existing`: a
+duplicate or partial version must fail loudly.
+
+Do not use a credential pasted into chat or committed in any file. Once the
+first Trusted Publisher release succeeds, revoke any remaining long-lived PyPI
+account token used for the bootstrap release.
 
 The public package name is `cseexamtty`; the installed command remains
 `csetty`. Release version `0.1.0a1` is intentionally pre-release and does not
