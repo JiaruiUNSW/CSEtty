@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import multiprocessing
+import os
+import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -9,10 +12,11 @@ from pathlib import Path
 
 import pytest
 
+import csetty.storage as storage_module
 from csetty.errors import StateError, ValidationError
 from csetty.models import AttemptMode, AttemptState, WorkspaceKind
 from csetty.paths import AppPaths
-from csetty.storage import Store
+from csetty.storage import Store, process_is_alive
 from csetty.supervisor import _deadline_warning_thresholds
 
 
@@ -34,6 +38,40 @@ def _hold_report_lock(
 
 def make_store(tmp_path: Path) -> Store:
     return Store(AppPaths.discover(tmp_path / "state"))
+
+
+def test_process_is_alive_dispatches_to_non_destructive_windows_probe(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    checked: list[int] = []
+
+    def probe(pid: int) -> bool:
+        checked.append(pid)
+        return False
+
+    monkeypatch.setattr(storage_module, "_IS_WINDOWS", True)
+    monkeypatch.setattr(storage_module, "_windows_process_is_alive", probe)
+
+    assert not process_is_alive(43210)
+    assert checked == [43210]
+
+
+@pytest.mark.skipif(os.name != "nt", reason="requires the Windows process API")
+def test_windows_process_liveness_probe_does_not_terminate_process() -> None:
+    process = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(30)"],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    try:
+        assert process_is_alive(process.pid)
+        assert process.poll() is None
+    finally:
+        process.terminate()
+        process.wait(timeout=5)
+
+    assert not process_is_alive(process.pid)
 
 
 def test_report_lock_serializes_another_process(tmp_path: Path) -> None:

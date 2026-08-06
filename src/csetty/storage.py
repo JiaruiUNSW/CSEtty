@@ -36,6 +36,9 @@ _TRANSITIONS: dict[AttemptState, set[AttemptState]] = {
 
 _REPORT_THREAD_LOCKS: dict[Path, threading.Lock] = {}
 _REPORT_THREAD_LOCKS_GUARD = threading.Lock()
+_IS_WINDOWS = os.name == "nt"
+_WINDOWS_SYNCHRONIZE = 0x00100000
+_WINDOWS_WAIT_TIMEOUT = 0x00000102
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -920,9 +923,41 @@ class Store:
         """Compatibility hook; Store uses short-lived connections."""
 
 
+def _windows_process_is_alive(pid: int) -> bool:
+    """Check a Windows process without signalling or terminating it."""
+
+    import ctypes
+    from ctypes import wintypes
+
+    win_dll = getattr(ctypes, "WinDLL", None)
+    if win_dll is None:
+        return False
+    kernel32 = win_dll("kernel32", use_last_error=True)
+    open_process = kernel32.OpenProcess
+    open_process.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    open_process.restype = wintypes.HANDLE
+    wait_for_single_object = kernel32.WaitForSingleObject
+    wait_for_single_object.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    wait_for_single_object.restype = wintypes.DWORD
+    close_handle = kernel32.CloseHandle
+    close_handle.argtypes = [wintypes.HANDLE]
+    close_handle.restype = wintypes.BOOL
+
+    handle = open_process(_WINDOWS_SYNCHRONIZE, False, pid)
+    if not handle:
+        return False
+    try:
+        status = int(wait_for_single_object(handle, 0))
+        return status == _WINDOWS_WAIT_TIMEOUT
+    finally:
+        close_handle(handle)
+
+
 def process_is_alive(pid: int) -> bool:
     if pid <= 0:
         return False
+    if _IS_WINDOWS:
+        return _windows_process_is_alive(pid)
     try:
         os.kill(pid, 0)
     except (OSError, ProcessLookupError):

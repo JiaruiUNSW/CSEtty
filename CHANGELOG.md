@@ -39,6 +39,9 @@
 - Stops an expired attempt's container even when resume-time report generation
   fails, terminates a companion child that misses its startup deadline, and
   contains permission races in the judge's direct-kill fallback.
+- Uses a non-signalling Windows process-handle probe for companion and
+  supervisor liveness, avoiding the terminating semantics of `os.kill(pid, 0)`
+  on Windows.
 
 ## 0.1.0a1 — 2026-08-06
 

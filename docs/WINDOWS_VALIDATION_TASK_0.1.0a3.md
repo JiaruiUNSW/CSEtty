@@ -273,6 +273,7 @@ $regressionTests = @(
     'tests/test_cli_start.py::test_resume_created_attempt_preserves_skip_reading_choice',
     'tests/test_companion.py::test_stale_working_report_is_not_ready_until_finalization_completes',
     'tests/test_storage.py::test_report_lock_serializes_another_process',
+    'tests/test_storage.py::test_windows_process_liveness_probe_does_not_terminate_process',
     'tests/test_cli_start.py::test_working_report_cannot_overwrite_a_concurrent_final_report',
     'tests/test_attempt_service.py::test_failed_report_rewrite_hides_the_previous_final_report',
     'tests/test_attempt_service.py::test_aborted_attempt_report_remains_ungraded_and_nonfinal'
@@ -299,6 +300,8 @@ The log must prove these exact states:
 - native-Windows processes serialize on the same per-attempt report lock, and a
   forced working-report/finalization race leaves the durable report graded and
   `FINISHED`; and
+- the native-Windows liveness probe observes a running process without
+  terminating it and reports it dead only after normal termination; and
 - a failed rewrite clears the old finalization marker instead of continuing to
   advertise stale report files; and
 - an `ABORTED` attempt remains ungraded and is never published as a final
