@@ -30,7 +30,7 @@ def test_kill_process_group_falls_back_after_permission_race(
         raise PermissionError
 
     monkeypatch.setattr(judge_module.sys, "platform", "darwin")
-    monkeypatch.setattr(judge_module.os, "killpg", deny_group_kill)
+    monkeypatch.setattr(judge_module.os, "killpg", deny_group_kill, raising=False)
 
     judge_module._kill_process_group(process)  # type: ignore[arg-type]
 
@@ -46,7 +46,7 @@ def test_kill_process_group_ignores_permission_race_after_exit(
         raise PermissionError
 
     monkeypatch.setattr(judge_module.sys, "platform", "darwin")
-    monkeypatch.setattr(judge_module.os, "killpg", deny_group_kill)
+    monkeypatch.setattr(judge_module.os, "killpg", deny_group_kill, raising=False)
 
     judge_module._kill_process_group(process)  # type: ignore[arg-type]
 
