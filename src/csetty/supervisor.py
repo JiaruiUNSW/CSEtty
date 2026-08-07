@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -24,7 +24,7 @@ from .grading import calculate_grade, render_grade_text
 from .models import Attempt, AttemptMode, AttemptState, ResultClass, TestVisibility
 from .pack import Pack, Question, TestGroup, load_pack, pack_digest
 from .paths import AppPaths
-from .report import report_document, write_reports
+from .report import open_report_in_browser, report_document, write_reports
 from .storage import Store, process_is_alive
 from .util import canonical_json, safe_relative_path, sha256_bytes
 
@@ -32,6 +32,7 @@ _GREEN = "\x1b[32m"
 _RED = "\x1b[31m"
 _RESET = "\x1b[0m"
 _DEADLINE_WARNING_THRESHOLDS = (3600, 1800, 900, 300)
+_SUPERVISOR_START_TIMEOUT_SECONDS = 30.0
 
 
 def _question_alias(pack: Pack, question: Question) -> str:
@@ -207,12 +208,14 @@ class AttemptService:
         attempt: Attempt,
         pack: Pack,
         clock: Clock,
+        report_opener: Callable[[Path], bool] | None = None,
     ) -> None:
         self.store = store
         self.runtime = runtime
         self.attempt_id = attempt.id
         self.pack = pack
         self.clock = clock
+        self.report_opener = report_opener
         self.countdown = DeadlineCountdown(attempt.deadline_at, clock)
 
     def _attempt(self) -> Attempt:
@@ -622,15 +625,47 @@ class AttemptService:
             total=str(score["total"]),
             report=report,
         )
-        document = report_document(
-            attempt=attempt,
-            pack=self.pack,
-            submissions=self.store.list_submissions(attempt.id),
-            grade=report,
-            object_reader=self.store.object_bytes,
-        )
-        write_reports(self.store.paths.reports, attempt.id, document)
         return report
+
+    def publish_report(
+        self, *, require_terminal: bool = False, lock_timeout: float | None = None
+    ) -> tuple[dict[str, Any], Path, Path, bool]:
+        """Write a current report without racing another report publisher."""
+        with self.store.report_lock(self.attempt_id, timeout=lock_timeout):
+            attempt = self._attempt()
+            if attempt.state is AttemptState.CREATED:
+                raise StateError("a report is unavailable before reading time starts")
+            finalized = attempt.state in {AttemptState.FINISHED, AttemptState.EXPIRED}
+            if require_terminal and not finalized:
+                raise StateError("a final report requires a finished or expired attempt")
+            grade = self.grade() if finalized else None
+            if finalized:
+                attempt = self.store.get_attempt(self.attempt_id)
+            document = report_document(
+                attempt=attempt,
+                pack=self.pack,
+                submissions=self.store.list_submissions(attempt.id),
+                grade=grade,
+                object_reader=self.store.object_bytes,
+            )
+            self.store.invalidate_report_finalization(attempt.id)
+            json_report, html_report = write_reports(
+                self.store.paths.reports, attempt.id, document
+            )
+            if finalized:
+                self.store.mark_report_finalized(attempt.id, at=self.clock.now())
+        return document, json_report, html_report, finalized
+
+    def finalize_report(self) -> tuple[dict[str, Any], Path, bool | None]:
+        """Grade, persist both report formats, and optionally open the HTML report."""
+        document, _json_report, html_report, finalized = self.publish_report(
+            require_terminal=True
+        )
+        report = document["grade"]
+        if not finalized or not isinstance(report, dict):
+            raise StateError("final report publication did not produce a grade")
+        opened = None if self.report_opener is None else self.report_opener(html_report)
+        return report, html_report, opened
 
     def finish(self) -> Mapping[str, Any]:
         attempt = self._require_working()
@@ -642,18 +677,27 @@ class AttemptService:
             at=self.clock.now(),
             finish_reason="student",
         )
-        report = self.grade()
+        report, html_report, opened = self.finalize_report()
         prefix = ""
         if missing:
             prefix = f"Warning: no accepted submission for {', '.join(missing)}.\n"
-        html_report = self.store.paths.reports / f"{attempt.id}.html"
+        if opened is True:
+            report_message = f"Opened local HTML report: {html_report}\n"
+        elif opened is False:
+            report_message = (
+                f"Local HTML report: {html_report}\n"
+                "The browser could not be opened automatically.\n"
+            )
+        else:
+            report_message = f"Local HTML report: {html_report}\n"
         return {
             "exit_code": 0,
             "stdout": (
                 prefix
                 + "Attempt finished.\n\n"
                 + render_grade_text(report)
-                + f"\n\nLocal HTML report: {html_report}\n"
+                + "\n\n"
+                + report_message
                 + f"On the host, run: csetty report {attempt.id}\n"
             ),
             "stderr": "",
@@ -669,7 +713,14 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
     if pack.digest != attempt.pack_digest:
         raise ValidationError("attempt pack content changed after attempt creation")
     runtime = DockerRuntime(paths)
-    service = AttemptService(store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock)
+    service = AttemptService(
+        store=store,
+        runtime=runtime,
+        attempt=attempt,
+        pack=pack,
+        clock=clock,
+        report_opener=open_report_in_browser,
+    )
     bridge = BridgeServer(
         root=runtime.bridge_directory(attempt.id), attempt=attempt, store=store, clock=clock
     )
@@ -689,7 +740,9 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
             current = store.expire_if_due(attempt.id, now=clock.now())
             if current.state is AttemptState.EXPIRED:
                 try:
-                    service.grade()
+                    _report, html_report, opened = service.finalize_report()
+                    action = "Opened" if opened else "Created"
+                    print(f"{action} final HTML report: {html_report}", flush=True)
                 finally:
                     runtime.stop_container(current)
                 return 0
@@ -722,11 +775,15 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
             handled = bridge.process_once(service.handle)
             current = store.get_attempt(attempt.id)
             if current.state.terminal:
-                if current.state is AttemptState.EXPIRED:
-                    service.grade()
-                if handled:
-                    time.sleep(0.3)
-                runtime.stop_container(current)
+                try:
+                    if current.state is AttemptState.EXPIRED:
+                        _report, html_report, opened = service.finalize_report()
+                        action = "Opened" if opened else "Created"
+                        print(f"{action} final HTML report: {html_report}", flush=True)
+                    if handled:
+                        time.sleep(0.3)
+                finally:
+                    runtime.stop_container(current)
                 return 0
             time.sleep(poll_seconds)
         return 0
@@ -734,11 +791,19 @@ def run_supervisor(*, state_dir: Path, attempt_id: str, poll_seconds: float = 0.
         store.remove_lease(attempt.id, pid=pid)
 
 
+def _live_supervisor_pid(store: Store, attempt_id: str) -> int | None:
+    lease = store.lease(attempt_id)
+    if lease is None:
+        return None
+    pid = int(lease["pid"])
+    return pid if process_is_alive(pid) else None
+
+
 def ensure_supervisor(paths: AppPaths, attempt: Attempt) -> int:
     store = Store(paths)
-    lease = store.lease(attempt.id)
-    if lease is not None and process_is_alive(int(lease["pid"])):
-        return int(lease["pid"])
+    live_pid = _live_supervisor_pid(store, attempt.id)
+    if live_pid is not None:
+        return live_pid
     log_path = paths.attempts / attempt.id / "supervisor.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log = log_path.open("ab", buffering=0)
@@ -775,17 +840,33 @@ def ensure_supervisor(paths: AppPaths, attempt: Attempt) -> int:
         **kwargs,
     )
     log.close()
-    deadline = time.monotonic() + 5
+    deadline = time.monotonic() + _SUPERVISOR_START_TIMEOUT_SECONDS
     while time.monotonic() < deadline:
-        lease = store.lease(attempt.id)
-        if lease is not None and int(lease["pid"]) == process.pid:
-            return process.pid
+        live_pid = _live_supervisor_pid(store, attempt.id)
+        if live_pid is not None:
+            return live_pid
         if process.poll() is not None:
             detail = log_path.read_text(encoding="utf-8", errors="replace")
             raise CSETTYError(f"supervisor failed to start: {detail.strip()}")
         time.sleep(0.05)
-    process.terminate()
-    raise CSETTYError("supervisor did not publish a lease within five seconds")
+    # Check once more at the boundary before terminating a process that became
+    # healthy during the final scheduler interval.
+    live_pid = _live_supervisor_pid(store, attempt.id)
+    if live_pid is not None:
+        return live_pid
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+    detail = log_path.read_text(encoding="utf-8", errors="replace").strip()
+    suffix = f"; inspect {log_path}: {detail}" if detail else f"; inspect {log_path}"
+    raise CSETTYError(
+        "supervisor did not publish a lease within "
+        f"{_SUPERVISOR_START_TIMEOUT_SECONDS:g} seconds{suffix}"
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:

@@ -5,7 +5,7 @@ import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_VERSION = "0.1.0a1"
+EXPECTED_VERSION = "0.1.0a3"
 EXPECTED_LICENSE_EXPRESSION = "Apache-2.0 AND CC-BY-NC-ND-4.0"
 EXPECTED_ASSESSMENT_LICENSE = "CC BY-NC-ND 4.0"
 
@@ -44,7 +44,7 @@ def test_file_level_license_map_covers_all_original_assessment_trees() -> None:
         assert data["license"] == EXPECTED_ASSESSMENT_LICENSE
 
 
-def test_public_approval_is_versioned_and_fails_closed_until_ci_evidence_exists() -> None:
+def test_public_release_candidate_is_versioned_and_fails_closed() -> None:
     approval = tomllib.loads(
         (ROOT / "release" / "public-release.toml").read_text(encoding="utf-8")
     )
@@ -52,13 +52,13 @@ def test_public_approval_is_versioned_and_fails_closed_until_ci_evidence_exists(
         "version": EXPECTED_VERSION,
         "channel": "alpha",
         "artifact_policy": "source-only-no-prebuilt-images",
-        "owner_approved": True,
-        "approval_date": "2026-08-06",
+        "owner_approved": False,
+        "approval_date": "PENDING_OWNER_APPROVAL",
     }
     run_url = re.compile(r"https://github\.com/JiaruiUNSW/CSEtty/actions/runs/[0-9]+")
     for gate in ("cross_platform_acceptance", "multiarch_acceptance"):
         value = approval["gates"][gate]
-        assert value == "PENDING_FIRST_PUBLIC_CI_RUN" or run_url.fullmatch(value)
+        assert value == "PENDING_0.1.0a3_CI_RUN" or run_url.fullmatch(value)
 
 
 def test_ci_has_native_arm64_live_acceptance_and_no_artifact_upload() -> None:

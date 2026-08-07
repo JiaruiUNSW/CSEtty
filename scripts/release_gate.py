@@ -262,6 +262,7 @@ def _verify_source_build_contract(project_root: Path) -> None:
         project_root / "docker" / "Dockerfile.interactive",
         project_root / "docker" / "Dockerfile.judge",
         project_root / "docker" / "build-dcc.sh",
+        project_root / "docker" / "dcc-command",
         project_root / "NOTICE",
     )
     missing = [str(path.relative_to(project_root)) for path in required if not path.is_file()]

@@ -1,0 +1,37 @@
+#!/bin/sh
+set -eu
+
+upstream=/usr/local/lib/csetty/dcc-upstream
+mode=${CSETTY_DCC_MODE:-auto}
+
+# ASan binaries randomly SIGSEGV on the Docker Desktop WSL2 kernel even when
+# compiled directly with Clang. DCC's supported Valgrind mode remains stable
+# there and keeps memory and uninitialised-value diagnostics available.
+if [ "$mode" = auto ]; then
+    kernel_release=$(uname -r 2>/dev/null || true)
+    case "$kernel_release" in
+        *[Mm]icrosoft*|*WSL2*) mode=valgrind ;;
+        *) mode=native ;;
+    esac
+fi
+
+case "$mode" in
+    native)
+        exec "$upstream" "$@"
+        ;;
+    valgrind)
+        # Preserve an explicit sanitizer selection made by the caller.
+        for argument in "$@"; do
+            case "$argument" in
+                -fsanitize=*|--memory|--valgrind)
+                    exec "$upstream" "$@"
+                    ;;
+            esac
+        done
+        exec "$upstream" --valgrind "$@"
+        ;;
+    *)
+        printf '%s\n' "dcc: invalid CSETTY_DCC_MODE: $mode" >&2
+        exit 2
+        ;;
+esac

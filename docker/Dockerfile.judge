@@ -46,18 +46,21 @@ RUN apt-get update \
     && useradd --create-home --uid 1000 --shell /bin/bash student
 
 COPY --from=dcc-builder /out/ /
+COPY docker/dcc-command /usr/local/bin/dcc
 COPY src/csetty /opt/csetty/csetty
 COPY THIRD_PARTY_NOTICES.md /usr/share/doc/csetty/THIRD_PARTY_NOTICES.md
 COPY LICENSE /usr/share/doc/csetty/LICENSE
 COPY NOTICE /usr/share/doc/csetty/NOTICE
 
-RUN dcc --version | grep -F 'dcc version 2.37'
+RUN chmod 0755 /usr/local/bin/dcc /usr/local/lib/csetty/dcc-upstream \
+    && dcc --version | grep -F 'dcc version 2.37'
 
 LABEL org.opencontainers.image.title="CSEExamTTY local judge environment" \
       org.opencontainers.image.description="Locally source-built isolated assessment runner" \
       io.csetty.image.role="judge" \
       io.csetty.dcc.version="2.37" \
       io.csetty.dcc.build="verified-source" \
+      io.csetty.dcc.wsl2-runtime="valgrind" \
       io.csetty.dcc.license="GPL-3.0-only" \
       io.csetty.dcc.source="https://github.com/COMP1511UNSW/dcc/tree/0a888fdb2bfe130c611fb84514fdbf52d3efe149"
 

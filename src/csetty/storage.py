@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import errno
+import importlib
 import json
 import os
 import secrets
 import sqlite3
+import threading
+import time
 import uuid
 from collections.abc import Iterator, Mapping
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -29,6 +33,12 @@ _TRANSITIONS: dict[AttemptState, set[AttemptState]] = {
     AttemptState.EXPIRED: set(),
     AttemptState.ABORTED: set(),
 }
+
+_REPORT_THREAD_LOCKS: dict[Path, threading.Lock] = {}
+_REPORT_THREAD_LOCKS_GUARD = threading.Lock()
+_IS_WINDOWS = os.name == "nt"
+_WINDOWS_SYNCHRONIZE = 0x00100000
+_WINDOWS_WAIT_TIMEOUT = 0x00000102
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -61,7 +71,8 @@ CREATE TABLE IF NOT EXISTS attempts (
     container_name TEXT NOT NULL UNIQUE,
     session_token TEXT NOT NULL,
     network TEXT NOT NULL DEFAULT 'none',
-    editor TEXT NOT NULL DEFAULT 'code'
+    editor TEXT NOT NULL DEFAULT 'code',
+    skip_reading INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS submissions (
@@ -100,7 +111,8 @@ CREATE TABLE IF NOT EXISTS grades (
     earned TEXT NOT NULL,
     available TEXT NOT NULL,
     total TEXT NOT NULL,
-    report_json TEXT NOT NULL
+    report_json TEXT NOT NULL,
+    report_finalized_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS events (
@@ -166,6 +178,94 @@ class Store:
         finally:
             connection.close()
 
+    @contextmanager
+    def report_lock(
+        self, attempt_id: str, *, timeout: float | None = None
+    ) -> Iterator[None]:
+        """Serialize report publication for one attempt across threads and processes."""
+        if timeout is not None and timeout < 0:
+            raise ValidationError("report lock timeout must be non-negative")
+        try:
+            parsed_id = uuid.UUID(attempt_id)
+        except ValueError as exc:
+            raise ValidationError("attempt id must be a canonical UUID") from exc
+        if str(parsed_id) != attempt_id:
+            raise ValidationError("attempt id must be a canonical UUID")
+
+        path = self.paths.attempts / attempt_id / "report.lock"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        resolved_path = path.resolve()
+        with _REPORT_THREAD_LOCKS_GUARD:
+            thread_lock = _REPORT_THREAD_LOCKS.setdefault(resolved_path, threading.Lock())
+
+        deadline = None if timeout is None else time.monotonic() + timeout
+        if deadline is None:
+            thread_acquired = thread_lock.acquire()
+        else:
+            thread_acquired = thread_lock.acquire(
+                timeout=max(0.0, deadline - time.monotonic())
+            )
+        if not thread_acquired:
+            raise StateError("another report publication is still in progress")
+        try:
+            with path.open("a+b") as stream:
+                stream.seek(0, os.SEEK_END)
+                if stream.tell() == 0:
+                    stream.write(b"\0")
+                    stream.flush()
+                stream.seek(0)
+                if os.name == "nt":
+                    lock_api: Any = importlib.import_module("msvcrt")
+
+                    while True:
+                        try:
+                            lock_api.locking(stream.fileno(), lock_api.LK_NBLCK, 1)
+                        except OSError as exc:
+                            if exc.errno not in {errno.EACCES, errno.EAGAIN, errno.EDEADLK}:
+                                raise
+                            if deadline is not None and time.monotonic() >= deadline:
+                                raise StateError(
+                                    "another report publication is still in progress"
+                                ) from exc
+                            time.sleep(0.05)
+                        else:
+                            break
+                    try:
+                        yield
+                    finally:
+                        stream.seek(0)
+                        with suppress(OSError):
+                            lock_api.locking(stream.fileno(), lock_api.LK_UNLCK, 1)
+                else:
+                    lock_api = importlib.import_module("fcntl")
+                    operation = lock_api.LOCK_EX
+                    if deadline is not None:
+                        operation |= lock_api.LOCK_NB
+                    while True:
+                        try:
+                            lock_api.flock(stream.fileno(), operation)
+                        except OSError as exc:
+                            if exc.errno not in {
+                                errno.EACCES,
+                                errno.EAGAIN,
+                                errno.EWOULDBLOCK,
+                            }:
+                                raise
+                            if deadline is not None and time.monotonic() >= deadline:
+                                raise StateError(
+                                    "another report publication is still in progress"
+                                ) from exc
+                            time.sleep(0.05)
+                        else:
+                            break
+                    try:
+                        yield
+                    finally:
+                        with suppress(OSError):
+                            lock_api.flock(stream.fileno(), lock_api.LOCK_UN)
+        finally:
+            thread_lock.release()
+
     def _migrate(self) -> None:
         with self._connect() as connection:
             connection.executescript(_SCHEMA)
@@ -186,6 +286,16 @@ class Store:
                 )
             if "candidate_id" not in columns:
                 connection.execute("ALTER TABLE attempts ADD COLUMN candidate_id TEXT")
+            if "skip_reading" not in columns:
+                connection.execute(
+                    "ALTER TABLE attempts ADD COLUMN skip_reading INTEGER NOT NULL DEFAULT 0"
+                )
+            grade_columns = {
+                row["name"]
+                for row in connection.execute("PRAGMA table_info(grades)").fetchall()
+            }
+            if "report_finalized_at" not in grade_columns:
+                connection.execute("ALTER TABLE grades ADD COLUMN report_finalized_at TEXT")
             connection.execute(
                 "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(1, ?)",
                 (to_iso(datetime.now().astimezone()),),
@@ -200,6 +310,10 @@ class Store:
             )
             connection.execute(
                 "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(4, ?)",
+                (to_iso(datetime.now().astimezone()),),
+            )
+            connection.execute(
+                "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(5, ?)",
                 (to_iso(datetime.now().astimezone()),),
             )
 
@@ -245,6 +359,7 @@ class Store:
         network: str = "none",
         editor: str = "code",
         candidate_id: str | None = None,
+        skip_reading: bool = False,
         attempt_id: str | None = None,
     ) -> Attempt:
         if attempt_id is None:
@@ -277,8 +392,9 @@ class Store:
                 INSERT INTO attempts(
                     id, pack_id, pack_version, pack_path, pack_digest, course, profile,
                     candidate_id, mode, state, timed, created_at, workspace_kind, workspace_ref,
-                    image, provenance_json, container_name, session_token, network, editor
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    image, provenance_json, container_name, session_token, network, editor,
+                    skip_reading
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     attempt_id,
@@ -301,6 +417,7 @@ class Store:
                     session_token,
                     network,
                     editor,
+                    int(skip_reading),
                 ),
             )
             self._insert_event(
@@ -312,6 +429,7 @@ class Store:
                     "mode": mode.value,
                     "pack_digest": pack_digest,
                     "candidate_id": candidate_id,
+                    "skip_reading": skip_reading,
                 },
             )
         return self.get_attempt(attempt_id)
@@ -347,6 +465,7 @@ class Store:
             network=row["network"],
             editor=row["editor"],
             candidate_id=row["candidate_id"],
+            skip_reading=bool(row["skip_reading"]),
         )
 
     def get_attempt(self, attempt_id: str) -> Attempt:
@@ -647,7 +766,8 @@ class Store:
                     earned = excluded.earned,
                     available = excluded.available,
                     total = excluded.total,
-                    report_json = excluded.report_json
+                    report_json = excluded.report_json,
+                    report_finalized_at = NULL
                 """,
                 (
                     attempt_id,
@@ -657,6 +777,24 @@ class Store:
                     total,
                     canonical_json(report).decode(),
                 ),
+            )
+
+    def mark_report_finalized(self, attempt_id: str, *, at: datetime) -> None:
+        """Publish report readiness only after both durable report files exist."""
+        with self.transaction(immediate=True) as connection:
+            cursor = connection.execute(
+                "UPDATE grades SET report_finalized_at = ? WHERE attempt_id = ?",
+                (to_iso(at), attempt_id),
+            )
+            if cursor.rowcount != 1:
+                raise StateError("a report cannot be finalized before its grade is recorded")
+
+    def invalidate_report_finalization(self, attempt_id: str) -> None:
+        """Hide a previously published report while its files are being replaced."""
+        with self.transaction(immediate=True) as connection:
+            connection.execute(
+                "UPDATE grades SET report_finalized_at = NULL WHERE attempt_id = ?",
+                (attempt_id,),
             )
 
     def get_grade(self, attempt_id: str) -> dict[str, Any] | None:
@@ -823,9 +961,41 @@ class Store:
         """Compatibility hook; Store uses short-lived connections."""
 
 
+def _windows_process_is_alive(pid: int) -> bool:
+    """Check a Windows process without signalling or terminating it."""
+
+    import ctypes
+    from ctypes import wintypes
+
+    win_dll = getattr(ctypes, "WinDLL", None)
+    if win_dll is None:
+        return False
+    kernel32 = win_dll("kernel32", use_last_error=True)
+    open_process = kernel32.OpenProcess
+    open_process.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    open_process.restype = wintypes.HANDLE
+    wait_for_single_object = kernel32.WaitForSingleObject
+    wait_for_single_object.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    wait_for_single_object.restype = wintypes.DWORD
+    close_handle = kernel32.CloseHandle
+    close_handle.argtypes = [wintypes.HANDLE]
+    close_handle.restype = wintypes.BOOL
+
+    handle = open_process(_WINDOWS_SYNCHRONIZE, False, pid)
+    if not handle:
+        return False
+    try:
+        status = int(wait_for_single_object(handle, 0))
+        return status == _WINDOWS_WAIT_TIMEOUT
+    finally:
+        close_handle(handle)
+
+
 def process_is_alive(pid: int) -> bool:
     if pid <= 0:
         return False
+    if _IS_WINDOWS:
+        return _windows_process_is_alive(pid)
     try:
         os.kill(pid, 0)
     except (OSError, ProcessLookupError):

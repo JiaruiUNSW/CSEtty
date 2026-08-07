@@ -73,6 +73,7 @@ class Attempt:
     network: str
     editor: str
     candidate_id: str | None = None
+    skip_reading: bool = False
 
 
 @dataclass(frozen=True)

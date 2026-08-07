@@ -6,9 +6,13 @@ Status: stages 1–5 are implemented on the Apple Silicon local alpha. Both
 current course images passed fresh Stage 4 prepare/offline-attach checks on
 2026-08-06. COMP1511 passed its full end-to-end workflow; COMP1521 passed a live
 MIPS/autotest/submission/finish/report workflow using the repository's
-independent `csetty-mips` runtime. Stage 6 source-only `0.1.0a1` was published;
-subsequent releases use the protected GitHub Actions/PyPI OIDC path. Stable
-`0.1.0` desktop acceptance remains open.
+independent `csetty-mips` runtime. Exact release-candidate commit
+`bc9d47bb65ee246e488d3a14156c0965e530c754` additionally passed the complete
+native-Windows contract on Windows 11 Pro for Workstations build 26200 with
+Docker Desktop 4.85.0, WSL2, and VS Code 1.132.0. Stage 6 source-only `0.1.0a1`
+was published; the source tree now prepares the fail-closed `0.1.0a3` release
+candidate, and subsequent releases use the protected GitHub Actions/PyPI OIDC
+path. Stable `0.1.0` acceptance across broader desktop hosts remains open.
 
 ## 1. Product boundary
 
@@ -49,7 +53,7 @@ csetty resume [ATTEMPT_ID]
 csetty code [ATTEMPT_ID]
 csetty export ATTEMPT_ID DESTINATION
 csetty attempts list
-csetty report ATTEMPT_ID [--json]
+csetty report [ATTEMPT_ID] [--json]
 ```
 
 The complete container command contract is maintained in `COMMAND_SPEC.md`.
@@ -79,7 +83,8 @@ The complete container command contract is maintained in `COMMAND_SPEC.md`.
   plus `ABORTED` for controlled test cleanup.
 - Persisted UTC deadlines and monotonic live reading countdown.
 - Content-addressed objects, atomic writes, submission sequence history, test
-  runs, grades, events, leases, and deadline-warning records.
+  runs, grades, report-finalization markers, events, leases, and deadline-warning
+  records.
 - Weighted all-or-nothing groups, question pass points, cross-question hurdles,
   and explicit not-automatically-assessed remainder.
 
@@ -99,7 +104,7 @@ The complete container command contract is maintained in `COMMAND_SPEC.md`.
   output-limit, and infrastructure failures.
 - Terminal broadcasts at 60, 30, 15, and 5 minutes remaining.
 
-### Stage 4 — VS Code and course profiles: complete on current Mac
+### Stage 4 — VS Code and course profiles: complete on current Mac and recorded Windows host
 
 - Host Desktop plus container Server architecture.
 - Per-course isolated host user-data/extension directories and visible red
@@ -113,6 +118,10 @@ The complete container command contract is maintained in `COMMAND_SPEC.md`.
   ID, or caches change.
 - Preparation window is detached to a local completion page before the
   disposable network is removed and its container stopped.
+- The exact `0.1.0a3` candidate also passed fresh Docker Desktop/WSL2 prepare,
+  offline attach, COMP1511/COMP1521 GUI, and automatic-report checks on the
+  native Windows host documented in
+  `docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md`.
 
 ### Stage 5 — Original complete packs: complete
 
@@ -158,7 +167,7 @@ following release engineering work is complete:
 
 Stable-release acceptance still to complete:
 
-1. broader native Windows 11, macOS Intel/Apple Silicon, and Ubuntu desktop
+1. additional native Windows 11, macOS Intel/Apple Silicon, and Ubuntu desktop
    Docker/VS Code acceptance;
 2. repeatable release-candidate live linux/amd64 and linux/arm64 acceptance;
 3. owner review of each final clean-commit wheel/sdist/SBOM/checksum set; and
@@ -169,9 +178,10 @@ provenance/MPL notices, the no-redistribution VS Code/extension boundary, and
 name/non-affiliation wording are recorded in
 `docs/RELEASE_EVIDENCE_0.1.0a1.md`.
 
-The alpha does not claim native Docker Desktop/WSL2 or offline VS Code
-acceptance on every host. Those remain stable `0.1.0` gates alongside broader
-Windows 11, macOS Intel/Apple Silicon, and Ubuntu desktop testing.
+The alpha claims native Docker Desktop/WSL2 and offline VS Code acceptance only
+for the exact Windows host and product commit recorded in the a3 Windows
+validation results. Acceptance on additional Windows 11, macOS Intel/Apple
+Silicon, and Ubuntu desktop hosts remains a stable `0.1.0` gate.
 
 No upstream mipsy checkout or executable is a release artifact. The canonical
 COMP1521 local build uses only `csetty-mips`; no prebuilt course image is a
@@ -183,10 +193,15 @@ Exam mode first presents a host-terminal welcome, simulated zID/password, the
 explicit non-UNSW disclaimer, and an original academic-integrity/exam-condition
 warning. Only `yes` proceeds. The simulation password is never retained.
 
-After acceptance, the paper is shown for read-only reading time. The workspace,
-interactive container, and VS Code are created only after reading ends. Exam
-mode is always timed and offline. Practice is untimed by default and has no
-pause function when explicitly timed.
+After acceptance, the companion opens every complete prompt as a read-only
+long-form paper. The workspace, interactive container, and VS Code are created
+only after reading ends; the existing page then refreshes to working state.
+Before the reading anchor is recorded, `CREATED` exposes only a waiting page and
+the persisted practice skip-reading flag governs recovery.
+Live paper and final report share the same packaged CSE course-exam theme, with
+the COMP1511 green or COMP1521 teal profile variant selected from attempt
+metadata. Exam mode is always timed and offline. Practice is untimed by default
+and has no pause function when explicitly timed.
 
 While working, the supervisor broadcasts fixed terminal warnings at 60, 30, 15,
 and 5 minutes. Threshold delivery is persisted so restart does not duplicate or
@@ -206,6 +221,9 @@ backfill multiple stale warnings.
 - Reports include attempt/candidate metadata, hashes, pack digest, image ID,
   tool versions, automatic score, paper total, group/test outcomes, hurdles,
   and a prominent local-estimate notice.
+- Explicit finish and timed expiry both generate JSON/HTML reports and request
+  that the host default browser open the HTML result; browser failure leaves the
+  durable files and attempt state intact.
 
 ## 6. Security model
 

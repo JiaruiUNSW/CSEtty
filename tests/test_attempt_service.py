@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 import pytest
 from test_pack import make_pack
 
+import csetty.supervisor as supervisor_module
 from csetty.clock import FrozenClock
 from csetty.errors import StateError, ValidationError
 from csetty.models import AttemptMode, AttemptState, WorkspaceKind
@@ -14,7 +16,7 @@ from csetty.pack import Pack, load_pack, snapshot_pack
 from csetty.pack import TestGroup as PackTestGroup
 from csetty.paths import AppPaths
 from csetty.storage import Store
-from csetty.supervisor import AttemptService, _question_alias, _resolve_question
+from csetty.supervisor import AttemptService, _question_alias, _resolve_question, run_supervisor
 
 
 class RuntimeFake:
@@ -77,7 +79,13 @@ class RuntimeFake:
         }
 
 
-def make_service(tmp_path: Path, now: datetime) -> tuple[AttemptService, Store, RuntimeFake]:
+def make_service(
+    tmp_path: Path,
+    now: datetime,
+    *,
+    report_opener: Callable[[Path], bool] | None = None,
+    state: AttemptState = AttemptState.WORKING,
+) -> tuple[AttemptService, Store, RuntimeFake]:
     source = load_pack(make_pack(tmp_path / "source-pack"))
     paths = AppPaths.discover(tmp_path / "state")
     store = Store(paths)
@@ -99,12 +107,15 @@ def make_service(tmp_path: Path, now: datetime) -> tuple[AttemptService, Store, 
         attempt_id=attempt_id,
         candidate_id="z1234567",
     )
-    attempt = store.transition(
-        attempt.id,
-        AttemptState.WORKING,
-        at=now,
-        deadline_at=now + timedelta(minutes=10),
-    )
+    if state is AttemptState.WORKING:
+        attempt = store.transition(
+            attempt.id,
+            AttemptState.WORKING,
+            at=now,
+            deadline_at=now + timedelta(minutes=10),
+        )
+    elif state is not AttemptState.CREATED:
+        raise AssertionError(f"unsupported service fixture state: {state.value}")
     runtime = RuntimeFake({"q1.c": b"pass\n"})
     service = AttemptService(
         store=store,
@@ -112,6 +123,7 @@ def make_service(tmp_path: Path, now: datetime) -> tuple[AttemptService, Store, 
         attempt=attempt,
         pack=pack,
         clock=FrozenClock(now),
+        report_opener=report_opener,
     )
     return service, store, runtime
 
@@ -175,6 +187,327 @@ def test_check_and_show_submission_when_nothing_was_submitted(tmp_path: Path) ->
         "stdout": "",
         "stderr": "No submission found for q1.\n",
     }
+
+
+def test_finish_generates_and_opens_the_html_report(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    opened: list[Path] = []
+
+    def open_report(path: Path) -> bool:
+        assert path.is_file()
+        opened.append(path)
+        return True
+
+    service, store, _runtime = make_service(tmp_path, now, report_opener=open_report)
+    finished = service.finish()
+
+    expected = store.paths.reports / f"{service.attempt_id}.html"
+    assert opened == [expected]
+    assert expected.is_file()
+    assert (store.paths.reports / f"{service.attempt_id}.json").is_file()
+    assert f"Opened local HTML report: {expected}" in finished["stdout"]
+
+
+def test_expired_attempt_finalization_opens_the_html_report(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    opened: list[Path] = []
+    service, store, _runtime = make_service(
+        tmp_path,
+        now,
+        report_opener=lambda path: opened.append(path) is None,
+    )
+    clock = service.clock
+    assert isinstance(clock, FrozenClock)
+    clock.advance(seconds=10 * 60)
+    expired = store.expire_if_due(service.attempt_id, now=clock.now())
+    assert expired.state is AttemptState.EXPIRED
+
+    _report, html_report, was_opened = service.finalize_report()
+
+    assert was_opened is True
+    assert opened == [html_report]
+    assert html_report.is_file()
+
+
+def test_browser_open_failure_does_not_fail_finishing_or_report_generation(
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(
+        tmp_path,
+        now,
+        report_opener=lambda _path: False,
+    )
+
+    finished = service.finish()
+
+    html_report = store.paths.reports / f"{service.attempt_id}.html"
+    assert finished["exit_code"] == 0
+    assert html_report.is_file()
+    assert "The browser could not be opened automatically." in finished["stdout"]
+
+
+def test_finish_without_a_report_opener_still_writes_the_report(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+
+    finished = service.finish()
+
+    html_report = store.paths.reports / f"{service.attempt_id}.html"
+    assert finished["exit_code"] == 0
+    assert html_report.is_file()
+    assert f"Local HTML report: {html_report}" in finished["stdout"]
+    assert "Opened local HTML report" not in finished["stdout"]
+
+
+def test_failed_report_rewrite_hides_the_previous_final_report(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    service.finish()
+    grade = store.get_grade(service.attempt_id)
+    assert grade is not None
+    assert grade["report_finalized_at"] is not None
+
+    def fail_write(*_args: object, **_kwargs: object) -> tuple[Path, Path]:
+        raise OSError("report write failed")
+
+    monkeypatch.setattr(supervisor_module, "write_reports", fail_write)
+    with pytest.raises(OSError, match="report write failed"):
+        service.finalize_report()
+
+    grade = store.get_grade(service.attempt_id)
+    assert grade is not None
+    assert grade["report_finalized_at"] is None
+
+
+def test_aborted_attempt_report_remains_ungraded_and_nonfinal(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    store.transition(
+        service.attempt_id,
+        AttemptState.ABORTED,
+        at=now,
+        finish_reason="cancelled",
+    )
+
+    document, _json_report, _html_report, finalized = service.publish_report()
+
+    assert finalized is False
+    assert document["attempt"]["state"] == AttemptState.ABORTED.value
+    assert document["grade"] is None
+    assert store.get_grade(service.attempt_id) is None
+
+    with pytest.raises(StateError, match="finished or expired"):
+        service.finalize_report()
+
+
+def test_created_attempt_report_is_rejected_before_rendering(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(
+        tmp_path,
+        now,
+        state=AttemptState.CREATED,
+    )
+
+    with pytest.raises(StateError, match="before reading time starts"):
+        service.publish_report()
+
+    assert list(store.paths.reports.glob(f"{service.attempt_id}.*")) == []
+
+
+def test_grade_has_no_report_file_side_effect_until_finalization(tmp_path: Path) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    store.transition(
+        service.attempt_id,
+        AttemptState.FINISHED,
+        at=now,
+        finish_reason="student",
+    )
+
+    service.grade()
+
+    assert not (store.paths.reports / f"{service.attempt_id}.html").exists()
+    assert not (store.paths.reports / f"{service.attempt_id}.json").exists()
+
+
+def test_supervisor_expiry_generates_and_opens_report(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    now = datetime.now(UTC) - timedelta(minutes=20)
+    service, store, _runtime = make_service(tmp_path, now)
+    opened: list[Path] = []
+    stopped: list[str] = []
+
+    class ExpiryRuntime:
+        def __init__(self, paths: AppPaths) -> None:
+            self.paths = paths
+
+        def bridge_directory(self, attempt_id: str) -> Path:
+            return self.paths.attempts / attempt_id / "bridge"
+
+        @staticmethod
+        def run_judge(**_kwargs: object) -> dict[str, object]:
+            raise AssertionError("an attempt without submissions must not invoke the judge")
+
+        @staticmethod
+        def stop_container(attempt: object) -> None:
+            stopped.append(attempt.id)  # type: ignore[union-attr]
+
+    def open_report(path: Path) -> bool:
+        assert path.is_file()
+        opened.append(path)
+        return True
+
+    monkeypatch.setattr(supervisor_module, "DockerRuntime", ExpiryRuntime)
+    monkeypatch.setattr(supervisor_module, "open_report_in_browser", open_report)
+    monkeypatch.setattr(supervisor_module.signal, "signal", lambda *_args: None)
+
+    assert run_supervisor(state_dir=store.paths.root, attempt_id=service.attempt_id) == 0
+    assert store.get_attempt(service.attempt_id).state is AttemptState.EXPIRED
+    assert opened == [store.paths.reports / f"{service.attempt_id}.html"]
+    assert stopped == [service.attempt_id]
+
+
+def test_supervisor_stops_container_when_bridge_expiry_report_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    now = datetime.now(UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    stopped: list[str] = []
+
+    class ExpiryRuntime:
+        def __init__(self, paths: AppPaths) -> None:
+            self.paths = paths
+
+        def bridge_directory(self, attempt_id: str) -> Path:
+            return self.paths.attempts / attempt_id / "bridge"
+
+        @staticmethod
+        def stop_container(attempt: object) -> None:
+            stopped.append(attempt.id)  # type: ignore[union-attr]
+
+    class ExpiryBridge:
+        def __init__(self, *, store: Store, attempt: object, **_kwargs: object) -> None:
+            self.store = store
+            self.attempt = attempt
+
+        def process_once(self, _handler: object) -> bool:
+            self.store.transition(
+                self.attempt.id,  # type: ignore[union-attr]
+                AttemptState.EXPIRED,
+                at=datetime.now(UTC),
+                finish_reason="deadline",
+            )
+            return True
+
+    def fail_report(_self: AttemptService) -> tuple[dict[str, object], Path, bool]:
+        raise RuntimeError("report failed")
+
+    monkeypatch.setattr(supervisor_module, "DockerRuntime", ExpiryRuntime)
+    monkeypatch.setattr(supervisor_module, "BridgeServer", ExpiryBridge)
+    monkeypatch.setattr(AttemptService, "finalize_report", fail_report)
+    monkeypatch.setattr(supervisor_module.signal, "signal", lambda *_args: None)
+
+    with pytest.raises(RuntimeError, match="report failed"):
+        run_supervisor(state_dir=store.paths.root, attempt_id=service.attempt_id)
+    assert stopped == [service.attempt_id]
+
+
+def test_supervisor_cold_start_can_publish_its_lease_after_five_seconds(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    attempt = store.get_attempt(service.attempt_id)
+    elapsed = {"seconds": 0.0}
+    terminated: list[bool] = []
+
+    class ProcessFake:
+        pid = 43210
+
+        @staticmethod
+        def poll() -> None:
+            return None
+
+        @staticmethod
+        def terminate() -> None:
+            terminated.append(True)
+
+    def sleep(_seconds: float) -> None:
+        elapsed["seconds"] += 1
+        if elapsed["seconds"] == 12:
+            store.update_lease(attempt_id=attempt.id, pid=ProcessFake.pid, at=now)
+
+    monkeypatch.setattr(
+        supervisor_module.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: ProcessFake(),
+    )
+    monkeypatch.setattr(
+        supervisor_module.time, "monotonic", lambda: elapsed["seconds"]
+    )
+    monkeypatch.setattr(supervisor_module.time, "sleep", sleep)
+    monkeypatch.setattr(
+        supervisor_module,
+        "process_is_alive",
+        lambda pid: pid == ProcessFake.pid,
+    )
+
+    assert supervisor_module.ensure_supervisor(store.paths, attempt) == ProcessFake.pid
+    assert elapsed["seconds"] == 12
+    assert terminated == []
+
+
+def test_supervisor_accepts_live_lease_from_windows_venv_redirector(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    service, store, _runtime = make_service(tmp_path, now)
+    attempt = store.get_attempt(service.attempt_id)
+    wrapper_pid = 43210
+    supervisor_pid = 43211
+    terminated: list[bool] = []
+
+    class ProcessFake:
+        pid = wrapper_pid
+
+        @staticmethod
+        def poll() -> None:
+            return None
+
+        @staticmethod
+        def terminate() -> None:
+            terminated.append(True)
+
+        @staticmethod
+        def wait(*, timeout: int) -> None:
+            assert timeout == 5
+
+    monkeypatch.setattr(
+        supervisor_module.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: ProcessFake(),
+    )
+    monkeypatch.setattr(
+        supervisor_module,
+        "process_is_alive",
+        lambda pid: pid == supervisor_pid,
+    )
+    monkeypatch.setattr(supervisor_module, "_SUPERVISOR_START_TIMEOUT_SECONDS", 0.1)
+
+    def publish_redirected_lease(_seconds: float) -> None:
+        store.update_lease(attempt_id=attempt.id, pid=supervisor_pid, at=now)
+
+    monkeypatch.setattr(supervisor_module.time, "sleep", publish_redirected_lease)
+
+    assert supervisor_module.ensure_supervisor(store.paths, attempt) == supervisor_pid
+    assert terminated == []
 
 
 def test_q_number_alias_resolves_prefixed_pack_activity(tmp_path: Path) -> None:

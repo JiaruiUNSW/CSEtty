@@ -24,11 +24,13 @@ from .models import Attempt, AttemptMode, AttemptState, WorkspaceKind
 from .pack import Pack, PackRepository, load_pack, snapshot_author_materials, snapshot_pack
 from .paths import AppPaths
 from .question_bank import build_exam_pack, build_verification_pack, load_question_bank
-from .report import render_report_text, report_document, write_reports
+from .report import open_report_in_browser, render_report_text
 from .storage import Store
 from .supervisor import AttemptService, ensure_supervisor
 from .util import atomic_write
 from .vscode import VSCodeManager
+
+_REPORT_LOCK_TIMEOUT_SECONDS = 5.0
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -86,7 +88,7 @@ def _parser() -> argparse.ArgumentParser:
     attempts_sub.add_parser("list")
 
     report = subcommands.add_parser("report", help="show an attempt report")
-    report.add_argument("attempt_id")
+    report.add_argument("attempt_id", nargs="?")
     report.add_argument("--json", action="store_true")
 
     bank = subcommands.add_parser("bank", help="validate and build from original question banks")
@@ -363,22 +365,36 @@ def _launch_working(
     store: Store,
     runtime: DockerRuntime,
     vscode: VSCodeManager,
+    open_companion_browser: bool = True,
 ) -> int:
     clock = SystemClock()
     attempt = store.expire_if_due(attempt.id, now=clock.now())
     if attempt.state is AttemptState.EXPIRED:
-        service = AttemptService(
-            store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock
-        )
-        service.grade()
-        raise StateError("attempt deadline has passed; a final report is available")
+        try:
+            service = AttemptService(
+                store=store,
+                runtime=runtime,
+                attempt=attempt,
+                pack=pack,
+                clock=clock,
+                report_opener=open_report_in_browser,
+            )
+            _report, html_report, opened = service.finalize_report()
+        finally:
+            runtime.stop_container(attempt)
+        if opened:
+            raise StateError("attempt deadline has passed; the final report was opened")
+        raise StateError(f"attempt deadline has passed; final report: {html_report}")
     if attempt.state is not AttemptState.WORKING:
         raise StateError(f"cannot launch workspace while attempt is {attempt.state.value}")
     _ensure_editor_ready(attempt, vscode)
     runtime.start_container(attempt, pack, network=attempt.network)
     ensure_supervisor(paths, attempt)
-    companion = launch_companion(paths, attempt)
-    print(f"Opened exam companion page: {companion.url}")
+    companion = launch_companion(paths, attempt, open_browser=open_companion_browser)
+    if open_companion_browser:
+        print(f"Exam companion page is ready (browser launch requested): {companion.url}")
+    else:
+        print(f"Exam companion page is ready: {companion.url}")
     if attempt.editor == "code":
         vscode.attach(attempt)
         print(f"Opened isolated VS Code for attempt {attempt.id}")
@@ -460,15 +476,23 @@ def _start(args: argparse.Namespace) -> int:
             network=network,
             editor=args.editor,
             candidate_id=candidate_id,
+            skip_reading=bool(args.skip_reading),
             attempt_id=attempt_id,
         )
     except Exception:
         shutil.rmtree(attempt_root, ignore_errors=True)
         raise
     print(f"Attempt created: {attempt.id}")
-    should_read = pack.reading_time_seconds > 0 and not args.skip_reading
+    should_read = pack.reading_time_seconds > 0 and not attempt.skip_reading
+    reading_page_open = False
     if should_read:
-        attempt = store.transition(attempt.id, AttemptState.READING, at=clock.now())
+        def begin_reading() -> None:
+            nonlocal attempt
+            attempt = store.transition(attempt.id, AttemptState.READING, at=clock.now())
+
+        companion = launch_companion(paths, attempt, ready_callback=begin_reading)
+        reading_page_open = True
+        print(f"Opened read-only exam paper: {companion.url}")
         assert attempt.reading_started_at is not None
         reading_end = attempt.reading_started_at + timedelta(seconds=pack.reading_time_seconds)
         _reading(pack, ends_at=reading_end, clock=clock)
@@ -482,6 +506,7 @@ def _start(args: argparse.Namespace) -> int:
         store=store,
         runtime=runtime,
         vscode=vscode,
+        open_companion_browser=not reading_page_open,
     )
 
 
@@ -496,10 +521,43 @@ def _resume(args: argparse.Namespace) -> int:
         assert attempt.reading_started_at is not None
         reading_end = attempt.reading_started_at + timedelta(seconds=pack.reading_time_seconds)
         if clock.now() < reading_end:
+            companion = launch_companion(paths, attempt)
+            reading_page_open = True
+            print(f"Read-only exam paper is ready: {companion.url}")
             _reading(pack, ends_at=reading_end, clock=clock)
+        else:
+            reading_page_open = False
         attempt = _enter_working(attempt=attempt, pack=pack, store=store, anchor=reading_end)
     elif attempt.state is AttemptState.CREATED:
-        attempt = _enter_working(attempt=attempt, pack=pack, store=store, anchor=clock.now())
+        if pack.reading_time_seconds > 0 and not attempt.skip_reading:
+            def begin_reading() -> None:
+                nonlocal attempt
+                attempt = store.transition(attempt.id, AttemptState.READING, at=clock.now())
+
+            companion = launch_companion(paths, attempt, ready_callback=begin_reading)
+            reading_page_open = True
+            print(f"Opened read-only exam paper: {companion.url}")
+            assert attempt.reading_started_at is not None
+            reading_end = attempt.reading_started_at + timedelta(
+                seconds=pack.reading_time_seconds
+            )
+            _reading(pack, ends_at=reading_end, clock=clock)
+            attempt = _enter_working(
+                attempt=attempt,
+                pack=pack,
+                store=store,
+                anchor=reading_end,
+            )
+        else:
+            reading_page_open = False
+            attempt = _enter_working(
+                attempt=attempt,
+                pack=pack,
+                store=store,
+                anchor=clock.now(),
+            )
+    else:
+        reading_page_open = False
     return _launch_working(
         attempt=attempt,
         pack=pack,
@@ -507,6 +565,7 @@ def _resume(args: argparse.Namespace) -> int:
         store=store,
         runtime=runtime,
         vscode=vscode,
+        open_companion_browser=not reading_page_open,
     )
 
 
@@ -534,7 +593,7 @@ def _page(args: argparse.Namespace) -> int:
     paths, store, _runtime, _vscode = _components()
     attempt = store.resolve_attempt(args.attempt_id)
     companion = launch_companion(paths, attempt)
-    print(f"Opened exam companion page: {companion.url}")
+    print(f"Exam companion page is ready (browser launch requested): {companion.url}")
     return 0
 
 
@@ -562,26 +621,22 @@ def _list_attempts() -> int:
 
 
 def _report(args: argparse.Namespace) -> int:
-    paths, store, runtime, _vscode = _components()
+    _paths, store, runtime, _vscode = _components()
     clock = SystemClock()
-    attempt = store.resolve_attempt(args.attempt_id)
+    if args.attempt_id is None:
+        attempts = store.list_attempts()
+        if not attempts:
+            raise ValidationError("there is no attempt to report")
+        attempt = attempts[0]
+    else:
+        attempt = store.resolve_attempt(args.attempt_id)
     pack = _attempt_pack(attempt)
-    attempt = store.expire_if_due(attempt.id, now=clock.now())
-    grade_row = store.get_grade(attempt.id)
-    grade = None if grade_row is None else grade_row["report"]
-    if attempt.state in {AttemptState.FINISHED, AttemptState.EXPIRED} and grade is None:
-        service = AttemptService(
-            store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock
-        )
-        grade = service.grade()
-    document = report_document(
-        attempt=attempt,
-        pack=pack,
-        submissions=store.list_submissions(attempt.id),
-        grade=grade,
-        object_reader=store.object_bytes,
+    service = AttemptService(
+        store=store, runtime=runtime, attempt=attempt, pack=pack, clock=clock
     )
-    json_path, html_path = write_reports(paths.reports, attempt.id, document)
+    document, json_path, html_path, _finalized = service.publish_report(
+        lock_timeout=_REPORT_LOCK_TIMEOUT_SECONDS
+    )
     if args.json:
         print(json.dumps(document, indent=2, sort_keys=True))
     else:

@@ -45,7 +45,17 @@ def _kill_process_group(process: subprocess.Popen[bytes]) -> None:
     killpg = getattr(os, "killpg", None)
     sigkill = getattr(signal, "SIGKILL", signal.SIGTERM)
     if callable(killpg):
-        killpg(process.pid, sigkill)
+        try:
+            killpg(process.pid, sigkill)
+        except ProcessLookupError:
+            return
+        except PermissionError:
+            # A short-lived child can leave the process group unavailable while
+            # Popen has not observed its exit yet. Recheck before falling back
+            # to terminating the child process itself.
+            if process.poll() is None:
+                with suppress(OSError):
+                    process.kill()
     else:  # pragma: no cover - defensive fallback for non-Windows POSIX variants
         process.kill()
 
