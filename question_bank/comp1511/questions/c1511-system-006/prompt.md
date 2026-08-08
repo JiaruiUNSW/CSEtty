@@ -1,5 +1,9 @@
 # Orbital Sample Inventory
 
+## Task
+
+The table maps unique names to signed values: `ADD` accumulates, `SET` replaces, `REMOVE` deletes, a missing `QUERY` returns zero, and `TOTAL` sums current values.
+
 ## Background
 
 An operator maintains orbital sample containers through a line-oriented command console. Entries appear dynamically and must remain correct across updates and removals.
@@ -8,13 +12,11 @@ An operator maintains orbital sample containers through a line-oriented command 
 
 Process commands until `END`: `ADD name delta`, `SET name value`, `REMOVE name`, `QUERY name`, and `TOTAL`. Missing names have value zero. `QUERY` prints `name value`; `TOTAL` prints `TOTAL sum`. Other commands print nothing.
 
-**Exact rule.** The table maps unique names to signed values: `ADD` accumulates, `SET` replaces, `REMOVE` deletes, a missing `QUERY` returns zero, and `TOTAL` sums current values.
+## Starter code
 
-Submit `c1511_system_006.c`. Your program must not print prompts or explanatory text.
+Complete the marked command loop and dynamic record table in `main`. This is a whole-program task; the starter provides only the data definition and includes.
 
 ## Examples
-
-Command arguments: `(no command-line arguments)`
 
 Input:
 
@@ -35,3 +37,7 @@ TOTAL 13
 ## Implementation notes
 
 Use a dynamic array of structs with bounded names. Growth must preserve existing records. Free the final allocation on every normal exit.
+
+## Submission
+
+Submit `c1511_system_006.c` only. Your program must not print prompts, labels, or explanatory text unless the required output format explicitly includes them.

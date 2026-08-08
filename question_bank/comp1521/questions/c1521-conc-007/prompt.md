@@ -6,11 +6,29 @@ A process exit code is not the raw integer returned by `waitpid`. The parent mus
 
 ## Requirements
 
-Implement `c1521_conc_007.c`. Accept one to eight decimal codes, each from 0 through 7. Fork one child for every code; each child immediately terminates with that code using `_exit`. The parent must retain every PID, use `waitpid` on each exact PID, reject any abnormal termination, count decoded `WEXITSTATUS` values, and print nonzero histogram entries in ascending status order as `status S count=N`. Finish with `children=N`. Invalid input or a system-call failure returns 1.
+- Implement `c1521_conc_007.c`.
+- Accept one to eight decimal codes, each from 0 through 7.
+- Fork one child for every code; each child immediately terminates with that code using `_exit`.
+- The parent must retain every PID, use `waitpid` on each exact PID, reject any abnormal termination, count decoded `WEXITSTATUS` values, and print nonzero histogram entries in ascending status order as `status S count=N`.
+- Finish with `children=N`.
+- Invalid input or a system-call failure returns 1.
 
 ## Examples
 
-Arguments `0 1 1 3` produce counts one, two, and one for statuses 0, 1, and 3. Output order is numeric, not child completion order.
+Command:
+
+```text
+./c1521_conc_007 0 1 1 3
+```
+
+Output:
+
+```text
+status 0 count=1
+status 1 count=2
+status 3 count=1
+children=4
+```
 
 ## Implementation notes
 

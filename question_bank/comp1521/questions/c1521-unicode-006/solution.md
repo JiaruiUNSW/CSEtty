@@ -21,8 +21,6 @@ Classify the scalar range first, then derive utf-16 code unit count from the UTF
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

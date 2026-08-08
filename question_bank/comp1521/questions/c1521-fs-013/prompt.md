@@ -6,11 +6,27 @@ Some byte-oriented importers need a deterministic recovery policy. This problem 
 
 ## Requirements
 
-Write `c1521_fs_013.c`. Parse one hexadecimal byte string. Scan left to right. If the bytes at the current position begin a complete strict UTF-8 scalar, copy that entire sequence unchanged. Otherwise replace exactly the single current byte with UTF-8 U+FFFD (`efbfbd`) and advance one byte. Print the repaired bytes as continuous lowercase hex. Bad hex syntax or arguments prints `c1521_fs_013: error\n` to standard error and returns 1.
+- Write `c1521_fs_013.c`.
+- Parse one hexadecimal byte string.
+- Scan left to right.
+- If the bytes at the current position begin a complete strict UTF-8 scalar, copy that entire sequence unchanged.
+- Otherwise replace exactly the single current byte with UTF-8 U+FFFD (`efbfbd`) and advance one byte.
+- Print the repaired bytes as continuous lowercase hex.
+- Bad hex syntax or arguments prints `c1521_fs_013: error\n` to standard error and returns 1.
 
 ## Examples
 
-`41bf42` becomes `41efbfbd42`. Under this problem's one-byte policy, overlong pair `c0af` produces two replacement scalars, not one.
+Command:
+
+```text
+./c1521_fs_013 41c3a9
+```
+
+Output:
+
+```text
+41c3a9
+```
 
 ## Implementation notes
 

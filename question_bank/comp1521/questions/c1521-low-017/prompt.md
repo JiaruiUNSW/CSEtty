@@ -4,9 +4,6 @@
 
 Read a 32-bit unsigned value in hexadecimal and an index `i`. Print byte `i`, where byte zero is the least-significant byte, as an unsigned decimal integer.
 
-This is an original local practice task. It exercises the `bitwise, integer-representation, c-revision`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Use shifts and a byte mask. Input is accepted by `scanf` with the fixed-width hexadecimal format and output is decimal.
@@ -31,12 +28,6 @@ the exact output is:
 171
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 Use `uint32_t`, shift right by `8*i`, then mask with `UINT32_C(0xff)`. Fixed-width `<inttypes.h>` macros avoid host-dependent formats.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

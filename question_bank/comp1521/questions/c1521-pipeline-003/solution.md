@@ -21,8 +21,6 @@ Compute pipe-transferred even count in the child and use the pipe as the only re
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

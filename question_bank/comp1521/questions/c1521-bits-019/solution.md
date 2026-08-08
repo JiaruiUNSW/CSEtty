@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement encode a compact mips i-format word w
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -1,7 +1,5 @@
 # Trim and Collapse Spacing
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A command label may contain runs of spaces and tabs. It must be normalised to single spaces, with no whitespace at either end.
@@ -39,4 +37,3 @@ Leading and trailing spaces disappear, and the internal run becomes one space.
 ## Implementation notes
 
 Remember pending whitespace only after some output exists, and emit it only when the next non-whitespace character arrives. Output spelling, spaces, punctuation, and newlines must match exactly.
-

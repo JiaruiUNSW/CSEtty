@@ -1,7 +1,5 @@
 # Alternating Digit Score
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A serial number receives a score by reading digits from right to left: add the first digit, subtract the next, then alternate.
@@ -39,4 +37,3 @@ From the right, the calculation is 5 - 4 + 3 - 2 + 1.
 ## Implementation notes
 
 A do-while loop naturally processes the input value zero as one zero digit. Output spelling, spaces, punctuation, and newlines must match exactly.
-

@@ -21,8 +21,6 @@ Classify the scalar range first, then derive utf-8 leading byte from the UTF-8/U
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -21,8 +21,6 @@ Translate the loop invariant for mips buffer range function into a leaf MIPS fun
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

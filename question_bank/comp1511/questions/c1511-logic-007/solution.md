@@ -21,8 +21,6 @@ Compare the three values in a fixed order to compute three-reading order code. K
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

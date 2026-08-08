@@ -1,7 +1,5 @@
 # Stable Sentinel Removal
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A data stream has been copied into an array, but a chosen sentinel value represents missing samples. The valid samples must be compacted toward the front without changing their order.
@@ -41,4 +39,3 @@ The two sentinel entries are removed while the other four retain their order.
 ## Implementation notes
 
 A write index identifies the next retained position. It advances only when a non-sentinel item is copied. Your output must match the specified spelling, spacing, and newlines exactly.
-

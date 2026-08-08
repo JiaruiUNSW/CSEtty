@@ -21,8 +21,6 @@ Translate the loop invariant for mips stream total into a leaf MIPS function. Ke
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

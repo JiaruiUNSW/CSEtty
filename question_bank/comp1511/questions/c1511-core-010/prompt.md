@@ -1,7 +1,5 @@
 # Diagonal Colour Changes
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A square mosaic's main diagonal is read from the top-left to the bottom-right. A colour change occurs whenever a diagonal value differs from the preceding diagonal value.
@@ -43,4 +41,3 @@ The diagonal is 1, 1, 2, 3, so it changes twice.
 ## Implementation notes
 
 Begin comparisons at diagonal index one. A size-one mosaic has zero changes. Your output must match the specified spelling, spacing, and newlines exactly.
-

@@ -21,8 +21,6 @@ Visit exactly the cells participating in coastal grid border total and maintain 
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -6,11 +6,38 @@ Ledger deltas are additive, so records can be applied in parallel if updates to 
 
 ## Requirements
 
-Implement `c1521_conc_013.c` as `./c1521_conc_013 FILE THREADS`, with 1 to 8 threads. The input has at most 1000 non-empty lines `account delta`; account names contain lowercase letters/digits, are at most 31 bytes, and there are at most 64 distinct accounts. Main must parse all operations first. Worker (i) applies operation indices `i, i+THREADS, ...` to a shared account table. Protect lookup/creation and addition as one mutex critical section. Join all threads, sort accounts lexicographically, and print `account=balance`, including zero balances. Values and sums fit `long long`.
+- Implement `c1521_conc_013.c` as `./c1521_conc_013 FILE THREADS`, with 1 to 8 threads.
+- The input has at most 1000 non-empty lines `account delta`; account names contain lowercase letters/digits, are at most 31 bytes, and there are at most 64 distinct accounts.
+- Main must parse all operations first.
+- Worker (i) applies operation indices `i, i+THREADS, ...` to a shared account table.
+- Protect lookup/creation and addition as one mutex critical section.
+- Join all threads, sort accounts lexicographically, and print `account=balance`, including zero balances.
+- Values and sums fit `long long`.
 
 ## Examples
 
-Records `alice 5`, `bob 3`, and `alice -2` print `alice=3` then `bob=3`, irrespective of which thread created an account entry.
+Command:
+
+```text
+./c1521_conc_013 ledger.txt 2
+```
+
+Files provided for this example:
+
+- `ledger.txt` (23 bytes) contains:
+
+  ```text
+  alice 5
+  bob 3
+  alice -2
+  ```
+
+Output:
+
+```text
+alice=3
+bob=3
+```
 
 ## Implementation notes
 

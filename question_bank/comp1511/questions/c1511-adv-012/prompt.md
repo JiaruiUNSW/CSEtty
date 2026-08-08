@@ -2,7 +2,7 @@
 
 ## Background
 
-This original exercise practises a small, precisely specified linked-list transformation or analysis. The supplied command-line harness converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `int consume_checksum(struct node *head)` returns `a0 - a1 + a2 - a3 + ...` while freeing the entire list.
+The supplied `main` converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `int consume_checksum(struct node *head)` returns `a0 - a1 + a2 - a3 + ...` while freeing the entire list.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original exercise practises a small, precisely specified linked-list transf
 
 ## Examples
 
-`./c1511_adv_012 5 2 1` prints `4`; no values print `0`. List output uses one space between integers and a final newline; an empty list is printed as `EMPTY`.
+Command:
+
+```text
+./c1511_adv_012 5 2 1
+```
+
+Output:
+
+```text
+4
+```
 
 ## Implementation notes
 
-The harness deliberately does not free the list after calling the function because ownership is transferred to it. Submit `c1511_adv_012.c`. The harness validates ownership by freeing all surviving nodes, so do not retain hidden aliases. Build commands are argument arrays and do not invoke a shell. Your submitted file must compile cleanly with `dcc -Werror`.
+The supplied `main` deliberately does not free the list after calling the function because ownership is transferred to it. Submit `c1511_adv_012.c`. The supplied `main` validates ownership by freeing all surviving nodes, so do not retain hidden aliases.

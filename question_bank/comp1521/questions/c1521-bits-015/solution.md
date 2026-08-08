@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement pack two sixteen-bit counters without
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

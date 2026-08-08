@@ -146,7 +146,7 @@ def test_full_report_embeds_submission_evaluation_and_terminal_solution(tmp_path
         manifest.read_text(encoding="utf-8").replace(
             'kind = "c_program"',
             'kind = "c_program"\nprompt = "paper/q1.md"\n'
-            'difficulty = 2\ntrack = "normal"\ntags = ["debugging"]',
+            'difficulty = 2\ntrack = "normal"\ntags = ["debugging", "loops", "functions"]',
         ),
         encoding="utf-8",
     )
@@ -284,5 +284,10 @@ def test_full_report_embeds_submission_evaluation_and_terminal_solution(tmp_path
     assert "<pre><code>0</code></pre>" in page
     assert "<pre><code>3</code></pre>" in page
     assert "Reproduce the first failing test locally" in page
+    assert (
+        '<span class="badge">debugging</span> · '
+        '<span class="badge">loops</span> · '
+        '<span class="badge">functions</span>'
+    ) in page
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in page
     assert "<script>alert(1)</script>" not in page

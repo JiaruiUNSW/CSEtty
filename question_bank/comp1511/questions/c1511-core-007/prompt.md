@@ -1,7 +1,5 @@
 # Warm Cross Centres
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 For an interior grid cell, its cross neighbours are the cells immediately above, below, left, and right. A cell is warm when four times its value is greater than the sum of those neighbours.
@@ -42,4 +40,3 @@ The centre contributes 20 on the left side of the comparison and its neighbours 
 ## Implementation notes
 
 Multiplying the centre by four compares it with the neighbour average without floating point. Your output must match the specified spelling, spacing, and newlines exactly.
-

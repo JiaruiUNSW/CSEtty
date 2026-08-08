@@ -21,8 +21,6 @@ Translate the loop invariant for mips even sample count into a leaf MIPS functio
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -1,7 +1,5 @@
 # Busiest Two-by-Two Window
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A rectangular activity map is inspected through every possible two-by-two window. The busiest window has the greatest sum; ties go to the smallest top row, then smallest left column.
@@ -43,4 +41,3 @@ The bottom-right window contains 4, 1, 0, and 3, whose sum eight is largest.
 ## Implementation notes
 
 Initialise the best from window (0, 0), because zero is not a safe initial sum for negative grids. Match every required label, space, punctuation mark, and newline exactly.
-

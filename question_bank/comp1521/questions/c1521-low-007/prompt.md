@@ -4,9 +4,6 @@
 
 Read a count `n`, then read `n` signed integers and print their sum. An empty sequence has sum zero.
 
-This is an original local practice task. It exercises the `mips-control, mips-data`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Consume exactly `n` values after the count. Use a counted loop and print one signed result with newline.
@@ -35,12 +32,6 @@ the exact output is:
 12
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 The values do not need to be stored: accumulate each as soon as it is read. A loop-index comparison naturally handles `n=0`.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

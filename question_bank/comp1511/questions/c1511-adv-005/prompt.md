@@ -2,7 +2,7 @@
 
 ## Background
 
-This original exercise practises a small, precisely specified linked-list transformation or analysis. The supplied command-line harness converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `struct node *insert_after_last_even(struct node *head, int value)` allocates one node and inserts it after the final even-valued node.
+The supplied `main` converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `struct node *insert_after_last_even(struct node *head, int value)` allocates one node and inserts it after the final even-valued node.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original exercise practises a small, precisely specified linked-list transf
 
 ## Examples
 
-`./c1511_adv_005 9 2 4 5` prints `2 4 9 5`; `./c1511_adv_005 8 1 3` prints `8 1 3`. List output uses one space between integers and a final newline; an empty list is printed as `EMPTY`.
+Command:
+
+```text
+./c1511_adv_005 9 2 4 5
+```
+
+Output:
+
+```text
+2 4 9 5
+```
 
 ## Implementation notes
 
-The supplied harness prints and frees the returned list. Treat zero and negative even values as even. Submit `c1511_adv_005.c`. The harness validates ownership by freeing all surviving nodes, so do not retain hidden aliases. Build commands are argument arrays and do not invoke a shell. Your submitted file must compile cleanly with `dcc -Werror`.
+The supplied `main` prints and frees the returned list. Treat zero and negative even values as even. Submit `c1511_adv_005.c`. The supplied `main` validates ownership by freeing all surviving nodes, so do not retain hidden aliases.

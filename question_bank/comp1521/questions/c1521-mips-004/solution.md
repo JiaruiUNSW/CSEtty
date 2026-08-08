@@ -21,8 +21,6 @@ Translate the loop invariant for mips nonzero channel count into a leaf MIPS fun
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

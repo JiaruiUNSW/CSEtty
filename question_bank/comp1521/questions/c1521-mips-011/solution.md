@@ -21,8 +21,6 @@ Translate the loop invariant for mips first maximum index function into a leaf M
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

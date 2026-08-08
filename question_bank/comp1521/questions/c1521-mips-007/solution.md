@@ -21,8 +21,6 @@ Translate the loop invariant for mips alternating register total into a leaf MIP
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

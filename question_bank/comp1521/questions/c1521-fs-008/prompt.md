@@ -6,11 +6,25 @@ UTF-8 partitions a scalar value into six-bit payload groups and adds length pref
 
 ## Requirements
 
-Write `c1521_fs_008.c`. Accept exactly one base-10 integer argument. For a Unicode scalar value U+0000..U+10FFFF excluding U+D800..U+DFFF, print its shortest UTF-8 encoding as lowercase two-digit bytes separated by spaces. For a numeric value outside that set, print `invalid\n` and return 0. Malformed numeric syntax or wrong arguments prints `c1521_fs_008: error\n` to standard error and returns 1.
+- Write `c1521_fs_008.c`.
+- Accept exactly one base-10 integer argument.
+- For a Unicode scalar value U+0000..U+10FFFF excluding U+D800..U+DFFF, print its shortest UTF-8 encoding as lowercase two-digit bytes separated by spaces.
+- For a numeric value outside that set, print `invalid\n` and return 0.
+- Malformed numeric syntax or wrong arguments prints `c1521_fs_008: error\n` to standard error and returns 1.
 
 ## Examples
 
-Decimal 65 prints `41`; decimal 8364 (U+20AC) prints `e2 82 ac`; decimal 55296 is a surrogate and prints `invalid`.
+Command:
+
+```text
+./c1521_fs_008 65
+```
+
+Output:
+
+```text
+41
+```
 
 ## Implementation notes
 

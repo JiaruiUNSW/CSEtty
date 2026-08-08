@@ -1,7 +1,5 @@
 # Character Run Count
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A run is a maximal consecutive block of the same character in a word. The task counts how many runs form the word.
@@ -39,4 +37,3 @@ The maximal blocks are `aaa`, `bb`, and `c`.
 ## Implementation notes
 
 A non-empty word begins with one run. Each later character different from its predecessor begins one additional run. Output spelling, spaces, punctuation, and newlines must match exactly.
-

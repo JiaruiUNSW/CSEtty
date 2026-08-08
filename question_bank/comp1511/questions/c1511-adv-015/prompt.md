@@ -2,7 +2,7 @@
 
 ## Background
 
-This original exercise focuses on safe pointer-based processing of dynamically allocated arrays. `int *copy_in_range(const int *values, size_t length, int low, int high, size_t *result_length)` allocates an exact-size array containing values in the inclusive range. The supplied executable converts command-line text into heap arrays so the function is self-contained and repeatable.
+`int *copy_in_range(const int *values, size_t length, int low, int high, size_t *result_length)` allocates an exact-size array containing values in the inclusive range. The supplied executable converts command-line text into heap arrays so the function is self-contained and repeatable.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original exercise focuses on safe pointer-based processing of dynamically a
 
 ## Examples
 
-`./c1511_adv_015 2 5 1 2 5 7` prints `2 5`; a range with no qualifying values prints `EMPTY`.
+Command:
+
+```text
+./c1511_adv_015 2 5 1 2 5 7
+```
+
+Output:
+
+```text
+2 5
+```
 
 ## Implementation notes
 
-A count pass followed by a copy pass is expected. The caller frees the returned pointer, including safely calling `free(NULL)`. Submit `c1511_adv_015.c`. Assume all input text represents valid decimal integers within the `int` range. Keep the provided harness and output format unchanged, and compile the unique submission file with `dcc -Werror`.
+A count pass followed by a copy pass is expected. The caller frees the returned pointer, including safely calling `free(NULL)`. Submit `c1511_adv_015.c`. Assume all input text represents valid decimal integers within the `int` range. Keep the provided starter program and output format unchanged.

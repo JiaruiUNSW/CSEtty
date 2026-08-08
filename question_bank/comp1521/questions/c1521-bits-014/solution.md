@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement extract a five-bit register field wit
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -1,69 +1,46 @@
 # CSEExamTTY
 
-CSEExamTTY is an independent local alpha that simulates a practical programming
-exam workflow for COMP1511- and COMP1521-style practice. It provides an isolated
-Linux shell, original exam packs, course-like commands, immutable submissions,
-timed attempts, an ephemeral judge, and local reports.
+CSEExamTTY lets you practise COMP1511- and COMP1521-style programming exams on
+your own computer. It gives you an isolated Linux workspace, course-like
+commands, autotests, local submissions, timed exam mode, and a detailed report
+with worked solutions after you finish.
+
+> [!IMPORTANT]
+> CSEExamTTY is alpha software. The latest public PyPI release is
+> [`0.1.0a1`](https://pypi.org/project/cseexamtty/0.1.0a1/) and contains the
+> earlier 150-question bank. This source checkout is the `0.1.0a3` release
+> candidate and contains the expanded 300-question bank described below.
 
 It is not made, managed, endorsed, or authenticated by UNSW or the UNSW School
 of Computer Science and Engineering. It never connects to UNSW systems, and no
 local submission is an official submission.
 
-## Current status
+## Quick start
 
-The source tree is the `0.1.0a3` source-only alpha release candidate; `0.1.0a1`
-remains the latest published alpha. Both current course images have passed
-fresh offline VS Code preparation and attach checks plus companion, autotest,
-submission, finish, judge, and report workflows on the current Apple Silicon
-Mac. Exact commit `bc9d47bb65ee246e488d3a14156c0965e530c754` also passed the
-complete native-Windows acceptance run on Windows 11 Pro for Workstations build
-26200 with Docker Desktop 4.85.0, WSL2, and VS Code 1.132.0. COMP1521 uses the
-separately released `csetty-mips` dependency; no upstream mipsy binary or source
-is included in its course image. The alpha includes:
+The normal workflow is:
 
-- COMP1511: 11 original questions, 100 points, DCC/GCC/Clang, arrays, linked
-  lists, debugging, functions, and whole programs;
-- COMP1521: 10 original questions, 100 points, C, MIPS, POSIX file I/O,
-  Unicode, processes, pipes, and threads;
-- two original 150-question banks (300 questions total), with normal/challenge
-  tracks, difficulty 1–5, topic/week tags, worked solutions, reference programs,
-  public tests, and post-finish tests; every question has at least five distinct
-  test points;
-- a 10-minute read-only reading period and 180-minute working period;
-- Docker volume workspaces by default, with an opt-in empty bind directory;
-- public autotests and post-finish test groups with proportional per-test-point
-  scoring, full-group status, and cross-question hurdles;
-- repeated, SHA-256-addressed local submissions and JSON/HTML/text reports;
-- non-root, read-only-rootfs interactive and judge containers with no Docker
-  socket, dropped capabilities, resource limits, and no network by default; and
-- an isolated host VS Code instance attached to the interactive container after
-  an explicit per-image `prepare` step;
-- a loopback-only companion page opened as a full read-only paper during reading
-  time and reused beside VS Code during working time, with detailed question
-  pages, bundled references, live state/countdown, and an **Open VSC** recovery
-  button when working; and
-- a post-exam HTML report that opens automatically after an explicit finish or
-  timed expiry and contains each submitted source file, detailed test evidence,
-  worked solution, reference implementation, strengths, gaps, and targeted
-  revision advice.
+`install` → `doctor` → `prepare` once → `start` → `autotest`/`submit` → `finish`
 
-The repository publishes Python/project source, original assessment materials,
-Compose/Dockerfile definitions, and integrity locks only. `prepare` builds
-separate interactive/judge images locally and records their exact IDs. Neither
-the project nor its CI publishes course images, registry layers, BuildKit
-caches, DCC binaries, Debian package archives, VS Code Server, or VSIX caches.
-This alpha is locally accepted on Apple Silicon and on the exact native-Windows
-host recorded in
-[`docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md`](docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md);
-the checked-in CI matrix is the release evidence for host Python compatibility
-and runner-local multi-architecture source builds. A future stable release still
-requires broader native desktop, Docker Desktop/WSL2, and offline VS Code
-acceptance across additional hosts.
+There are two different things you can start from:
 
-## Install the alpha
+- `comp1511-original-a` and `comp1521-original-a` are **fixed papers**. Each
+  contains the same questions every time you start it.
+- `comp1511` and `comp1521` are **150-question banks**. A bank is not a paper
+  and cannot be started directly; first use `csetty bank build` to select a
+  new 100-mark paper from it.
 
-Python 3.11 or later and Docker Desktop/Engine are required. VS Code and its
-`code` command are required only when using the default editor integration.
+### 1. Install the prerequisites
+
+You need:
+
+- Python 3.11 or later;
+- Docker Desktop or Docker Engine, running before you start; and
+- VS Code with the `code` command available for preparation and the default
+  editor workflow.
+
+### 2. Install CSEExamTTY
+
+For the latest published alpha:
 
 ```sh
 pipx install cseexamtty==0.1.0a1
@@ -71,67 +48,116 @@ pipx install cseexamtty==0.1.0a1
 uv tool install cseexamtty==0.1.0a1
 ```
 
-Then run `csetty doctor`. `csetty prepare` is the explicit networked phase that
-locally builds the course images and warms an isolated VS Code cache.
-
-## Development setup
-
-For development from a source checkout:
+To use the current source checkout instead:
 
 ```sh
+git clone https://github.com/JiaruiUNSW/CSEtty.git
+cd CSEtty
 python3 -m venv .venv
-.venv/bin/python -m pip install -e '.[dev]'
-.venv/bin/csetty doctor
+source .venv/bin/activate
+python -m pip install -e .
 ```
 
-`uv sync --extra dev` may be used instead when `uv` is installed.
+On Windows PowerShell, create the environment with `py -3.11 -m venv .venv`
+and activate it with `.\.venv\Scripts\Activate.ps1`. The remaining `csetty`
+commands are the same on every platform.
 
-## csetty-mips dependency
+### 3. Prepare one course
 
-The independently implemented MIPS32 teaching engine lives in the separate
-[CSEtty-MIPS repository](https://github.com/JiaruiUNSW/CSEtty-MIPS) and is
-[published on PyPI](https://pypi.org/project/csetty-mips/0.1.1/). This project
-pins the `csetty-mips==0.1.1` release as its runtime dependency and records
-source commit `33410078667ad67942c6700d73411fc31be00c8f` in its toolchain
-locks and image labels. It is the runtime behind `/usr/local/bin/mipsy` and
-`1521 mipsy` in the COMP1521 course image, and contains no upstream mipsy
-source or binary.
+Check the host, build the local course images, and confirm that the course is
+ready for an offline attempt:
 
 ```sh
-.venv/bin/csetty-mips program.s -- arg1 arg2
-.venv/bin/csetty-mips --check program.s
-.venv/bin/csetty-mips --hex-pad-zero program.s
-.venv/bin/csetty-mips --interactive program.s
-.venv/bin/csetty-mips                 # debugger; use `load FILE...`
+csetty doctor
+csetty prepare --profile comp1511
+csetty doctor --offline-ready comp1511
 ```
 
-Strict initialization diagnostics are enabled by default. `--spim` (also
-spelled `--relaxed`) makes uninitialized registers and memory read as zero for
-compatibility-oriented runs. Sandboxed file syscalls require an explicit
-`--fs-root DIR`.
+Preparation is a one-time networked step for each version of a course image. It
+also opens a clearly labelled, isolated CSEExamTTY VS Code window while it
+caches the required extensions. Use `--profile comp1521` for COMP1521 or
+`--profile all` to prepare both courses.
 
-The Python API is also public:
+### 4. Start a practice attempt
 
-```python
-from csetty_mips import Machine, SourceUnit, assemble
+Practice mode is untimed by default:
 
-program = assemble([SourceUnit("answer.s", ".text\nmain: li $a0, 42\nli $v0, 1\nsyscall\njr $ra\n")])
-machine = Machine(program)
-machine.run()
-assert machine.io.output == b"42"
+```sh
+csetty start comp1511-original-a
 ```
 
-Its package specification, acceptance matrix, clean-room provenance record,
-source, and pure-engine tests are maintained in that separate MPL-2.0 project.
-This repository retains only CSEExamTTY integration tests and the pinned
-dependency contract described in
-[the integration note](docs/CSETTY_MIPS_INTEGRATION.md).
+For COMP1521:
+
+```sh
+csetty start comp1521-original-a
+```
+
+CSEExamTTY opens the local paper and your isolated workspace. No work is sent
+to UNSW or to any other marking system.
+
+### 5. Solve, test, submit, and finish
+
+Inside the exam terminal, open and edit the starter file named in the paper,
+then run a workflow like this:
+
+```text
+exam questions
+1511 autotest q1
+submit q1
+check
+exam finish
+```
+
+Use `1521 autotest q1` in a COMP1521 attempt. `submit` is separate from
+`autotest`: only submitted files are graded. After you confirm `exam finish`,
+CSEExamTTY grades the latest accepted submission for each question and opens
+the local HTML report.
+
+## Choose your next action
+
+| I want to... | Run... |
+| --- | --- |
+| See the installed fixed papers | `csetty packs list` |
+| Practise COMP1511 without a timer | `csetty start comp1511-original-a` |
+| Practise COMP1521 without a timer | `csetty start comp1521-original-a` |
+| Run the full timed simulation | `csetty start comp1511-original-a --mode exam` |
+| Work only in the terminal | add `--editor terminal` to `csetty start` |
+| Continue the newest active attempt | `csetty resume` |
+| Reopen the paper or workspace | `csetty page` or `csetty code` |
+| Reopen the latest report | `csetty report` |
+| Generate and sit a different timed paper | follow [Build and sit a random exam paper](#build-and-sit-a-random-exam-paper) |
+
+Run `csetty --help` or `csetty COMMAND --help` whenever you need the full list
+of options.
+
+## What is included
+
+The current source checkout includes:
+
+- a fixed 11-question, 100-point COMP1511 paper covering C, arrays, linked
+  lists, debugging, functions, and whole programs;
+- a fixed 10-question, 100-point COMP1521 paper covering C, MIPS, file I/O,
+  Unicode, processes, pipes, and threads;
+- two 150-question banks (300 original questions total), with difficulty 1–5,
+  topic/week tags, worked solutions, reference programs, and at least five test
+  points for every question;
+- random paper generation that covers every declared topic and orders questions
+  from easier to harder;
+- untimed practice and a full simulation with 10 minutes of reading time and
+  180 minutes of working time;
+- course-like fetch, autotest, submit, check, classrun, DCC, and MIPS commands in
+  an isolated Linux workspace with networking disabled by default; and
+- immutable local submissions plus HTML, text, and JSON reports with test
+  evidence, submitted code, worked solutions, strengths, gaps, and revision
+  advice.
+
+## One-time preparation
 
 Preparation is the only phase that may download or build tooling:
 
 ```sh
-.venv/bin/csetty prepare --profile comp1511
-.venv/bin/csetty prepare --profile comp1521
+csetty prepare --profile comp1511
+csetty prepare --profile comp1521
 ```
 
 Each preparation uses the digest-pinned Debian 12 multi-architecture base,
@@ -141,10 +167,6 @@ at its pinned Git commit for COMP1521. No DCC binary, prebuilt course image,
 registry layer, public BuildKit cache, VS Code Server, or VSIX cache is shipped
 by this repository. `start` verifies the recorded interactive and judge image
 IDs and never builds or pulls an image.
-
-`--mipsy-source PATH` remains optional for maintainers who want to validate and
-record the pinned upstream checkout used for a private black-box comparison.
-That checkout is never copied into, built into, or selected by the course image.
 
 ### What preparation does to VS Code
 
@@ -163,61 +185,29 @@ Jupyter, ChatGPT, Remote SSH, or any plugin from the normal VS Code profile.
 After caching completes, the preparation window moves to a local completion
 page before its disposable container is stopped.
 
-## Start an attempt
+## Practice and exam modes
 
-Practice mode defaults to VS Code, no network, and no timer:
+| Mode | What happens | Example |
+| --- | --- | --- |
+| Practice (default) | No timer and no simulated sign-in | `csetty start comp1511-original-a` |
+| Exam | 10 minutes reading, 180 minutes working, timed and offline | `csetty start comp1511-original-a --mode exam` |
 
-```sh
-.venv/bin/csetty start comp1511-original-a
-.venv/bin/csetty start comp1521-original-a --editor terminal
-```
+Add `--editor terminal` if you prefer a terminal instead of VS Code.
 
-Exam simulation mode is always timed and offline:
+Exam mode starts in the host terminal. CSEExamTTY clears that terminal, asks
+for a simulated zID and password, shows the local-system warning, and requires
+you to type `yes`. The password is never authenticated, stored, hashed, or
+logged. **Do not enter a real UNSW password.**
 
-```sh
-.venv/bin/csetty start comp1511-original-a --mode exam
-```
+During reading time, the browser shows the complete read-only paper but no
+editable workspace. When reading ends, CSEExamTTY opens the starter workspace
+and editor. The paper remains available beside the editor with the current
+state and countdown.
 
-The exam entry sequence happens in the **host terminal before reading time**:
-
-1. the interactive terminal screen and scrollback are cleared;
-2. `Welcome to the COMPxxxx Exam Simulation`;
-3. a simulated zID in the form `z` plus seven digits;
-4. any non-empty simulation password (never authenticated, stored, hashed, or
-   logged; do not enter a real UNSW password);
-5. the local-system disclaimer and academic-integrity/exam-condition warning;
-6. exact acknowledgement by typing `yes`; and
-7. the full read-only paper and reading countdown.
-
-During reading time, the companion page opens in the host browser with every
-complete question prompt and only the resources explicitly permitted by the
-pack. The persisted reading clock begins only after the companion is healthy
-and the browser-launch call succeeds; a reported launch failure leaves the
-attempt resumable in `CREATED` state without consuming reading time. That state
-serves only a waiting page: complete questions and resources remain unavailable
-until a successful `resume` starts the reading clock. No editable container,
-workspace, or VS Code window exists yet. When
-reading time ends, the same page updates to working state and the starter
-workspace, supervised container, and VS Code are opened. A practice attempt,
-including one started with `--skip-reading`, deliberately does not show the exam
-sign-in gate; the skip choice is persisted if a `CREATED` attempt must be
-resumed.
-
-The live paper is a single navigable long-form exam page rather than a
-question-name dashboard. Its offline visual shell follows the public CSE course
-exam conventions: a course-colour navbar, light examination header, bordered
-question headings, Bootstrap-style alerts/tables, and light code/TTY blocks.
-COMP1511 uses its green accent and COMP1521 its teal accent. The final HTML
-report imports the same local theme, so finishing the exam changes the content
-and status, not the course's visual language.
-
-The companion is served only on `127.0.0.1` at an unguessable per-process path.
-Its **Open VSC** control reconnects to the existing supervised container and
-does not recreate the attempt or reset its clock. Bundled pack references work
-offline. Official course links open in the host browser: `--network none`
-isolates the Docker container only, so those links remain usable whenever the
-host itself has network access. Public course content is not copied into this
-repository.
+The paper is served only from `127.0.0.1` using an unguessable local path. Its
+**Open VSC** button reconnects to the same attempt without resetting the clock.
+If a browser or editor window is closed, use `csetty page`, `csetty code`, or
+`csetty resume` to reopen it.
 
 ## Commands inside the exam container
 
@@ -259,57 +249,135 @@ personal shell alias rather than a standard command, so it is not defined.
 ## Resume, export, and report
 
 ```sh
-.venv/bin/csetty attempts list
-.venv/bin/csetty resume [ATTEMPT_ID]
-.venv/bin/csetty code [ATTEMPT_ID]
-.venv/bin/csetty page [ATTEMPT_ID]
-.venv/bin/csetty export ATTEMPT_ID EMPTY_DESTINATION
-.venv/bin/csetty report [ATTEMPT_ID]
-.venv/bin/csetty report [ATTEMPT_ID] --json
+csetty attempts list
+csetty resume [ATTEMPT_ID]
+csetty code [ATTEMPT_ID]
+csetty page [ATTEMPT_ID]
+csetty export ATTEMPT_ID EMPTY_DESTINATION
+csetty report [ATTEMPT_ID]
+csetty report [ATTEMPT_ID] --json
 ```
 
-Closing the shell or VS Code never pauses or finishes a timed attempt. A
-persisted UTC deadline is reused after a restart. Final grading uses only the
-latest accepted submission for each question, never unsaved or later workspace
-content. At 60, 30, 15, and 5 minutes remaining, the supervisor broadcasts an
-English warning to every open exam terminal, including VS Code integrated
-terminals. Every report is prominently labelled as a local estimate.
-After `exam finish` or automatic timed expiry, the supervisor grades the latest
-accepted submissions, writes both report formats, and opens the HTML report in
-the host's default browser. The companion redirects only after the grade and
-both atomic report writes are durably marked complete, so an earlier working
-report cannot be mistaken for the final result. Report publishers are serialized
-per attempt across processes, and a rewrite temporarily withdraws the readiness
-marker until both replacement files are complete. If the browser cannot be
-launched, the absolute report path remains in the terminal or supervisor log and `csetty report
-[ATTEMPT_ID]` remains available. Without an ID, `report` selects the newest
-attempt; a `CREATED` attempt cannot be reported until reading starts. Every
-successful `start` also prints the full ID before reading begins.
-Outside the initial reading transition, a browser-launch failure is nonfatal and
-the ready loopback URL is printed so the timed workspace can still open.
+The attempt ID is printed by `start`. When an optional ID is omitted, `resume`,
+`code`, `page`, and `report` select the newest relevant attempt.
 
-## Original question banks
+Closing the terminal or VS Code does not pause or finish a timed attempt. Its
+saved deadline continues to run. Final grading uses the latest accepted
+submission for each question, not unsaved editor content. After `exam finish`
+or timed expiry, the HTML report normally opens automatically; use
+`csetty report` if it does not. Every score is labelled as a local estimate.
 
-The source checkout contains 150 original questions for each course (300 total):
+## Build and sit a random exam paper
+
+`comp1511-original-a` is one fixed paper. By contrast, `comp1511` names the
+150-question COMP1511 bank used by the generator. The same distinction applies
+to `comp1521-original-a` and the `comp1521` bank. A generated paper selects 11
+COMP1511 questions or 10 COMP1521 questions; it does not place all 150 bank
+questions into one exam.
+
+Choose an integer seed and a new destination directory, then start the generated
+directory in exam mode:
 
 ```sh
-.venv/bin/csetty bank validate comp1511
-.venv/bin/csetty bank stats comp1521
-.venv/bin/csetty bank verify comp1521
-.venv/bin/csetty bank build comp1511 /tmp/comp1511-paper --seed 1511
-.venv/bin/csetty bank build comp1521 /tmp/comp1521-paper --seed 1521
+csetty bank build comp1511 ./comp1511-paper-1511 --seed 1511
+csetty start ./comp1511-paper-1511 --mode exam
 ```
 
-Generation is deterministic for a given bank, seed, and version. COMP1511
-builds an 11-question, 100-mark paper with array and linked-list hurdles.
-COMP1521 builds a 10-question, 100-mark paper: Q1–4 foundations, Q5 Unicode,
-Q6–8 advanced systems/MIPS/files, Q9 processes or threads, and Q10 a required
-challenge combination. Every generated paper covers every declared course tag,
-and its fixed difficulty pattern is non-decreasing from the first question to
-the last. `bank verify` builds an author-only temporary pack and runs all 150
-reference solutions in the selected course bank against all public and
-after-finish tests in the real isolated judge. See [question-bank format and
-blueprints](docs/QUESTION_BANK.md).
+For COMP1521:
+
+```sh
+csetty bank build comp1521 ./comp1521-paper-1521 --seed 1521
+csetty start ./comp1521-paper-1521 --mode exam
+```
+
+Do not omit `--mode exam` when you want the normal exam workflow. CSEExamTTY
+shows the Welcome screen, asks for the simulated zID and password, displays the
+exam-condition acknowledgement, opens the complete paper for the read-only
+reading period, and only then creates the starter workspace for working time.
+
+Generated starter and submission filenames follow their position in the paper:
+`q1.c`, `q2.c`, and so on. A COMP1521 MIPS question uses the corresponding
+`.s` name, such as `q3.s`. Use `exam questions`, `1511 autotest q1` or
+`1521 autotest q1`, and `submit q1` just as you would in a fixed paper.
+
+Use a different seed for a different paper. Reusing the same bank version and
+seed produces the same paper. Every generated paper covers all declared course
+topic tags and becomes progressively harder from its first question to its
+last.
+
+Authors can inspect or verify a bank with:
+
+```sh
+csetty bank stats comp1511
+csetty bank validate comp1511
+csetty bank verify comp1511
+```
+
+`bank verify` runs all 150 reference solutions for that course against every
+public and post-finish test in the isolated judge. See the
+[question-bank format and blueprints](docs/QUESTION_BANK.md) for the authoring
+contract.
+
+## Troubleshooting
+
+Start with these two checks:
+
+```sh
+csetty doctor
+csetty doctor --offline-ready comp1511
+```
+
+| If you see... | Do this... |
+| --- | --- |
+| `Docker daemon: FAIL` | Start Docker Desktop or the Docker service, then rerun `csetty doctor`. |
+| `VS Code CLI: FAIL` | Install VS Code's `code` command in your shell path. |
+| `Local images` or `Offline VS Code` fails | Rerun `csetty prepare --profile comp1511`. |
+| The paper or editor was closed | Run `csetty page`, `csetty code`, or `csetty resume`. |
+| The final report did not open | Run `csetty report` and use the printed local path. |
+
+If the problem remains, include the output of `csetty doctor`, your operating
+system, Python version, Docker version, and CSEExamTTY version in a
+[GitHub issue](https://github.com/JiaruiUNSW/CSEtty/issues).
+
+## COMP1521 MIPS support
+
+Installing CSEExamTTY also installs the independently implemented
+[`csetty-mips==0.1.1`](https://pypi.org/project/csetty-mips/0.1.1/) teaching
+engine used by the COMP1521 image. No upstream mipsy source or binary is
+included. See the [integration note](docs/CSETTY_MIPS_INTEGRATION.md) and the
+[CSEtty-MIPS repository](https://github.com/JiaruiUNSW/CSEtty-MIPS) for its CLI,
+Python API, specification, and provenance.
+
+## Project status
+
+This repository is the `0.1.0a3` source-only alpha release candidate. The latest
+published PyPI alpha is `0.1.0a1`. The current course images have passed the
+complete prepare, attach, companion, autotest, submit, finish, judge, and report
+workflow on the current Apple Silicon development Mac. Exact commit
+`bc9d47bb65ee246e488d3a14156c0965e530c754` also passed the recorded native
+Windows acceptance run described in
+[`docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md`](docs/WINDOWS_VALIDATION_RESULTS_0.1.0a3.md).
+
+The repository publishes source and original assessment materials, not course
+images, DCC binaries, Docker layers, VS Code Server files, or extension caches.
+`csetty prepare` builds and records those local assets explicitly. A future
+stable release still requires broader native desktop and offline VS Code
+acceptance across additional hosts.
+
+## Development
+
+For an editable development environment:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -e '.[dev]'
+.venv/bin/ruff check src tests scripts
+.venv/bin/mypy src/csetty
+.venv/bin/pytest -q
+```
+
+You can use `uv sync --extra dev` instead when `uv` is installed. On Windows,
+replace `.venv/bin/` with `.venv\Scripts\`.
 
 ## Important limitations
 

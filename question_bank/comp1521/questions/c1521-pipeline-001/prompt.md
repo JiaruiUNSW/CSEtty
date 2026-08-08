@@ -1,20 +1,22 @@
 # Pipe-Transferred Child Sum
 
+## Task
+
+Return the sum of all input elements, or 0 for an empty array.
+
 ## Background
 
 A parent delegates one deterministic reduction to a child. Because post-fork memory is private, the child returns a fixed-width binary result record through a pipe.
 
 ## Requirements
 
-Read `n` and `n` integers, create a pipe, fork one child to compute the title's metric, transfer one `long long`, wait successfully, and print `result: X`.
+Read `n` and `n` integers. The supplied code creates a pipe and forks one child. Complete the child branch so it computes the required value, transfers one `long long`, closes its pipe end, and exits successfully. The parent waits and prints `result: X`.
 
-**Exact rule.** Return the sum of all input elements, or 0 for an empty array.
+## Starter code
 
-Submit `c1521_pipeline_001.c`. Your program must not print prompts or explanatory text.
+Complete the marked child-process branch. The supplied code already reads the array, creates the pipe, forks, receives one `long long`, waits for the child, and prints the result.
 
 ## Examples
-
-Command arguments: `(no command-line arguments)`
 
 Input:
 
@@ -32,3 +34,7 @@ result: 3
 ## Implementation notes
 
 Close unused pipe ends immediately, require full record transfer, use `_exit` in the child, and validate `waitpid` status.
+
+## Submission
+
+Submit `c1521_pipeline_001.c` only. Your program must not print prompts, labels, or explanatory text unless the required output format explicitly includes them.

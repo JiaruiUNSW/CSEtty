@@ -21,8 +21,6 @@ Scan the array while maintaining exactly the state needed for even platform code
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

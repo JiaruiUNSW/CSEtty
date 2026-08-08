@@ -1,7 +1,5 @@
 # Shifted Signal Mismatches
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 Two cyclic signals contain the same number of samples. The first signal is viewed after a left rotation, and it must be compared position-by-position with the second signal.
@@ -41,4 +39,3 @@ A viewed one position to the left is exactly B.
 ## Implementation notes
 
 The index calculation must wrap for positions near the end. Shift zero is a direct comparison. Your output must match the specified spelling, spacing, and newlines exactly.
-

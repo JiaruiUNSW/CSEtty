@@ -1,7 +1,5 @@
 # Metro Fare Band
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A tiny ticket machine calculates an integer fare from journey distance and whether the trip occurs during a peak period.
@@ -39,4 +37,3 @@ The base 4 plus the middle-distance surcharge 3 plus peak surcharge 2 gives 9.
 ## Implementation notes
 
 Choose exactly one distance surcharge, then independently apply the peak surcharge. Output spelling, spaces, punctuation, and newlines must match exactly.
-

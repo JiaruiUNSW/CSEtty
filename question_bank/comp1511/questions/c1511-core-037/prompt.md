@@ -1,7 +1,5 @@
 # Sensor Window Anomalies
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A sliding window over sensor readings is anomalous when its range, maximum minus minimum, is at least a supplied threshold. The report also records the greatest range among all windows.
@@ -41,4 +39,3 @@ The last two width-three windows have range six; the first has range three.
 ## Implementation notes
 
 There are n - width + 1 windows. Initialise the maximum from the first window. Match every required label, space, punctuation mark, and newline exactly.
-

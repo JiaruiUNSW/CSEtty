@@ -21,8 +21,6 @@ Visit exactly the cells participating in all-zero sensor rows and maintain one s
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

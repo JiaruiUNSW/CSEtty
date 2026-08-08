@@ -1,7 +1,5 @@
 # Cyclic Trail Distance
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 Checkpoints form a closed trail. The travel cost between consecutive checkpoints is the absolute difference between their integer labels, including the edge from the last checkpoint back to the first.
@@ -40,4 +38,3 @@ The four costs are 3, 2, 4, and 5.
 ## Implementation notes
 
 Modulo indexing can select the next checkpoint for the last element. A small integer absolute-value helper avoids changing the array. Your output must match the specified spelling, spacing, and newlines exactly.
-

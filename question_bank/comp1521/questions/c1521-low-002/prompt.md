@@ -4,9 +4,6 @@
 
 Read two signed sensor readings `a` and `b`, then print the non-negative distance `|a - b|` and a newline.
 
-This is an original local practice task. It exercises the `mips-basics, mips-control, integer-representation`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Compute the difference in registers, branch only when the sign requires negation, and print one decimal integer.
@@ -32,12 +29,6 @@ the exact output is:
 7
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 A zero or positive difference is already the answer. For a negative difference, subtract it from zero. The comparison must be signed.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

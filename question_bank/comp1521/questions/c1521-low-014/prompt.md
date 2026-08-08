@@ -4,9 +4,6 @@
 
 Read an unsigned byte value `x` in decimal and a rotation count `k`. Rotate the low eight bits of `x` left by `k`, then print the resulting unsigned byte in decimal.
 
-This is an original local practice task. It exercises the `bitwise, mips-control, integer-representation`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Implement `(x << k) | (x >> (8-k))`, mask the result to eight bits, and handle `k=0` without shifting by eight.
@@ -32,12 +29,6 @@ the exact output is:
 3
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 Use variable shifts `sllv` and `srlv`. Branch around the second expression for `k=0`, then apply an `0xff` mask.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

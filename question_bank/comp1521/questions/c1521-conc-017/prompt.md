@@ -6,11 +6,29 @@ A bounded producer/consumer queue requires two conditions: consumers wait while 
 
 ## Requirements
 
-Implement `c1521_conc_017.c` as `./c1521_conc_017 CAPACITY CONSUMERS VALUE ...`. CAPACITY is 1 through 8, CONSUMERS is 1 through 4, there are 1 through 16 values, and values are -10000 through 10000. Create one producer thread and the requested consumer threads. The producer enqueues indexed tasks in argument order into a circular queue protected by one mutex and `not_empty`/`not_full` condition variables, then sets `done` and broadcasts. Consumers dequeue until done and empty, compute squares, and store into the result slot named by the task index. Join all threads, print indexed squares in argument order, then `total=S`.
+- Implement `c1521_conc_017.c` as `./c1521_conc_017 CAPACITY CONSUMERS VALUE ...`.
+- CAPACITY is 1 through 8, CONSUMERS is 1 through 4, there are 1 through 16 values, and values are -10000 through 10000.
+- Create one producer thread and the requested consumer threads.
+- The producer enqueues indexed tasks in argument order into a circular queue protected by one mutex and `not_empty`/`not_full` condition variables, then sets `done` and broadcasts.
+- Consumers dequeue until done and empty, compute squares, and store into the result slot named by the task index.
+- Join all threads, print indexed squares in argument order, then `total=S`.
+- Print each result as `INDEX square=S`, then print the final line `total=T`.
 
 ## Examples
 
-Capacity one with values 2 and -3 must still terminate and print squares 4 and 9, then total 13. Consumer completion order never affects output order.
+Command:
+
+```text
+./c1521_conc_017 1 1 2 -3
+```
+
+Output:
+
+```text
+0 square=4
+1 square=9
+total=13
+```
 
 ## Implementation notes
 

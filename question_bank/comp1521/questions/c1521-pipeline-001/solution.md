@@ -21,8 +21,6 @@ Compute pipe-transferred child sum in the child and use the pipe as the only res
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

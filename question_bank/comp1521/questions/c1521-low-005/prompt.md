@@ -4,9 +4,6 @@
 
 Read signed integers `value`, `low`, and `high`. Print `low` when `value < low`, `high` when `value > high`, and otherwise print `value`.
 
-This is an original local practice task. It exercises the `mips-control, integer-representation`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 All comparisons must be signed, and the output must contain exactly the clamped decimal value plus newline.
@@ -33,12 +30,6 @@ the exact output is:
 10
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 The lower-bound and upper-bound cases are mutually exclusive once `low <= high` is known. Structure the branches so the in-range path remains clear.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

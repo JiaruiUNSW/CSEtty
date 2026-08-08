@@ -6,11 +6,27 @@ Independent string analysis is a natural thread task. Deterministic reporting co
 
 ## Requirements
 
-Implement `c1521_conc_011.c`. Accept one to eight strings. Create one thread per string; worker (i) counts ASCII vowels `a e i o u` case-insensitively in argument (i) and writes only result slot (i). The main thread must join all workers and then print `INDEX vowels=N` in argument order. Punctuation and non-vowels are ignored. Invalid argument counts or pthread failures return 1 after joining every thread that was created.
+- Implement `c1521_conc_011.c`.
+- Accept one to eight strings.
+- Create one thread per string; worker (i) counts ASCII vowels `a e i o u` case-insensitively in argument (i) and writes only result slot (i).
+- The main thread must join all workers and then print `INDEX vowels=N` in argument order.
+- Punctuation and non-vowels are ignored.
+- Invalid argument counts or pthread failures return 1 after joining every thread that was created.
 
 ## Examples
 
-Arguments `apple SKY` print vowel counts 2 and 0. Output order remains zero then one even if the second worker finishes first.
+Command:
+
+```text
+./c1521_conc_011 apple SKY
+```
+
+Output:
+
+```text
+0 vowels=2
+1 vowels=0
+```
 
 ## Implementation notes
 

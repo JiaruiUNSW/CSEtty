@@ -1,7 +1,5 @@
 # Frame Balance Checksum
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A rectangular tile has an outer frame and an interior. Its frame balance checksum is the sum of border values minus the sum of all strictly interior values.
@@ -42,4 +40,3 @@ The border sums to 40 and the sole interior value is 5.
 ## Implementation notes
 
 A cell is on the border when its row or column index is at either endpoint. Avoid summing corner cells twice. Your output must match the specified spelling, spacing, and newlines exactly.
-

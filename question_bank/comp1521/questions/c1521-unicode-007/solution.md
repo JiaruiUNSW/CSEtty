@@ -21,8 +21,6 @@ Classify the scalar range first, then derive unicode plane number from the UTF-8
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

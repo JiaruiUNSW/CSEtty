@@ -21,8 +21,6 @@ Scan the array while maintaining exactly the state needed for largest seismic ma
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

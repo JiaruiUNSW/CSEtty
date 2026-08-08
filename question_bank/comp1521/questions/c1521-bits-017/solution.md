@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement merge two masked device words without
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

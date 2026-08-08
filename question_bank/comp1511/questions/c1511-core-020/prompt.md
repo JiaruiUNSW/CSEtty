@@ -1,7 +1,5 @@
 # Temperature Drift
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A weather station compares an initial integer temperature with a later reading.
@@ -40,4 +38,3 @@ The later reading is five degrees higher.
 ## Implementation notes
 
 Classify the sign of the computed change rather than repeating the subtraction in every branch. Output spelling, spaces, punctuation, and newlines must match exactly.
-

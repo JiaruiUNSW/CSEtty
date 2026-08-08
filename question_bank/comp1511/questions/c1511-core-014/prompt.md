@@ -1,7 +1,5 @@
 # Descending Number Fence
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A display uses a descending sequence of positive labels separated by fence symbols.
@@ -39,4 +37,3 @@ The labels descend by one and the three separators appear only between labels.
 ## Implementation notes
 
 Print the separator based on whether another number follows. Output spelling, spaces, punctuation, and newlines must match exactly.
-

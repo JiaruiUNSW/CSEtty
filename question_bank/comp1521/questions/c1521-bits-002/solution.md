@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement extract the packet high byte without 
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

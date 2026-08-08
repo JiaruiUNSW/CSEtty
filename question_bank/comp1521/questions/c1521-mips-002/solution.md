@@ -21,8 +21,6 @@ Translate the loop invariant for mips positive reading count into a leaf MIPS fu
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -2,7 +2,7 @@
 
 ## Background
 
-This original short exercise isolates one core C skill behind a complete command-line harness. `size_t clamp_values(int *values, size_t length, int low, int high)` clamps every value to the inclusive interval and returns how many elements changed. Inputs are supplied as documented so the target behaviour can be reproduced directly.
+`size_t clamp_values(int *values, size_t length, int low, int high)` clamps every value to the inclusive interval and returns how many elements changed.
 
 ## Requirements
 
@@ -13,8 +13,19 @@ This original short exercise isolates one core C skill behind a complete command
 
 ## Examples
 
-`./c1511_adv_018 0 10 -2 5 12` prints `changes=2` followed by `0 5 10`.
+Command:
+
+```text
+./c1511_adv_018 0 10 -2 5 12
+```
+
+Output:
+
+```text
+changes=2
+0 5 10
+```
 
 ## Implementation notes
 
-Modify values in place. The provided output helper prints `EMPTY` for zero values. Submit `c1511_adv_018.c`. Keep all provided function signatures and harness code unless the task explicitly identifies a starter bug. Build and submit the unique source file using the shell-free `dcc -Werror` command supplied by the pack.
+Modify values in place. The provided output helper prints `EMPTY` for zero values. Submit `c1511_adv_018.c`. Keep all provided function signatures and starter code unless the task explicitly identifies a starter bug.

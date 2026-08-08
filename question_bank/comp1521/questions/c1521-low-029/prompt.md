@@ -4,9 +4,6 @@
 
 Read `n`, target, then a strictly increasing array. Call `binary_search(base, low, high, target)` recursively and print its zero-based index, or -1 if absent.
 
-This is an original local practice task. It exercises the `mips-functions, mips-data, mips-control`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Pass four arguments in `$a0`–`$a3`. Every recursive call must preserve `$ra`; the function itself performs no I/O.
@@ -38,12 +35,6 @@ the exact output is:
 3
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 The empty-range base case is `high < low`. Compute `mid = low + (high-low)/2`, load `base[mid]`, and recurse into exactly one half.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

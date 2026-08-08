@@ -1,20 +1,22 @@
 # MIPS Adjacent Rise Count
 
+## Task
+
+Count adjacent pairs `(a[i-1], a[i])` for which the later value is strictly greater.
+
 ## Background
 
 A MIPS32 routine receives a pointer and element count after `main` reads a bounded integer stream. The routine must obey the register interface and return one scalar in `$v0`.
 
 ## Requirements
 
-Read `n` (0 to 100) and `n` signed integers. `main` calls `solve($a0 = array, $a1 = n)`. Implement `solve`, return the title's metric in `$v0`, and let `main` print it with one newline.
+Read `n` (0 to 100) and `n` signed integers. `main` calls `solve($a0 = array, $a1 = n)`. Implement `solve`, return the computed value in `$v0`, and let `main` print it with one newline.
 
-**Exact rule.** Count adjacent pairs `(a[i-1], a[i])` for which the later value is strictly greater.
+## Starter code
 
-Submit `c1521_mips_009.s`. Your program must not print prompts or explanatory text.
+Complete the `solve` label only. It receives the array address in `$a0` and its length in `$a1`, and must return the result in `$v0`; the supplied `main` handles all syscalls.
 
 ## Examples
-
-Command arguments: `(no command-line arguments)`
 
 Input:
 
@@ -32,3 +34,7 @@ Output:
 ## Implementation notes
 
 Use word-aligned loads, advance pointers by four bytes, and do not issue input/output syscalls inside `solve`.
+
+## Submission
+
+Submit `c1521_mips_009.s` only. Your program must not print prompts, labels, or explanatory text unless the required output format explicitly includes them.

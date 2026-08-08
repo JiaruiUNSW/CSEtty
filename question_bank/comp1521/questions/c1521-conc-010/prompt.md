@@ -6,11 +6,26 @@ Threads share an address space, but a parent thread should not consume a worker'
 
 ## Requirements
 
-Implement `c1521_conc_010.c` as `./c1521_conc_010 N THREADS`, where (0\le N\le1,000,000) and THREADS is 1 through 8. Create exactly THREADS workers. Worker (i) owns integers from `N*i/THREADS + 1` through `N*(i+1)/THREADS`, inclusive; an empty range contributes zero. Each worker writes only its own result slot and returns. The main thread joins every successfully created worker, adds partial sums only after joins, and prints `sum=S`. Check parsing and pthread return codes.
+- Implement `c1521_conc_010.c` as `./c1521_conc_010 N THREADS`, where (0\le N\le1,000,000) and THREADS is 1 through 8.
+- Create exactly THREADS workers.
+- Worker (i) owns integers from `N*i/THREADS + 1` through `N*(i+1)/THREADS`, inclusive; an empty range contributes zero.
+- Each worker writes only its own result slot and returns.
+- The main thread joins every successfully created worker, adds partial sums only after joins, and prints `sum=S`.
+- Check parsing and pthread return codes.
 
 ## Examples
 
-For N=10 and two threads, ranges are 1..5 and 6..10, so the printed sum is 55. More threads than values is valid.
+Command:
+
+```text
+./c1521_conc_010 10 2
+```
+
+Output:
+
+```text
+sum=55
+```
 
 ## Implementation notes
 

@@ -1,20 +1,22 @@
 # UTF-8 Continuation Byte Count
 
+## Task
+
+Return the canonical UTF-8 width minus one, or -1 for a non-scalar.
+
 ## Background
 
 A Unicode boundary utility receives one numeric code point and must reason about scalar validity and variable-width encodings without depending on locale.
 
 ## Requirements
 
-Read one hexadecimal code point and print `result: X` for the operation in the title. Surrogates and values above U+10FFFF are invalid and use the stated invalid result.
+Read one hexadecimal code point and print the computed value as `result: X` followed by one newline. Surrogates and values above U+10FFFF are invalid and use the task rule's stated invalid result.
 
-**Exact rule.** Return the canonical UTF-8 width minus one, or -1 for a non-scalar.
+## Starter code
 
-Submit `c1521_unicode_003.c`. Your program must not print prompts or explanatory text.
+Complete `static long long solve(uint32_t cp)`. The supplied `main` reads the hexadecimal code point and prints the returned value.
 
 ## Examples
-
-Command arguments: `(no command-line arguments)`
 
 Input:
 
@@ -31,3 +33,7 @@ result: 2
 ## Implementation notes
 
 Derive UTF-8 fields with masks and shifts. Validate scalar range before encoding.
+
+## Submission
+
+Submit `c1521_unicode_003.c` only. Your program must not print prompts, labels, or explanatory text unless the required output format explicitly includes them.

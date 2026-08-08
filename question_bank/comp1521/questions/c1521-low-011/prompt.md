@@ -4,9 +4,6 @@
 
 Read three signed integers. Call a function `range_width` with them in `$a0`–`$a2`; the function returns `max - min` in `$v0`. Print that result.
 
-This is an original local practice task. It exercises the `mips-functions, mips-control`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 `main` must use `jal range_width`. The function must return with `jr $ra` and follow caller/callee register conventions.
@@ -33,12 +30,6 @@ the exact output is:
 10
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 A leaf function needs no stack frame if it only uses caller-saved temporaries. Find the minimum and maximum independently before subtracting.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

@@ -4,9 +4,6 @@
 
 Read `n`, followed by `n` integers. For each value, call `square`, a leaf function receiving `$a0` and returning its square in `$v0`. Print the sum of squares.
 
-This is an original local practice task. It exercises the `mips-functions, mips-control`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 The loop must invoke `jal square` once per element. The final sum and every individual square fit in signed 32 bits.
@@ -34,12 +31,6 @@ the exact output is:
 29
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 Values in caller-saved registers may be changed by a function. Keep the persistent loop state in `$s` registers or save it before each call.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

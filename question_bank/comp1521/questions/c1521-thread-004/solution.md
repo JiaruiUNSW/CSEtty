@@ -21,8 +21,6 @@ Partition indices by residue modulo three and merge local values for threaded ab
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

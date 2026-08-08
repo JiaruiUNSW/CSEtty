@@ -1,7 +1,5 @@
 # Signal State Advances
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A three-state signal repeats the cycle Red, Green, Amber, Red. The input gives a starting state and a number of advances.
@@ -39,4 +37,3 @@ Two advances from Green move through Amber to Red.
 ## Implementation notes
 
 Reducing steps modulo three is optional; a small loop is sufficient. Output spelling, spaces, punctuation, and newlines must match exactly.
-

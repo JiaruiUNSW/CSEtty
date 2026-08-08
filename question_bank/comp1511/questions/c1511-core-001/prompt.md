@@ -1,7 +1,5 @@
 # Count Echo Valleys
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A sensor log is stored as a sequence of integer readings. An interior reading is an echo valley when it is strictly lower than the reading immediately before it and the reading immediately after it.
@@ -40,4 +38,3 @@ The readings 1 and 2 are each lower than both immediate neighbours.
 ## Implementation notes
 
 Scan only indices 1 through n - 2. Strict comparisons matter: an equal neighbour prevents a valley. Your output must match the specified spelling, spacing, and newlines exactly.
-

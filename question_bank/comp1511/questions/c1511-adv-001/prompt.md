@@ -2,7 +2,7 @@
 
 ## Background
 
-This original exercise practises a small, precisely specified linked-list transformation or analysis. The supplied command-line harness converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `int alternating_position_total(const struct node *head)` returns the sum of values at zero-based positions 0, 2, 4, and so on.
+The supplied `main` converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `int alternating_position_total(const struct node *head)` returns the sum of values at zero-based positions 0, 2, 4, and so on.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original exercise practises a small, precisely specified linked-list transf
 
 ## Examples
 
-Running `./c1511_adv_001 4 7 1 9` prints `5`. Running it with no values prints `0`. List output uses one space between integers and a final newline; an empty list is printed as `EMPTY`.
+Command:
+
+```text
+./c1511_adv_001 4 7 1 9
+```
+
+Output:
+
+```text
+5
+```
 
 ## Implementation notes
 
-Assume the mathematical result fits in an `int`. Do not allocate memory, use arrays, or count the list in a separate pass. Submit `c1511_adv_001.c`. The harness validates ownership by freeing all surviving nodes, so do not retain hidden aliases. Build commands are argument arrays and do not invoke a shell. Your submitted file must compile cleanly with `dcc -Werror`.
+Assume the mathematical result fits in an `int`. Do not allocate memory, use arrays, or count the list in a separate pass. Submit `c1511_adv_001.c`. The supplied `main` validates ownership by freeing all surviving nodes, so do not retain hidden aliases.

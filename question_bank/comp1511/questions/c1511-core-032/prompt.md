@@ -1,7 +1,5 @@
 # Most Improved Student
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A class stores student IDs with before and after scores. The most improved student has the largest after-minus-before gain; ties prefer the higher after score, then the lower ID.
@@ -43,4 +41,3 @@ Students 42 and 17 both gain 15, but 17 has the higher after score.
 ## Implementation notes
 
 A gain may be negative. Initialise the winner from the first record rather than assuming gains are non-negative. Match every required label, space, punctuation mark, and newline exactly.
-

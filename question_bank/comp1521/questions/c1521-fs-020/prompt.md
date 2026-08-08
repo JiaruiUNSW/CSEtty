@@ -6,11 +6,34 @@ Fixed-width files support direct record access: record `i` begins at `i * width`
 
 ## Requirements
 
-Write `c1521_fs_020.c`. The file consists entirely of six-byte records: five data bytes followed by newline. Given `FILE INDEX`, where `INDEX` is non-negative decimal, use one positioned read to obtain that record and print its five data bytes plus newline. If the index is beyond the complete records, print `NOT FOUND`. A non-regular file, malformed file length or record newline, invalid index, overflow, or I/O failure prints `c1521_fs_020: error\n` to standard error and returns 1.
+- Write `c1521_fs_020.c`.
+- The file consists entirely of six-byte records: five data bytes followed by newline.
+- Given `FILE INDEX`, where `INDEX` is non-negative decimal, use one positioned read to obtain that record and print its five data bytes plus newline.
+- If the index is beyond the complete records, print `NOT FOUND`.
+- A non-regular file, malformed file length or record newline, invalid index, overflow, or I/O failure prints `c1521_fs_020: error\n` to standard error and returns 1.
 
 ## Examples
 
-A file containing `alpha\nbravo\n` returns `bravo` for index 1 and `NOT FOUND` for index 2.
+Command:
+
+```text
+./c1521_fs_020 records 1
+```
+
+Files provided for this example:
+
+- `records` (12 bytes) contains:
+
+  ```text
+  alpha
+  bravo
+  ```
+
+Output:
+
+```text
+bravo
+```
 
 ## Implementation notes
 

@@ -4,9 +4,6 @@
 
 Read decimal fields `opcode rs rt immediate` and encode the standard MIPS I-format word. Print the result as eight lowercase hexadecimal digits.
 
-This is an original local practice task. It exercises the `mips-basics, bitwise, integer-representation`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Place the 6-bit opcode at 31..26, 5-bit `rs` at 25..21, 5-bit `rt` at 20..16, and the low 16 bits of signed `immediate` at 15..0.
@@ -31,12 +28,6 @@ the exact output is:
 212afffc
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 Convert the immediate to `uint16_t` before widening it. Use unsigned fields so left shifts are defined.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

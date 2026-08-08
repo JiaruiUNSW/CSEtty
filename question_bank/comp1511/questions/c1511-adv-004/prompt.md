@@ -2,7 +2,7 @@
 
 ## Background
 
-This original exercise practises a small, precisely specified linked-list transformation or analysis. The supplied command-line harness converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `int longest_nondecreasing_run(const struct node *head)` returns the length of the longest contiguous run in which each value is at least its predecessor.
+The supplied `main` converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `int longest_nondecreasing_run(const struct node *head)` returns the length of the longest contiguous run in which each value is at least its predecessor.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original exercise practises a small, precisely specified linked-list transf
 
 ## Examples
 
-`./c1511_adv_004 3 3 5 2 4` prints `3` because `3 3 5` is the longest qualifying run. List output uses one space between integers and a final newline; an empty list is printed as `EMPTY`.
+Command:
+
+```text
+./c1511_adv_004 3 3 5 2 4
+```
+
+Output:
+
+```text
+3
+```
 
 ## Implementation notes
 
-Keep both the current run length and best length. Modify only the marked function. Submit `c1511_adv_004.c`. The harness validates ownership by freeing all surviving nodes, so do not retain hidden aliases. Build commands are argument arrays and do not invoke a shell. Your submitted file must compile cleanly with `dcc -Werror`.
+Keep both the current run length and best length. Modify only the marked function. Submit `c1511_adv_004.c`. The supplied `main` validates ownership by freeing all surviving nodes, so do not retain hidden aliases.

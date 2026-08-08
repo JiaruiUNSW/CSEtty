@@ -2,7 +2,7 @@
 
 ## Background
 
-This original medium exercise combines several C concepts in one self-contained linked or dynamically allocated data task. `void deal_alternating(struct node *head, struct node **first, struct node **second)` moves nodes at even positions to `first` and odd positions to `second`. The supplied harness constructs all input state and retains the ownership rules described below.
+`void deal_alternating(struct node *head, struct node **first, struct node **second)` moves nodes at even positions to `first` and odd positions to `second`.
 
 ## Requirements
 
@@ -13,8 +13,19 @@ This original medium exercise combines several C concepts in one self-contained 
 
 ## Examples
 
-`./c1511_adv_027 1 2 3 4 5` prints `A: 1 3 5` and then `B: 2 4`.
+Command:
+
+```text
+./c1511_adv_027 1 2 3 4 5
+```
+
+Output:
+
+```text
+A: 1 3 5
+B: 2 4
+```
 
 ## Implementation notes
 
-A pointer-to-tail-link for each output avoids separate head cases. The harness prints and frees both results. Submit `c1511_adv_027.c`. Modify only the marked function or helper region, retain the testable command-line interface, and submit the uniquely named source. The build uses the shell-free argument array `dcc -Werror <file> -o <program>`.
+A pointer-to-tail-link for each output avoids separate head cases. The supplied `main` prints and frees both results. Submit `c1511_adv_027.c`. Modify only the marked function or helper region, retain the testable command-line interface, and submit the uniquely named source.

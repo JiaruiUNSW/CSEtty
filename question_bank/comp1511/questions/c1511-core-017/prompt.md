@@ -1,7 +1,5 @@
 # Parenthesis Stream Audit
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A line of text may contain nested parentheses mixed with arbitrary other characters. The audit records whether parentheses are balanced and the greatest nesting depth reached.
@@ -40,4 +38,3 @@ The inner pair reaches depth two and every opener is closed.
 ## Implementation notes
 
 Track current depth, maximum depth, and an invalid flag. Do not let an unmatched closing parenthesis make the depth negative. Output spelling, spaces, punctuation, and newlines must match exactly.
-

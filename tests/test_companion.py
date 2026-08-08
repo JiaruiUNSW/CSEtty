@@ -47,7 +47,7 @@ def _application(
     manifest_text = manifest.read_text(encoding="utf-8").replace(
         'kind = "c_program"',
         'kind = "c_program"\nprompt = "paper/q1.md"\n'
-        'difficulty = 2\ntrack = "normal"\ntags = ["arrays-1d"]',
+        'difficulty = 2\ntrack = "normal"\ntags = ["arrays-1d", "loops", "functions"]',
     )
     if state in {AttemptState.CREATED, AttemptState.READING}:
         manifest_text = manifest_text.replace(
@@ -132,6 +132,19 @@ def test_companion_overview_and_question_are_pack_driven(tmp_path: Path) -> None
     assert "Detailed question" in question
     assert "difficulty 2/5" in question
     assert "arrays-1d" in question
+    tag_badges = (
+        '<span class="badge">arrays-1d</span> · '
+        '<span class="badge">loops</span> · '
+        '<span class="badge">functions</span>'
+    )
+    assert overview.count(tag_badges) == 2
+    assert tag_badges in question
+    assert (
+        '<span class="badge">c_program</span> · '
+        '<span class="badge">difficulty 2/5</span> · '
+        '<span class="badge">normal</span> · '
+        f"{tag_badges}"
+    ) in question
     assert "&lt;safe&gt;" in question
     assert overview.count('target="_blank" rel="noopener noreferrer"') == len(
         course_resource_links("comp1511")

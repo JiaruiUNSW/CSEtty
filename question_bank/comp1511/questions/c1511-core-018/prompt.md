@@ -1,7 +1,5 @@
 # Vowel Bookends
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A lowercase word is summarised by its vowel count and whether vowels appear at both ends.
@@ -40,4 +38,3 @@ The word contains `a` and `e`, and both endpoints are vowels.
 ## Implementation notes
 
 Find the string length while counting, or use the standard string length function after input. Output spelling, spaces, punctuation, and newlines must match exactly.
-

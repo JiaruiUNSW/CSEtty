@@ -2,7 +2,7 @@
 
 ## Background
 
-This original short exercise isolates one core C skill behind a complete command-line harness. `int first_decimal(const char *text, int *value)` finds the first decimal integer token and stores it through `value`, returning 1 on success and 0 otherwise. Inputs are supplied as documented so the target behaviour can be reproduced directly.
+`int first_decimal(const char *text, int *value)` finds the first decimal integer token and stores it through `value`, returning 1 on success and 0 otherwise.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original short exercise isolates one core C skill behind a complete command
 
 ## Examples
 
-`./c1511_adv_022 'abc -42x'` prints `-42`; `./c1511_adv_022 none` prints `NONE`.
+Command:
+
+```text
+./c1511_adv_022 'abc -42x'
+```
+
+Output:
+
+```text
+-42
+```
 
 ## Implementation notes
 
-Exactly one text argument is supplied. Cast to `unsigned char` before passing bytes to `isdigit`. Submit `c1511_adv_022.c`. Keep all provided function signatures and harness code unless the task explicitly identifies a starter bug. Build and submit the unique source file using the shell-free `dcc -Werror` command supplied by the pack.
+Exactly one text argument is supplied. Cast to `unsigned char` before passing bytes to `isdigit`. Submit `c1511_adv_022.c`. Keep all provided function signatures and starter code unless the task explicitly identifies a starter bug.

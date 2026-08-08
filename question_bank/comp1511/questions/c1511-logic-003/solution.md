@@ -21,8 +21,6 @@ Compare the three values in a fixed order to compute bounded pump setting. Keep 
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

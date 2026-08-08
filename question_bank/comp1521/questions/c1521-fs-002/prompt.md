@@ -6,11 +6,34 @@ A binary file format must choose a byte order rather than expose the host machin
 
 ## Requirements
 
-Write `c1521_fs_002.c`. The single argument is an output filename. Read zero or more base-10 integers, one per line, from standard input; each must be in `0..4294967295`. Write each value as exactly four bytes, most significant byte first. Close and reopen the file, decode every complete word, and print `count=N checksum=S`, where `S` is the sum modulo 2^32. Invalid input or any I/O failure must print `c1521_fs_002: error\n` to standard error, return 1, and never print a success line.
+- Write `c1521_fs_002.c`.
+- The single argument is an output filename.
+- Read zero or more base-10 integers, one per line, from standard input; each must be in `0..4294967295`.
+- Write each value as exactly four bytes, most significant byte first.
+- Close and reopen the file, decode every complete word, and print `count=N checksum=S`, where `S` is the sum modulo 2^32.
+- Invalid input or any I/O failure must print `c1521_fs_002: error\n` to standard error, return 1, and never print a success line.
 
 ## Examples
 
-Input `1`, `256`, and `65537` creates twelve bytes and prints `count=3 checksum=65794`.
+Command:
+
+```text
+./c1521_fs_002 words.bin
+```
+
+Input:
+
+```text
+1
+256
+65537
+```
+
+Output:
+
+```text
+count=3 checksum=65794
+```
 
 ## Implementation notes
 

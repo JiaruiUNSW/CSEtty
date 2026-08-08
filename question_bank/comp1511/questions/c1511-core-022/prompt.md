@@ -1,7 +1,5 @@
 # Compass Quarter Turns
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A compass pointer is rotated by signed quarter turns. Positive turns are clockwise and negative turns are anticlockwise.
@@ -39,4 +37,3 @@ One anticlockwise quarter turn from South points East.
 ## Implementation notes
 
 Map N, E, S, W to consecutive values zero through three. Add turns, take modulo four, then repair a negative result. Output spelling, spaces, punctuation, and newlines must match exactly.
-

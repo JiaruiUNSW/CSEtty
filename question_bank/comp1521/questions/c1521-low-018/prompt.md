@@ -4,9 +4,6 @@
 
 Read three eight-digit hexadecimal words: `value`, `set_mask`, and `clear_mask`. First set every selected bit, then clear every selected bit, and print the final word in lowercase hexadecimal.
 
-This is an original local practice task. It exercises the `bitwise, integer-representation`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Compute `(value | set_mask) & ~clear_mask`. Clearing wins when the same bit appears in both masks. Print exactly eight hex digits.
@@ -31,12 +28,6 @@ the exact output is:
 00000007
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 Use fixed-width unsigned operations. The field width and leading-zero flag in `printf` make output deterministic.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

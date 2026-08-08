@@ -21,8 +21,6 @@ Scan the line from left to right and retain only the state needed for balanced c
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

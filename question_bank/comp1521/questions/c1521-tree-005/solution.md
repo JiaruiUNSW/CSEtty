@@ -21,14 +21,20 @@ Use depth-first traversal and merge each entry into a summary for recursive dire
 
 ## Worked example
 
-Command arguments: `tree`
-Fixture files: tree/src/one.c, tree/build/two.o
+Command-line arguments: `tree`
 
-Input:
+Files provided for this example:
 
-```text
-(empty)
-```
+- `tree/src/one.c` contains:
+
+  ```text
+  int x;
+  ```
+- `tree/build/two.o` contains:
+
+  ```text
+  1234
+  ```
 
 Output:
 

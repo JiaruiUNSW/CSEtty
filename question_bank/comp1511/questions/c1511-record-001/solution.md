@@ -21,8 +21,6 @@ Store each input row as one struct and compute first highest lab batch over the 
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

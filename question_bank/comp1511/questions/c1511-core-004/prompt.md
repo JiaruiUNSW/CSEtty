@@ -1,7 +1,5 @@
 # Balanced Cut Counter
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A row of cargo crates may be cut between adjacent crates. A cut is balanced when the total weight strictly to its left equals the total weight strictly to its right.
@@ -40,4 +38,3 @@ Only the cut after the second crate leaves weight 2 on each side.
 ## Implementation notes
 
 Compute the total once, then move values from the right sum into a running left sum. This avoids a nested loop. Your output must match the specified spelling, spacing, and newlines exactly.
-

@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement sign-extend an eight-bit reading with
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

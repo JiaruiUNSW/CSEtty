@@ -21,8 +21,6 @@ Compute pipe-transferred absolute total in the child and use the pipe as the onl
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

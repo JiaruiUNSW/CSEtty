@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement compute packet bit parity without str
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

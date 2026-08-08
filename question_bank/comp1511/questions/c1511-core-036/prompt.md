@@ -1,7 +1,5 @@
 # Digit-Run Redactor
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A log line is sanitised by replacing each maximal consecutive run of ASCII digits with a single `#`, while retaining every other character.
@@ -40,4 +38,3 @@ The two maximal digit runs are each replaced by one marker.
 ## Implementation notes
 
 A digit begins a new run when the previous processed character was not a digit. Match every required label, space, punctuation mark, and newline exactly.
-

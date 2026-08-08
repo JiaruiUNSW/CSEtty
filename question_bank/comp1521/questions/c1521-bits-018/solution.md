@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement classify a binary32 telemetry word wi
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

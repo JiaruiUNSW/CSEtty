@@ -2,7 +2,7 @@
 
 ## Background
 
-This original exercise practises a small, precisely specified linked-list transformation or analysis. The supplied command-line harness converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `int count_record_highs(const struct node *head)` counts nodes whose value is strictly greater than every earlier value. The first node, when present, is a record.
+The supplied `main` converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `int count_record_highs(const struct node *head)` counts nodes whose value is strictly greater than every earlier value. The first node, when present, is a record.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original exercise practises a small, precisely specified linked-list transf
 
 ## Examples
 
-`./c1511_adv_002 3 1 4 4 7` prints `3`, for the records 3, 4, and 7. List output uses one space between integers and a final newline; an empty list is printed as `EMPTY`.
+Command:
+
+```text
+./c1511_adv_002 3 1 4 4 7
+```
+
+Output:
+
+```text
+3
+```
 
 ## Implementation notes
 
-Values may be negative. Modify only the marked function in the starter harness. Submit `c1511_adv_002.c`. The harness validates ownership by freeing all surviving nodes, so do not retain hidden aliases. Build commands are argument arrays and do not invoke a shell. Your submitted file must compile cleanly with `dcc -Werror`.
+Values may be negative. Modify only the marked function in the starter program. Submit `c1511_adv_002.c`. The supplied `main` validates ownership by freeing all surviving nodes, so do not retain hidden aliases.

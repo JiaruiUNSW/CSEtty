@@ -21,8 +21,6 @@ Translate the loop invariant for mips minimum buffer value into a leaf MIPS func
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

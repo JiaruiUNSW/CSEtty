@@ -17,6 +17,45 @@ one or more starter files, matching author reference files, and public and
 and Implementation notes. Solutions must include Approach, Step-by-step, Worked
 example, Correctness, Complexity, and Common pitfalls.
 
+Student-facing prompts must state the concrete operation directly; a title or
+scenario must never be the only definition of the task. When starter code
+contains a marked function or block, the prompt names that exact editable
+interface and explains what the supplied `main` already does. Examples use
+fenced input/output blocks and show command arguments or fixture contents only
+when they exist. Author provenance, hidden-marking language, and internal build
+details do not belong in a student prompt.
+
+The generated half of each bank is reproduced by
+`scripts/generate_question_bank_expansion.py`. The older half is normalised by
+`scripts/polish_legacy_question_prompts.py`; both scripts are idempotent so a
+curator can refresh the committed Markdown without changing tests or scoring.
+
+## Fixed papers, banks, and generated papers
+
+These names are intentionally different:
+
+| Name | What it is | What to do with it |
+|---|---|---|
+| `comp1511-original-a` | A fixed 11-question exam paper | Start it directly with `csetty start comp1511-original-a --mode exam` |
+| `comp1521-original-a` | A fixed 10-question exam paper | Start it directly with `csetty start comp1521-original-a --mode exam` |
+| `comp1511` | The built-in 150-question COMP1511 bank | Pass it to `csetty bank build`; do not pass it directly to `csetty start` |
+| `comp1521` | The built-in 150-question COMP1521 bank | Pass it to `csetty bank build`; do not pass it directly to `csetty start` |
+
+Build a paper into a new or empty directory, then run that directory through
+the normal exam workflow:
+
+```sh
+csetty bank build comp1511 ./my-comp1511-paper --seed 1511
+csetty start ./my-comp1511-paper --mode exam
+```
+
+The second command shows the Welcome screen and simulated zID entry before the
+read-only reading period. The starter workspace is created only when working
+time begins. Generated filenames are based on exam position (`q1.c`, `q2.c`,
+and so on; MIPS questions use `qN.s`), so the normal `autotest q1` and
+`submit q1` workflow applies. Using the same bank version and seed reproduces
+the same paper; changing the seed requests a different selection.
+
 ## Commands
 
 ```text

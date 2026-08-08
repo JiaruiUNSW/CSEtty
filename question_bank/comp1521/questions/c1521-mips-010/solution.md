@@ -21,8 +21,6 @@ Translate the loop invariant for mips position-weighted checksum into a leaf MIP
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

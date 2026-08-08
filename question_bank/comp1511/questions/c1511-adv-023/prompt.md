@@ -2,7 +2,7 @@
 
 ## Background
 
-This original short exercise isolates one core C skill behind a complete command-line harness. `size_t recursive_tally(const char *text, char target)` recursively counts occurrences of one byte in a null-terminated string. Inputs are supplied as documented so the target behaviour can be reproduced directly.
+`size_t recursive_tally(const char *text, char target)` recursively counts occurrences of one byte in a null-terminated string.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original short exercise isolates one core C skill behind a complete command
 
 ## Examples
 
-`./c1511_adv_023 a banana` prints `3`; target `A` in `banana` prints `0`.
+Command:
+
+```text
+./c1511_adv_023 a banana
+```
+
+Output:
+
+```text
+3
+```
 
 ## Implementation notes
 
-Use the null terminator as the base case and add either zero or one before the recursive result. Submit `c1511_adv_023.c`. Keep all provided function signatures and harness code unless the task explicitly identifies a starter bug. Build and submit the unique source file using the shell-free `dcc -Werror` command supplied by the pack.
+Use the null terminator as the base case and add either zero or one before the recursive result. Submit `c1511_adv_023.c`. Keep all provided function signatures and starter code unless the task explicitly identifies a starter bug.

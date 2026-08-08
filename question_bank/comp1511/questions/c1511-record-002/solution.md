@@ -21,8 +21,6 @@ Store each input row as one struct and compute positive wildlife records over th
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

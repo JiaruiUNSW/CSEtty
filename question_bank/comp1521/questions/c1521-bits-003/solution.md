@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement combine redundant sensor masks withou
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -21,8 +21,6 @@ Classify the scalar range first, then derive unicode scalar validity from the UT
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

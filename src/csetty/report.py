@@ -21,6 +21,13 @@ from .web_theme import course_navbar, course_theme_class, theme_style
 _MAX_EMBEDDED_SOURCE_BYTES = 256 * 1024
 
 
+def _render_badges(labels: Sequence[object]) -> str:
+    """Render badges with real text separators that survive copying."""
+    return " · ".join(
+        f'<span class="badge">{html.escape(str(label))}</span>' for label in labels
+    )
+
+
 def _companion_report_url(html_path: Path) -> str | None:
     """Return the authenticated loopback report URL when its companion is healthy."""
     attempt_id = html_path.stem
@@ -534,7 +541,7 @@ def render_report_html(document: Mapping[str, Any]) -> str:
         )
         earned = "—" if evaluation is None else evaluation.get("points_earned")
         available = "—" if evaluation is None else evaluation.get("automatic_points")
-        tags = "".join(f'<span class="badge">{html.escape(str(tag))}</span>' for tag in question.get("tags", []))
+        tags = _render_badges(question.get("tags", []))
         question_nav_items.append(
             f'<a href="#report-question-{question_id}">Q{number}. '
             f"{html.escape(str(question.get('title')))}</a>"

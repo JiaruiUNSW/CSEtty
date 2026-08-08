@@ -1,7 +1,5 @@
 # Repair the Clock Wrap
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 The supplied clock program adds a signed minute offset, but it wraps by the wrong unit and mishandles negative remainders.
@@ -39,4 +37,3 @@ Twenty minutes after 23:50 is ten minutes after midnight.
 ## Implementation notes
 
 A day contains 1440 minutes. After remainder, add 1440 if the total is negative before splitting into hours and minutes. Output spelling, spaces, punctuation, and newlines must match exactly.
-

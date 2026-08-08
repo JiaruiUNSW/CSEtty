@@ -1,7 +1,5 @@
 # Longest Gentle Climb
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A hiking trace is divided into consecutive samples. A gentle climb is a contiguous run in which each new sample is greater than or equal to the previous sample.
@@ -40,4 +38,3 @@ Both `1 2 2` and `0 3 4` have length 3.
 ## Implementation notes
 
 Maintain the current run length and the best length seen. Reset the current length to 1 after a decrease. Your output must match the specified spelling, spacing, and newlines exactly.
-

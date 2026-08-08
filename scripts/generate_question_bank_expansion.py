@@ -75,25 +75,65 @@ def _points(slot: str) -> tuple[int, int]:
 
 
 def _example_text(case: Case, stdout: str) -> str:
-    command = " ".join(case.args) if case.args else "(no command-line arguments)"
-    stdin = case.stdin.rstrip("\n") or "(empty)"
-    output = stdout.rstrip("\n") or "(empty)"
-    fixtures = ""
+    sections: list[str] = []
+    if case.args:
+        sections.append(f"Command-line arguments: `{' '.join(case.args)}`")
     if case.fixtures:
-        fixtures = "\nFixture files: " + ", ".join(target for _, target, _ in case.fixtures)
-    return (
-        f"Command arguments: `{command}`{fixtures}\n\n"
-        f"Input:\n\n```text\n{stdin}\n```\n\n"
-        f"Output:\n\n```text\n{output}\n```"
-    )
+        descriptions: list[str] = []
+        for _source, target, content in case.fixtures:
+            if not content:
+                descriptions.append(f"- `{target}` is empty.")
+                continue
+            try:
+                decoded = content.decode("utf-8")
+            except UnicodeDecodeError:
+                decoded = ""
+            if decoded and all(character.isprintable() or character in "\n\r\t" for character in decoded):
+                descriptions.append(
+                    f"- `{target}` contains:\n\n  ```text\n"
+                    + "\n".join(f"  {line}" for line in decoded.rstrip("\n").split("\n"))
+                    + "\n  ```"
+                )
+            else:
+                descriptions.append(f"- `{target}` contains the bytes `{content.hex()}` (hexadecimal).")
+        sections.append("Files provided for this example:\n\n" + "\n".join(descriptions))
+    if case.stdin:
+        sections.append(f"Input:\n\n```text\n{case.stdin.rstrip(chr(10))}\n```")
+    output = stdout.rstrip("\n")
+    rendered_output = output if output else "(no output)"
+    sections.append(f"Output:\n\n```text\n{rendered_output}\n```")
+    return "\n\n".join(sections)
+
+
+def _starter_instructions(question: AuthoredQuestion) -> str:
+    prefix = question.id.rsplit("-", 1)[0]
+    instructions = {
+        "c1511-array": "Complete `static long long solve(const int *a, int n)`. The supplied `main` already reads the array and prints the returned value; do not replace the input/output code.",
+        "c1511-list": "Complete `static long long solve(const struct node *head)`. The supplied `main` builds and later frees the list; `solve` must inspect it without changing ownership.",
+        "c1511-text": "Complete `static long long solve(const char *s)`. The supplied `main` reads one line, removes its trailing newline, and prints the returned value.",
+        "c1511-logic": "Complete `static long long solve(int a, int b, int c)`. The supplied `main` reads the three inputs and prints the returned value.",
+        "c1511-grid": "Complete `static long long solve(const int *a, int rows, int columns)`. The grid is stored in row-major order, so cell `(r, c)` is `a[r * columns + c]`.",
+        "c1511-record": "Complete `static long long solve(const struct record *a, int n)`. The supplied `main` reads the records and prints the returned value.",
+        "c1511-system": "Complete the marked command loop and dynamic record table in `main`. This is a whole-program task; the starter provides only the data definition and includes.",
+        "c1521-bits": "Complete `static uint32_t solve(uint32_t x, uint32_t y, unsigned k)`. The supplied `main` reads the values and prints the returned word in the required format.",
+        "c1521-mips": "Complete the `solve` label only. It receives the array address in `$a0` and its length in `$a1`, and must return the result in `$v0`; the supplied `main` handles all syscalls.",
+        "c1521-file": "Complete `static long long solve(const unsigned char *data, size_t n)`. The supplied `main` already opens the named file, reads every byte, closes it, and frees the buffer.",
+        "c1521-unicode": "Complete `static long long solve(uint32_t cp)`. The supplied `main` reads the hexadecimal code point and prints the returned value.",
+        "c1521-tree": "Complete `static int walk(const char *path, int depth, struct summary *s)`. The supplied `main` initialises the summary and prints the field needed by this question.",
+        "c1521-thread": "Complete `static void *worker(void *arg)`. The supplied `main` reads the array, creates and joins exactly three threads, destroys the mutex, and prints the merged total.",
+        "c1521-pipeline": "Complete the marked child-process branch. The supplied code already reads the array, creates the pipe, forks, receives one `long long`, waits for the child, and prints the result.",
+    }
+    return instructions[prefix]
 
 
 def _prompt(question: AuthoredQuestion, first_stdout: str) -> str:
     filename = _slug_source(question.id, question.extension)
-    exact_rule = (
-        f"\n\n**Exact rule.** {question.definition}" if question.definition else ""
-    )
+    task = question.definition or question.requirements
     return f"""# {question.title}
+
+## Task
+
+{task}
 
 ## Background
 
@@ -101,9 +141,11 @@ def _prompt(question: AuthoredQuestion, first_stdout: str) -> str:
 
 ## Requirements
 
-{question.requirements}{exact_rule}
+{question.requirements}
 
-Submit `{filename}`. Your program must not print prompts or explanatory text.
+## Starter code
+
+{_starter_instructions(question)}
 
 ## Examples
 
@@ -112,6 +154,10 @@ Submit `{filename}`. Your program must not print prompts or explanatory text.
 ## Implementation notes
 
 {question.implementation_notes}
+
+## Submission
+
+Submit `{filename}` only. Your program must not print prompts, labels, or explanatory text unless the required output format explicitly includes them.
 """
 
 
@@ -518,9 +564,9 @@ def _sequence_questions() -> Iterable[AuthoredQuestion]:
             weeks=(4, 5) if slot == "medium" else (4,),
             slot=slot,
             minutes=12 + difficulty * 4,
-            background=f"The data in {setting} arrives as a bounded integer array. A small, auditable metric is needed before the next processing stage.",
-            requirements="Read `n` (0 to 100), followed by `n` signed integers. Compute the metric named in the title and print `result: X` followed by a newline. Empty input arrays use the neutral result shown by the public test.",
-            implementation_notes="Use an array and a helper function. Do not sort or alter the input unless the metric explicitly depends on ordering. All supplied arithmetic fits in `long long`.",
+            background=f"The data comes from {setting} and is stored as a bounded integer array. The array order is significant whenever the task refers to positions or neighbours.",
+            requirements="Read `n` (0 to 100), followed by `n` signed integers. Print the computed value as `result: X` followed by a newline. The task rule states the result for an empty array whenever `n = 0` is valid.",
+            implementation_notes="Use the supplied array and helper function. Do not sort or alter the input unless the task explicitly depends on ordering. All supplied arithmetic fits in `long long`.",
             idea=f"Scan the array while maintaining exactly the state needed for {title.lower()}.",
             steps=(
                 "Read and validate `n`, then store exactly `n` values.",
@@ -696,9 +742,9 @@ def _list_questions() -> Iterable[AuthoredQuestion]:
             weeks=(6, 7),
             slot="list_hurdle",
             minutes=14 + difficulty * 4,
-            background="A linked chain stores readings in arrival order. The caller owns the nodes; your metric must inspect them without losing the head or leaking memory in the supplied harness.",
-            requirements="Complete `solve`. The harness converts every command-line argument to one list node, calls your function, prints `result: X`, and frees the chain. With no arguments the list is empty.",
-            implementation_notes="Do not change the harness or print inside `solve`. Preserve every `next` link. Recursive variants should give the empty-list base case before accessing a node.",
+            background="A linked chain stores readings in arrival order. The supplied `main` owns the nodes and frees the complete chain after `solve` returns.",
+            requirements="Each command-line integer becomes one list node in the same order. With no arguments, `head` is `NULL`. Return the required value from `solve`; the supplied `main` prints it as `result: X`.",
+            implementation_notes="Do not change `main` or print inside `solve`. Preserve every `next` link. Recursive variants should give the empty-list base case before accessing a node.",
             idea=f"Traverse the chain in order and maintain the minimal state for {title.lower()}.",
             steps=(
                 "Handle `head == NULL` using the documented neutral result.",
@@ -911,7 +957,7 @@ def _string_questions() -> Iterable[AuthoredQuestion]:
             weeks=(3, 5),
             slot=slot,
             minutes=10 + difficulty * 4,
-            background="A line-oriented tool must summarise human-readable text without tokenising beyond the rule in the title. The complete line, including spaces, is meaningful.",
+            background="A line-oriented tool must summarise human-readable text. The complete line, including spaces, is meaningful.",
             requirements="Read one line of at most 255 characters, excluding the final newline from the calculation. Print `result: X` and a newline. Character classification is ASCII for these tests.",
             implementation_notes="Use `fgets`, remove at most one trailing newline, and cast to `unsigned char` before calling `<ctype.h>` functions.",
             idea=f"Scan the line from left to right and retain only the state needed for {title.lower()}.",
@@ -1069,7 +1115,7 @@ def _numeric_questions() -> Iterable[AuthoredQuestion]:
             slot="short",
             minutes=8 + difficulty * 4,
             background="A small control program receives three signed readings and must make one deterministic decision. Equality and signed boundary cases are intentional.",
-            requirements="Read exactly three signed integers from standard input. Apply the rule named in the title and print `result: X` followed by one newline.",
+            requirements="Read exactly three signed integers from standard input. Print the computed value as `result: X` followed by one newline.",
             implementation_notes="Use named intermediate values when that makes the tie rule visible. Do not rely on undefined signed overflow.",
             idea=f"Compare the three values in a fixed order to compute {title.lower()}.",
             steps=(
@@ -1255,7 +1301,7 @@ def _grid_questions() -> Iterable[AuthoredQuestion]:
             slot="medium",
             minutes=22 + difficulty * 4,
             background="A rectangular grid models a spatial survey. Rows and columns may differ, so every index calculation must use the supplied column count.",
-            requirements="Read `rows columns` (each 0 to 8), then the grid in row-major order. Compute the metric in the title and print `result: X`.",
+            requirements="Read `rows columns` (each 0 to 8), then the grid in row-major order. Print the computed value as `result: X` followed by one newline.",
             implementation_notes="Store the grid in a bounded flat or two-dimensional array. Check dimensions before accessing the first cell or a neighbour/window.",
             idea=f"Visit exactly the cells participating in {title.lower()} and maintain one scalar result.",
             steps=(
@@ -1360,7 +1406,7 @@ def _record_questions() -> Iterable[AuthoredQuestion]:
             weeks=(4, 5),
             slot=slots[index - 1],
             minutes=14 + difficulty * 4,
-            background="Named records combine a short identifier with one signed measurement. The identifier establishes input shape while the metric uses record order and values.",
+            background="Named records combine a short identifier with one signed measurement. The identifier establishes the input shape while the required result uses record order and values.",
             requirements="Read `n` (0 to 50), followed by `n` lines containing a whitespace-free name and signed value. Print `result: X`.",
             implementation_notes="Represent each item with a `struct`; use a width limit when scanning the 31-character name.",
             idea=f"Store each input row as one struct and compute {title.lower()} over the resulting record array.",
@@ -1763,7 +1809,7 @@ def _bit_questions() -> Iterable[AuthoredQuestion]:
             slot=slot,
             minutes=12 + difficulty * 4,
             background="A systems utility represents compact state in one 32-bit word. The transformation must be explicit about unsigned shifts, masks, and field widths.",
-            requirements="Read two hexadecimal 32-bit words `x y` and a decimal shift/field value `k`. Compute the operation in the title and print `result: XXXXXXXX` using eight lowercase hexadecimal digits.",
+            requirements="Read two hexadecimal 32-bit words `x y` and a decimal shift or field value `k`. Print the computed value as `result: XXXXXXXX` using exactly eight lowercase hexadecimal digits.",
             implementation_notes="Use `uint32_t`. Reduce variable shifts to 0 through 31 before shifting, and never shift a 32-bit value by 32.",
             idea=f"Use masks and unsigned shifts to implement {title.lower()} without string conversion.",
             steps=(
@@ -1977,7 +2023,7 @@ def _mips_questions() -> Iterable[AuthoredQuestion]:
             slot=slot,
             minutes=14 + difficulty * 5,
             background="A MIPS32 routine receives a pointer and element count after `main` reads a bounded integer stream. The routine must obey the register interface and return one scalar in `$v0`.",
-            requirements="Read `n` (0 to 100) and `n` signed integers. `main` calls `solve($a0 = array, $a1 = n)`. Implement `solve`, return the title's metric in `$v0`, and let `main` print it with one newline.",
+            requirements="Read `n` (0 to 100) and `n` signed integers. `main` calls `solve($a0 = array, $a1 = n)`. Implement `solve`, return the computed value in `$v0`, and let `main` print it with one newline.",
             implementation_notes="Use word-aligned loads, advance pointers by four bytes, and do not issue input/output syscalls inside `solve`.",
             idea=f"Translate the loop invariant for {title.lower()} into a leaf MIPS function.",
             steps=(
@@ -2168,9 +2214,9 @@ def _file_questions() -> Iterable[AuthoredQuestion]:
             weeks=(7, 8),
             slot=slot,
             minutes=14 + difficulty * 5,
-            background="A binary-safe command-line utility must derive one metric from a regular file without assuming text encoding or a terminating byte.",
-            requirements="Accept exactly one file path, read the complete byte stream using POSIX file I/O, and print `result: X`. Empty files are valid.",
-            implementation_notes="Handle short reads and `read` errors, grow storage without losing the old pointer, and close the descriptor on every path.",
+            background="A binary-safe command-line utility must inspect a regular file without assuming text encoding or a terminating zero byte.",
+            requirements="The program accepts exactly one file path. The supplied code reads its complete byte stream and passes the bytes to `solve`. Print the computed value as `result: X` followed by one newline. Empty files are valid.",
+            implementation_notes="Treat the input as binary data: use `n`, not `strlen`, and compare each byte as an `unsigned char`. Do not change the supplied file-reading and cleanup code.",
             idea=f"Read the file as bytes and scan once to compute {title.lower()}.",
             steps=(
                 "Validate the argument and open the file read-only.",
@@ -2314,7 +2360,7 @@ def _unicode_questions() -> Iterable[AuthoredQuestion]:
             slot="unicode",
             minutes=14 + difficulty * 5,
             background="A Unicode boundary utility receives one numeric code point and must reason about scalar validity and variable-width encodings without depending on locale.",
-            requirements="Read one hexadecimal code point and print `result: X` for the operation in the title. Surrogates and values above U+10FFFF are invalid and use the stated invalid result.",
+            requirements="Read one hexadecimal code point and print the computed value as `result: X` followed by one newline. Surrogates and values above U+10FFFF are invalid and use the task rule's stated invalid result.",
             implementation_notes="Derive UTF-8 fields with masks and shifts. Validate scalar range before encoding.",
             idea=f"Classify the scalar range first, then derive {title.lower()} from the UTF-8/UTF-16 boundary table.",
             steps=(
@@ -2436,7 +2482,7 @@ TREE_OPERATIONS = (
 )
 
 TREE_DEFINITIONS = {
-    "files": "Count real regular files anywhere below the supplied root; directories and the fixture-only `.keep` marker do not count.",
+    "files": "Count regular files anywhere below the supplied root. Directories and the reserved `.keep` placeholder do not count.",
     "bytes": "Sum `st_size` for every real regular file below the root; an empty tree returns 0.",
     "depth": "The root has depth 0 and a file's depth is the number of containing subdirectories below the root; return the maximum file depth, or 0 if there are no files.",
     "text": "Count real regular files whose basename ends exactly with the case-sensitive suffix `.txt`.",
@@ -2482,7 +2528,7 @@ def _tree_questions() -> Iterable[AuthoredQuestion]:
             slot="advanced_systems",
             minutes=24 + difficulty * 5,
             background="A build/archive inspection tool must walk a supplied directory tree. Only real regular files and real directories participate; traversal order must not affect the scalar result.",
-            requirements="Accept one root directory, recursively traverse it, and print `result: X` for the metric in the title. The root directory has depth zero and counts as a directory for directory-count questions.",
+            requirements="Accept one root directory, recursively traverse it, and print the computed value as `result: X` followed by one newline. The root directory has depth zero and counts as a directory for directory-count questions. Ignore any file named `.keep`; it is used only to create an otherwise empty test directory.",
             implementation_notes="Skip `.` and `..`, construct bounded child paths, call `lstat`, and close every opened `DIR *` even on failure.",
             idea=f"Use depth-first traversal and merge each entry into a summary for {title.lower()}.",
             steps=(
@@ -2561,7 +2607,7 @@ def _thread_questions() -> Iterable[AuthoredQuestion]:
             slot="processes_threads",
             minutes=32,
             background="Three worker threads process disjoint stride-three positions of a bounded sensor array. They merge local results under one mutex so output remains deterministic.",
-            requirements="Read `n` and `n` integers. Create exactly three workers for indices `start, start+3, ...`, merge the title's metric, join all workers, and print `result: X`.",
+            requirements="Read `n` and `n` integers. The supplied `main` creates exactly three workers. Worker `start` processes indices `start, start + 3, ...`; each worker computes a local value, locks once to merge it, and returns. After all joins the program prints `result: X`.",
             implementation_notes="Pass stable job records, compute locally before locking, check thread calls, and destroy the mutex after all joins.",
             idea=f"Partition indices by residue modulo three and merge local values for {title.lower()} under a mutex.",
             steps=(
@@ -2629,7 +2675,7 @@ def _process_questions() -> Iterable[AuthoredQuestion]:
             slot="challenge_combo",
             minutes=42,
             background="A parent delegates one deterministic reduction to a child. Because post-fork memory is private, the child returns a fixed-width binary result record through a pipe.",
-            requirements="Read `n` and `n` integers, create a pipe, fork one child to compute the title's metric, transfer one `long long`, wait successfully, and print `result: X`.",
+            requirements="Read `n` and `n` integers. The supplied code creates a pipe and forks one child. Complete the child branch so it computes the required value, transfers one `long long`, closes its pipe end, and exits successfully. The parent waits and prints `result: X`.",
             implementation_notes="Close unused pipe ends immediately, require full record transfer, use `_exit` in the child, and validate `waitpid` status.",
             idea=f"Compute {title.lower()} in the child and use the pipe as the only result channel back to the parent.",
             steps=(

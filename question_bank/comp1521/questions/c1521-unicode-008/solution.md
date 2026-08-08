@@ -21,8 +21,6 @@ Classify the scalar range first, then derive utf-8 boundary class from the UTF-8
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -21,8 +21,6 @@ Visit exactly the cells participating in survey main diagonal and maintain one s
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

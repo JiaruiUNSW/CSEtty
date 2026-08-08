@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement clear fault mask bits without string 
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

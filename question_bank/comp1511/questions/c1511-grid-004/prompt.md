@@ -1,20 +1,22 @@
 # Horizontal Mirror Mismatches
 
+## Task
+
+Count unequal horizontal mirror pairs, examining each pair only once.
+
 ## Background
 
 A rectangular grid models a spatial survey. Rows and columns may differ, so every index calculation must use the supplied column count.
 
 ## Requirements
 
-Read `rows columns` (each 0 to 8), then the grid in row-major order. Compute the metric in the title and print `result: X`.
+Read `rows columns` (each 0 to 8), then the grid in row-major order. Print the computed value as `result: X` followed by one newline.
 
-**Exact rule.** Count unequal horizontal mirror pairs, examining each pair only once.
+## Starter code
 
-Submit `c1511_grid_004.c`. Your program must not print prompts or explanatory text.
+Complete `static long long solve(const int *a, int rows, int columns)`. The grid is stored in row-major order, so cell `(r, c)` is `a[r * columns + c]`.
 
 ## Examples
-
-Command arguments: `(no command-line arguments)`
 
 Input:
 
@@ -33,3 +35,7 @@ result: 2
 ## Implementation notes
 
 Store the grid in a bounded flat or two-dimensional array. Check dimensions before accessing the first cell or a neighbour/window.
+
+## Submission
+
+Submit `c1511_grid_004.c` only. Your program must not print prompts, labels, or explanatory text unless the required output format explicitly includes them.

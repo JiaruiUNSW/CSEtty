@@ -21,8 +21,6 @@ Visit exactly the cells participating in first highest-energy row and maintain o
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

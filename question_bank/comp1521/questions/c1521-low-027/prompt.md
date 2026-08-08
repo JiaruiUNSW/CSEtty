@@ -4,9 +4,6 @@
 
 Read `rows`, `cols`, then a row-major matrix. Call `border_sum(base, rows, cols)` and print the sum of entries in the outer border, counting every cell once.
 
-This is an original local practice task. It exercises the `mips-data, mips-functions, mips-control`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 The function must identify first/last rows or first/last columns. A one-row or one-column matrix must not double-count cells.
@@ -41,12 +38,6 @@ the exact output is:
 40
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 A single row-major scan avoids double counting. Derive row and column counters as you walk the array, or use nested loops.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

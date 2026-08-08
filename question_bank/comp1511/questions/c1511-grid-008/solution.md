@@ -21,8 +21,6 @@ Visit exactly the cells participating in grid value range and maintain one scala
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

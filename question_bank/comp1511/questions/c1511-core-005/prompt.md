@@ -1,7 +1,5 @@
 # Calm Grid Rows
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A monitoring grid records several readings per station row. A row is calm when the difference between its largest and smallest readings does not exceed a supplied tolerance.
@@ -41,4 +39,3 @@ The first row has range 2; the second has range 3.
 ## Implementation notes
 
 Initialise both the minimum and maximum from the first element of a row rather than from zero. Your output must match the specified spelling, spacing, and newlines exactly.
-

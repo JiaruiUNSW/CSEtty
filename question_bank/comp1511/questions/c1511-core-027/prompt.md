@@ -1,7 +1,5 @@
 # Triangle Label
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 Three positive integer lengths must first be checked as a triangle and then labelled by side equality.
@@ -39,4 +37,3 @@ The lengths satisfy all triangle inequalities and exactly two sides are equal.
 ## Implementation notes
 
 All three triangle inequalities are required because the sides are not supplied in sorted order. Output spelling, spaces, punctuation, and newlines must match exactly.
-

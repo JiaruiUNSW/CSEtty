@@ -21,8 +21,6 @@ Translate the loop invariant for mips adjacent rise count into a leaf MIPS funct
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

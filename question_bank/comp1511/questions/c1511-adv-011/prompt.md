@@ -2,7 +2,7 @@
 
 ## Background
 
-This original exercise practises a small, precisely specified linked-list transformation or analysis. The supplied command-line harness converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `struct node *outside_in(struct node *head)` reorders `a0,a1,...,an` into `a0,an,a1,a(n-1),...` by relinking existing nodes.
+The supplied `main` converts each listed integer into one heap-allocated node so that the target function can be tested without any external files. `struct node *outside_in(struct node *head)` reorders `a0,a1,...,an` into `a0,an,a1,a(n-1),...` by relinking existing nodes.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original exercise practises a small, precisely specified linked-list transf
 
 ## Examples
 
-`./c1511_adv_011 1 2 3 4 5` prints `1 5 2 4 3`; four values print `1 4 2 3`. List output uses one space between integers and a final newline; an empty list is printed as `EMPTY`.
+Command:
+
+```text
+./c1511_adv_011 1 2 3 4 5
+```
+
+Output:
+
+```text
+1 5 2 4 3
+```
 
 ## Implementation notes
 
-A useful decomposition is split, reverse the second half, then weave. Submit `c1511_adv_011.c`. The harness validates ownership by freeing all surviving nodes, so do not retain hidden aliases. Build commands are argument arrays and do not invoke a shell. Your submitted file must compile cleanly with `dcc -Werror`.
+A useful decomposition is split, reverse the second half, then weave. Submit `c1511_adv_011.c`. The supplied `main` validates ownership by freeing all surviving nodes, so do not retain hidden aliases.

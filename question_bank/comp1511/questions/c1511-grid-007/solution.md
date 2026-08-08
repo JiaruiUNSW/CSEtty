@@ -21,8 +21,6 @@ Visit exactly the cells participating in maximum two-by-two load and maintain on
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

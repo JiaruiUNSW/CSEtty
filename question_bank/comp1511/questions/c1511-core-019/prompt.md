@@ -1,7 +1,5 @@
 # Repair the Range Clamp
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 The supplied program is intended to clamp a value to an inclusive interval, but its branch order and returned bounds are wrong.
@@ -39,4 +37,3 @@ Fourteen is above the interval, so it is clamped to the upper bound.
 ## Implementation notes
 
 Each out-of-range comparison must return the boundary on that same side. Output spelling, spaces, punctuation, and newlines must match exactly.
-

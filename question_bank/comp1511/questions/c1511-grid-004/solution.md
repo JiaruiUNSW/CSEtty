@@ -21,8 +21,6 @@ Visit exactly the cells participating in horizontal mirror mismatches and mainta
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -2,7 +2,7 @@
 
 ## Background
 
-This original short exercise isolates one core C skill behind a complete command-line harness. `size_t first_extreme_distance(const int *values, size_t length)` returns the index distance between the first minimum and first maximum. Inputs are supplied as documented so the target behaviour can be reproduced directly.
+`size_t first_extreme_distance(const int *values, size_t length)` returns the index distance between the first minimum and first maximum.
 
 ## Requirements
 
@@ -13,8 +13,18 @@ This original short exercise isolates one core C skill behind a complete command
 
 ## Examples
 
-`./c1511_adv_021 4 1 7 1 7` prints `1`, because the first minimum is index 1 and first maximum is index 2.
+Command:
+
+```text
+./c1511_adv_021 4 1 7 1 7
+```
+
+Output:
+
+```text
+1
+```
 
 ## Implementation notes
 
-Use strict comparisons so ties retain their earlier indices. The input array is read-only. Submit `c1511_adv_021.c`. Keep all provided function signatures and harness code unless the task explicitly identifies a starter bug. Build and submit the unique source file using the shell-free `dcc -Werror` command supplied by the pack.
+Use strict comparisons so ties retain their earlier indices. The input array is read-only. Submit `c1511_adv_021.c`. Keep all provided function signatures and starter code unless the task explicitly identifies a starter bug.

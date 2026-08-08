@@ -6,11 +6,36 @@ A scalable histogram lets workers count locally, then briefly lock while merging
 
 ## Requirements
 
-Implement `c1521_conc_016.c` as `./c1521_conc_016 FILE THREADS`, with 1 to 8 threads. Main must open the regular file, read its bytes into owned memory, and partition offsets using integer-division boundaries. Every worker counts its slice into a private 256-entry `unsigned long long` array, locks one shared mutex, merges all nonzero local counters into the global histogram, and unlocks. Join all threads; print nonzero bytes in ascending value as two uppercase hex digits `HH=N`, then `total=N`. Empty slices are valid.
+- Implement `c1521_conc_016.c` as `./c1521_conc_016 FILE THREADS`, with 1 to 8 threads.
+- Main must open the regular file, read its bytes into owned memory, and partition offsets using integer-division boundaries.
+- Every worker counts its slice into a private 256-entry `unsigned long long` array, locks one shared mutex, merges all nonzero local counters into the global histogram, and unlocks.
+- Join all threads; print nonzero bytes in ascending value as two uppercase hex digits `HH=N`, then `total=N`.
+- Empty slices are valid.
 
 ## Examples
 
-For bytes `A B A newline`, print counts for 0A, 41, and 42 in numeric byte order, followed by total four.
+Command:
+
+```text
+./c1521_conc_016 input.bin 2
+```
+
+Files provided for this example:
+
+- `input.bin` (4 bytes) contains:
+
+  ```text
+  ABA
+  ```
+
+Output:
+
+```text
+0A=1
+41=2
+42=1
+total=4
+```
 
 ## Implementation notes
 

@@ -1,7 +1,5 @@
 # Parcel Classifier
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A dispatch desk classifies a rectangular parcel using its weight and dimensions.
@@ -39,4 +37,3 @@ The parcel weighs at most 5 and has volume 800.
 ## Implementation notes
 
 Check oversized before compact so a long thin parcel cannot be called compact. Output spelling, spaces, punctuation, and newlines must match exactly.
-

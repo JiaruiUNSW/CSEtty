@@ -4,9 +4,6 @@
 
 Read `n` and then `n` signed integers into an array. Call `first_max_index(array, n)` and print the zero-based index of the first maximum.
 
-This is an original local practice task. It exercises the `mips-data, mips-functions, mips-control`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Pass the base address in `$a0` and length in `$a1`. The function returns the index in `$v0`; it must not perform I/O.
@@ -36,12 +33,6 @@ the exact output is:
 1
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 Reserve 64 aligned bytes. Update the saved index only for a strictly larger element so that ties retain the first occurrence.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

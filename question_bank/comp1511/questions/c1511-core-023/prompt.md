@@ -1,7 +1,5 @@
 # Same-Day Elapsed Minutes
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 Two 24-hour clock times describe the start and finish of an activity on the same day.
@@ -39,4 +37,3 @@ From 09:45 to 11:10 is one hour and twenty-five minutes.
 ## Implementation notes
 
 Convert both endpoints to the same unit before subtracting. Output spelling, spaces, punctuation, and newlines must match exactly.
-

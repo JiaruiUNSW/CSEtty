@@ -2,7 +2,7 @@
 
 ## Background
 
-This is an original whole-program exercise. Build a command-driven editor for a heap-allocated chain of short marker names. Unlike a single-function task, you should decompose parsing, state updates, output, and cleanup into clear helpers.
+Build a command-driven editor for a heap-allocated chain of short marker names. Unlike a single-function task, you should decompose parsing, state updates, output, and cleanup into clear helpers.
 
 ## Requirements
 
@@ -14,8 +14,28 @@ This is an original whole-program exercise. Build a command-driven editor for a 
 
 ## Examples
 
-After `APPEND red`, `APPEND blue`, `PREPEND green`, `PRINT`, the line is `green -> red -> blue`. Each mentioned fragment is one input line, and every described output occupies its own newline exactly as shown.
+Command:
+
+```text
+./c1511_adv_036
+```
+
+Input:
+
+```text
+APPEND red
+APPEND blue
+PREPEND green
+PRINT
+END
+```
+
+Output:
+
+```text
+green -> red -> blue
+```
 
 ## Implementation notes
 
-The starter deliberately contains only the data definitions and a minimal command loop; implement the complete behaviour rather than printing sample-specific answers. Use bounded `scanf` conversions for names, check allocation where applicable, and release every owned allocation before normal exit. Submit `c1511_adv_036.c`, compiled using the supplied shell-free `dcc -Werror` argument array.
+The starter deliberately contains only the data definitions and a minimal command loop; implement the complete behaviour. Use bounded `scanf` conversions for names, check allocation where applicable, and release every owned allocation before normal exit. Submit `c1511_adv_036.c`.

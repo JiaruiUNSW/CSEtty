@@ -21,8 +21,6 @@ Compute pipe-transferred weighted checksum in the child and use the pipe as the 
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

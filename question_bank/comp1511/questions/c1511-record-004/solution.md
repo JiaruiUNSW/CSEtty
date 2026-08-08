@@ -21,8 +21,6 @@ Store each input row as one struct and compute equal-reading record pairs over t
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

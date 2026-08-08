@@ -1,7 +1,5 @@
 # Unique Column Beacons
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 Each column of a grid is a radio channel. A channel has a unique beacon when its maximum reading appears in exactly one row.
@@ -42,4 +40,3 @@ Only column zero has a maximum that occurs once.
 ## Implementation notes
 
 For each column, update both a current maximum and its occurrence count. A new maximum resets the count to one. Your output must match the specified spelling, spacing, and newlines exactly.
-

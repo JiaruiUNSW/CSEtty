@@ -1,7 +1,5 @@
 # Race Split Awards
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 Each runner has three integer split times. One award goes to the fastest total, and another to the most consistent runner with the smallest difference between largest and smallest split. Either tie goes to the lower bib number.
@@ -43,4 +41,3 @@ Bib 5 has the smallest total; bibs 5 and 12 tie on range, so lower bib 5 wins co
 ## Implementation notes
 
 The two awards have independent comparisons and may select different runners. Match every required label, space, punctuation mark, and newline exactly.
-

@@ -6,11 +6,32 @@ UTF-8 encodes one Unicode scalar value in one to four bytes. Counting bytes, con
 
 ## Requirements
 
-Write `c1521_fs_007.c`. Read all bytes from standard input. If they form strict UTF-8, print the number of encoded Unicode scalar values followed by newline. If not, print `invalid\n` and still return 0. Reject stray continuation bytes, truncated sequences, overlong encodings, UTF-16 surrogate values, and values above U+10FFFF. A standard-input read failure prints `c1521_fs_007: error\n` to standard error and returns 1.
+- Write `c1521_fs_007.c`.
+- Read all bytes from standard input.
+- If they form strict UTF-8, print the number of encoded Unicode scalar values followed by newline.
+- If not, print `invalid\n` and still return 0.
+- Reject stray continuation bytes, truncated sequences, overlong encodings, UTF-16 surrogate values, and values above U+10FFFF.
+- A standard-input read failure prints `c1521_fs_007: error\n` to standard error and returns 1.
 
 ## Examples
 
-ASCII `abc` contains three code points. The UTF-8 text `é猫` contains two even though it occupies five bytes.
+Command:
+
+```text
+./c1521_fs_007
+```
+
+Input:
+
+```text
+abc
+```
+
+Output:
+
+```text
+3
+```
 
 ## Implementation notes
 

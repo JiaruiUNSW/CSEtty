@@ -1,26 +1,24 @@
 # Distance-Weighted Supply Chain
 
+## Task
+
+Compute `sum((position + 1) * value)` in list order.
+
 ## Background
 
-A linked chain stores readings in arrival order. The caller owns the nodes; your metric must inspect them without losing the head or leaking memory in the supplied harness.
+A linked chain stores readings in arrival order. The supplied `main` owns the nodes and frees the complete chain after `solve` returns.
 
 ## Requirements
 
-Complete `solve`. The harness converts every command-line argument to one list node, calls your function, prints `result: X`, and frees the chain. With no arguments the list is empty.
+Each command-line integer becomes one list node in the same order. With no arguments, `head` is `NULL`. Return the required value from `solve`; the supplied `main` prints it as `result: X`.
 
-**Exact rule.** Compute `sum((position + 1) * value)` in list order.
+## Starter code
 
-Submit `c1511_list_010.c`. Your program must not print prompts or explanatory text.
+Complete `static long long solve(const struct node *head)`. The supplied `main` builds and later frees the list; `solve` must inspect it without changing ownership.
 
 ## Examples
 
-Command arguments: `3 -1 -1 4 0 -2`
-
-Input:
-
-```text
-(empty)
-```
+Command-line arguments: `3 -1 -1 4 0 -2`
 
 Output:
 
@@ -30,4 +28,8 @@ result: 2
 
 ## Implementation notes
 
-Do not change the harness or print inside `solve`. Preserve every `next` link. Recursive variants should give the empty-list base case before accessing a node.
+Do not change `main` or print inside `solve`. Preserve every `next` link. Recursive variants should give the empty-list base case before accessing a node.
+
+## Submission
+
+Submit `c1511_list_010.c` only. Your program must not print prompts, labels, or explanatory text unless the required output format explicitly includes them.

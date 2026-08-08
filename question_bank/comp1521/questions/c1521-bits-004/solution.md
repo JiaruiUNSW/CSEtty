@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement enable permission bits without string
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

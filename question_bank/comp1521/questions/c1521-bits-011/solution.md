@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement swap byte nibbles without string conv
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

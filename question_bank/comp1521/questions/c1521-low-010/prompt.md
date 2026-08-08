@@ -4,9 +4,6 @@
 
 Read a length `n`, then all `n` elements of vector A, then all `n` elements of vector B. Print their dot product.
 
-This is an original local practice task. It exercises the `mips-data, mips-control, integer-representation`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Store vector A in memory because B arrives later. Compute `sum(A[i] * B[i])` in index order and print the signed result.
@@ -37,12 +34,6 @@ the exact output is:
 32
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 Reserve 64 bytes of aligned storage. Scale each index by four before adding it to the base address. Use `mult` and `mflo` for each product.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

@@ -1,7 +1,5 @@
 # Row Champion
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 Rows in a score grid compete using two measures. Higher row sum wins; when sums tie, the row with the smaller range (maximum minus minimum) wins; a remaining tie goes to the lower row index.
@@ -44,4 +42,3 @@ The third row has the greatest sum, so its larger range does not matter.
 ## Implementation notes
 
 Initialise the champion from row zero, especially because every possible sum may be negative. Match every required label, space, punctuation mark, and newline exactly.
-

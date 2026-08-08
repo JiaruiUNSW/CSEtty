@@ -4,9 +4,6 @@
 
 Read exactly five signed integers and print how many of them are even.
 
-This is an original local practice task. It exercises the `mips-control, bitwise`
-part of COMP1521 without relying on any UNSW assessment text.
-
 ## Requirements
 
 Use a loop to perform five reads. Test parity from the low bit; zero and negative even numbers count as even.
@@ -35,12 +32,6 @@ the exact output is:
 3
 ```
 
-The public examples illustrate the interface only; marking also uses distinct
-boundary and mixed-value cases.
-
 ## Implementation notes
 
 `andi value, value, 1` isolates parity without needing division. Keep separate registers for the number read, the loop count, and the answer.
-
-Do not special-case the shown values or embed a table of test answers. Your
-algorithm must work for every value permitted by the constraints.

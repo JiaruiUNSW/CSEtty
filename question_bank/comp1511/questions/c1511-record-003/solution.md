@@ -21,8 +21,6 @@ Store each input row as one struct and compute shipment value range over the res
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

@@ -39,6 +39,13 @@ _MAX_REQUEST_BYTES = 4096
 _START_TIMEOUT_SECONDS = 30.0
 
 
+def _render_badges(labels: Sequence[object]) -> str:
+    """Render badges with real text separators that survive copying."""
+    return " · ".join(
+        f'<span class="badge">{html.escape(str(label))}</span>' for label in labels
+    )
+
+
 @dataclass(frozen=True)
 class CompanionInfo:
     attempt_id: str
@@ -550,7 +557,7 @@ class CompanionApplication:
                     else f"Submitted #{submission['sequence']}"
                 )
                 status_class = "alert-warning" if submission is None else "alert-success"
-            tags = "".join(f'<span class="badge">{html.escape(tag)}</span>' for tag in question.tags)
+            tags = _render_badges(question.tags)
             files = ", ".join(
                 f"<code>{html.escape(path)}</code>" for path in question.submission_files
             )
@@ -669,11 +676,13 @@ class CompanionApplication:
         attempt, pack = self.attempt_and_pack()
         self._require_paper_available(attempt)
         question = pack.question(question_id)
-        metadata = (
-            f'<span class="badge">{html.escape(question.kind)}</span>'
-            f'<span class="badge">difficulty {question.difficulty}/5</span>'
-            f'<span class="badge">{html.escape(question.track)}</span>'
-            + "".join(f'<span class="badge">{html.escape(tag)}</span>' for tag in question.tags)
+        metadata = _render_badges(
+            (
+                question.kind,
+                f"difficulty {question.difficulty}/5",
+                question.track,
+                *question.tags,
+            )
         )
         files = ", ".join(f"<code>{html.escape(path)}</code>" for path in question.submission_files)
         editor_control = ""

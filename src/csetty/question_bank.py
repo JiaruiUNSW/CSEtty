@@ -460,23 +460,121 @@ def _copy_file(source: Path, destination: Path) -> None:
     shutil.copy2(source, destination)
 
 
+def _student_submission_aliases(
+    slot_id: str, submission_files: Sequence[str]
+) -> dict[str, str]:
+    """Return concise, collision-free filenames for a generated student paper."""
+
+    suffix_counts: dict[str, int] = {}
+    for relative in submission_files:
+        suffix = "".join(safe_relative_path(relative, label="submission path").suffixes)
+        suffix_counts[suffix] = suffix_counts.get(suffix, 0) + 1
+
+    aliases: dict[str, str] = {}
+    suffix_indexes: dict[str, int] = {}
+    for relative in submission_files:
+        suffix = "".join(safe_relative_path(relative, label="submission path").suffixes)
+        suffix_indexes[suffix] = suffix_indexes.get(suffix, 0) + 1
+        qualifier = f"_{suffix_indexes[suffix]}" if suffix_counts[suffix] > 1 else ""
+        aliases[relative] = f"{slot_id}{qualifier}{suffix}"
+    return aliases
+
+
+def _argv_aliases(submission_aliases: Mapping[str, str]) -> dict[str, str]:
+    aliases: dict[str, str] = {}
+    for original, student_name in submission_aliases.items():
+        original_path = safe_relative_path(original, label="submission path")
+        original_name = original_path.name
+        student_path = safe_relative_path(student_name, label="student submission path")
+        student_stem = student_path.name.removesuffix("".join(student_path.suffixes))
+        original_stem = original_name.removesuffix("".join(original_path.suffixes))
+        aliases[original] = student_name
+        aliases[original_name] = student_name
+        aliases[original_stem] = student_stem
+        aliases[f"./{original_stem}"] = f"./{student_stem}"
+    return aliases
+
+
+def _rewrite_argv(argv: Sequence[str], aliases: Mapping[str, str]) -> tuple[str, ...]:
+    return tuple(aliases.get(argument, argument) for argument in argv)
+
+
+def _copy_student_text(
+    source: Path, destination: Path, submission_aliases: Mapping[str, str]
+) -> None:
+    text = source.read_text(encoding="utf-8")
+    replacements: dict[str, str] = {}
+    for original, student_name in submission_aliases.items():
+        original_path = safe_relative_path(original, label="submission path")
+        student_path = safe_relative_path(student_name, label="student submission path")
+        original_stem = original_path.name.removesuffix("".join(original_path.suffixes))
+        student_stem = student_path.name.removesuffix("".join(student_path.suffixes))
+        replacements[original] = student_name
+        replacements[original_path.name] = student_name
+        replacements[original_stem] = student_stem
+    for original in sorted(replacements, key=len, reverse=True):
+        text = text.replace(original, replacements[original])
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(text, encoding="utf-8")
+
+
 def _emit_question(
-    *, slot: BlueprintSlot, item: BankQuestion, output: Path
+    *,
+    slot: BlueprintSlot,
+    item: BankQuestion,
+    output: Path,
+    rename_for_student: bool,
 ) -> tuple[list[str], Question]:
-    source = item.question
+    original = item.question
+    submission_aliases = (
+        _student_submission_aliases(slot.id, original.submission_files)
+        if rename_for_student
+        else {relative: relative for relative in original.submission_files}
+    )
+    argument_aliases = _argv_aliases(submission_aliases) if rename_for_student else {}
+    if rename_for_student:
+        argument_aliases[original.id] = slot.id
+        argument_aliases[f"./{original.id}"] = f"./{slot.id}"
+    test_groups = tuple(
+        replace(
+            group,
+            tests=tuple(
+                replace(test, argv=_rewrite_argv(test.argv, argument_aliases))
+                for test in group.tests
+            ),
+        )
+        for group in original.test_groups
+    )
+    source = replace(
+        original,
+        submission_files=tuple(
+            submission_aliases[relative] for relative in original.submission_files
+        ),
+        build_argv=_rewrite_argv(original.build_argv, argument_aliases),
+        test_groups=test_groups,
+    )
     prompt_path = f"questions/{slot.id}.md"
-    _copy_file(resolve_under(item.root, source.prompt or ""), output / prompt_path)
+    _copy_student_text(
+        resolve_under(item.root, original.prompt or ""),
+        output / prompt_path,
+        submission_aliases,
+    )
     starter_files: list[str] = []
-    for relative in source.starter_files:
+    for relative in original.starter_files:
         target = Pack.starter_target(relative).as_posix()
-        destination = f"starter/{target}"
+        student_target = submission_aliases.get(target, target)
+        destination = f"starter/{student_target}"
         _copy_file(resolve_under(item.root, relative), output / destination)
         starter_files.append(destination)
-    for relative in source.submission_files:
-        _copy_file(item.reference_file(relative), output / "solutions" / "reference" / relative)
-    _copy_file(
+    for relative in original.submission_files:
+        _copy_file(
+            item.reference_file(relative),
+            output / "solutions" / "reference" / submission_aliases[relative],
+        )
+    _copy_student_text(
         resolve_under(item.root, item.solution),
         output / "solutions" / "explanations" / f"{slot.id}.md",
+        submission_aliases,
     )
 
     lines = [
@@ -572,14 +670,20 @@ def build_exam_pack(
     question_lines: list[str] = []
     emitted_questions: list[Question] = []
     for slot, item in selection:
-        lines, emitted = _emit_question(slot=slot, item=item, output=destination)
+        lines, emitted = _emit_question(
+            slot=slot,
+            item=item,
+            output=destination,
+            rename_for_student=True,
+        )
         question_lines.extend(lines)
         emitted_questions.append(emitted)
 
     paper_lines = [
-        f"# {bank.course} original generated practice exam",
+        f"# {bank.course} Generated Exam Paper",
         "",
-        "This local simulation paper is original material and is not made or managed by UNSW.",
+        f"This 100-mark paper was generated from the bundled {bank.course} question bank "
+        f"using seed `{seed}`.",
         "",
         "## Questions",
         "",
@@ -599,7 +703,7 @@ def build_exam_pack(
         "schema_version = 1",
         f"id = {_toml_string(pack_id)}",
         f"version = {_toml_string(version)}",
-        f"title = {_toml_string(f'{bank.course} Original Generated Practice Exam')}",
+        f"title = {_toml_string(f'{bank.course} Generated Exam Paper')}",
         f"course = {_toml_string(bank.course)}",
         f"profile = {_toml_string(bank.profile)}",
         f"author = {_toml_string(bank.author)}",
@@ -664,7 +768,12 @@ def build_verification_pack(
             bank_slot=item.slots[0],
             points=item.question.points,
         )
-        lines, _emitted = _emit_question(slot=slot, item=item, output=destination)
+        lines, _emitted = _emit_question(
+            slot=slot,
+            item=item,
+            output=destination,
+            rename_for_student=False,
+        )
         question_lines.extend(lines)
 
     paper_lines = [

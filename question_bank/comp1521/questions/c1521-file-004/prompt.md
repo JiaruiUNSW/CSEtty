@@ -1,27 +1,32 @@
 # ASCII Digit Byte Count
 
+## Task
+
+Count bytes from `0x30` through `0x39` inclusive (ASCII `0` through `9`).
+
 ## Background
 
-A binary-safe command-line utility must derive one metric from a regular file without assuming text encoding or a terminating byte.
+A binary-safe command-line utility must inspect a regular file without assuming text encoding or a terminating zero byte.
 
 ## Requirements
 
-Accept exactly one file path, read the complete byte stream using POSIX file I/O, and print `result: X`. Empty files are valid.
+The program accepts exactly one file path. The supplied code reads its complete byte stream and passes the bytes to `solve`. Print the computed value as `result: X` followed by one newline. Empty files are valid.
 
-**Exact rule.** Count bytes from `0x30` through `0x39` inclusive (ASCII `0` through `9`).
+## Starter code
 
-Submit `c1521_file_004.c`. Your program must not print prompts or explanatory text.
+Complete `static long long solve(const unsigned char *data, size_t n)`. The supplied `main` already opens the named file, reads every byte, closes it, and frees the buffer.
 
 ## Examples
 
-Command arguments: `input.bin`
-Fixture files: input.bin
+Command-line arguments: `input.bin`
 
-Input:
+Files provided for this example:
 
-```text
-(empty)
-```
+- `input.bin` contains:
+
+  ```text
+  A1b2C3
+  ```
 
 Output:
 
@@ -31,4 +36,8 @@ result: 3
 
 ## Implementation notes
 
-Handle short reads and `read` errors, grow storage without losing the old pointer, and close the descriptor on every path.
+Treat the input as binary data: use `n`, not `strlen`, and compare each byte as an `unsigned char`. Do not change the supplied file-reading and cleanup code.
+
+## Submission
+
+Submit `c1521_file_004.c` only. Your program must not print prompts, labels, or explanatory text unless the required output format explicitly includes them.

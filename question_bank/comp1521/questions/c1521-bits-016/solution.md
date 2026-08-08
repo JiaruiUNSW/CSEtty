@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement reverse a diagnostic bit string witho
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

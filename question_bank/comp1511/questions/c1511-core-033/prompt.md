@@ -1,7 +1,5 @@
 # Alphabet Histogram
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A lowercase word is summarised as a sparse alphabet histogram, listing only letters that actually occur.
@@ -42,4 +40,3 @@ Only a, b, and n occur, and the lines are alphabetically ordered.
 ## Implementation notes
 
 Character subtraction maps a lowercase letter to an array index. Count distinct letters when printing or when a frequency first changes from zero. Match every required label, space, punctuation mark, and newline exactly.
-

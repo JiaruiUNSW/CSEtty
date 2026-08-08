@@ -1,7 +1,5 @@
 # Restock Manifest
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A storeroom records an item identifier, current stock, and target stock for each product. Products below target must appear in a restock manifest in their original input order.
@@ -44,4 +42,3 @@ Items 101 and 103 are short by three and two units; item 102 already exceeds tar
 ## Implementation notes
 
 A helper may return zero for any item that does not require stock. Preserve input order when printing. Match every required label, space, punctuation mark, and newline exactly.
-

@@ -2,7 +2,7 @@
 
 ## Background
 
-This is an original whole-program exercise. Build a journal that counts event categories while retaining a stack of up to 100 logged categories for undo. Unlike a single-function task, you should decompose parsing, state updates, output, and cleanup into clear helpers.
+Build a journal that counts event categories while retaining a stack of up to 100 logged categories for undo. Unlike a single-function task, you should decompose parsing, state updates, output, and cleanup into clear helpers.
 
 ## Requirements
 
@@ -15,8 +15,30 @@ This is an original whole-program exercise. Build a journal that counts event ca
 
 ## Examples
 
-After `LOG rain`, `LOG wind`, `LOG rain`, `COUNT rain`, `TOTAL`, the two output lines are `rain 2` and `TOTAL 3`. Each mentioned fragment is one input line, and every described output occupies its own newline exactly as shown.
+Command:
+
+```text
+./c1511_adv_034
+```
+
+Input:
+
+```text
+LOG rain
+LOG wind
+LOG rain
+COUNT rain
+TOTAL
+END
+```
+
+Output:
+
+```text
+rain 2
+TOTAL 3
+```
 
 ## Implementation notes
 
-The starter deliberately contains only the data definitions and a minimal command loop; implement the complete behaviour rather than printing sample-specific answers. Use bounded `scanf` conversions for names, check allocation where applicable, and release every owned allocation before normal exit. Submit `c1511_adv_034.c`, compiled using the supplied shell-free `dcc -Werror` argument array.
+The starter deliberately contains only the data definitions and a minimal command loop; implement the complete behaviour. Use bounded `scanf` conversions for names, check allocation where applicable, and release every owned allocation before normal exit. Submit `c1511_adv_034.c`.

@@ -6,11 +6,43 @@ Several file-reading threads can build private frequency tables and merge them u
 
 ## Requirements
 
-Implement `c1521_conc_018.c` with one to six file arguments. Create one thread per file. Each worker opens its own file, parses whitespace-separated decimal integers in the inclusive range -10 through 10, and accumulates a private 21-entry histogram. At EOF it locks a shared mutex once, adds its local table and value count into the global state, and unlocks. Malformed/out-of-range input marks that job failed. Main joins all workers, then prints nonzero values in numeric order as `VALUE=COUNT`, followed by `values=TOTAL`.
+- Implement `c1521_conc_018.c` with one to six file arguments.
+- Create one thread per file.
+- Each worker opens its own file, parses whitespace-separated decimal integers in the inclusive range -10 through 10, and accumulates a private 21-entry histogram.
+- At EOF it locks a shared mutex once, adds its local table and value count into the global state, and unlocks.
+- Malformed/out-of-range input marks that job failed.
+- Main joins all workers, then prints nonzero values in numeric order as `VALUE=COUNT`, followed by `values=TOTAL`.
 
 ## Examples
 
-Files containing `-1 0 1 1` and `1 2 -1` combine to counts two for -1, one for 0, three for 1, and one for 2.
+Command:
+
+```text
+./c1521_conc_018 a.txt b.txt
+```
+
+Files provided for this example:
+
+- `a.txt` (9 bytes) contains:
+
+  ```text
+  -1 0 1 1
+  ```
+- `b.txt` (7 bytes) contains:
+
+  ```text
+  1 2 -1
+  ```
+
+Output:
+
+```text
+-1=2
+0=1
+1=3
+2=1
+values=7
+```
 
 ## Implementation notes
 

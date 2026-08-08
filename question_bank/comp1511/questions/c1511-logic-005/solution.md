@@ -21,8 +21,6 @@ Compare the three values in a fixed order to compute distinct channel count. Kee
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

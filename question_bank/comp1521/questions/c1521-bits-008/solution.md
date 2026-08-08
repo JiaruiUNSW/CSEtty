@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement rotate a control word right without s
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

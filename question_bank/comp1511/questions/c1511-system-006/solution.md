@@ -21,8 +21,6 @@ Maintain one authoritative dynamic table and interpret each command as a small s
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

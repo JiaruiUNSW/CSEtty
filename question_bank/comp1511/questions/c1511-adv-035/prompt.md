@@ -2,7 +2,7 @@
 
 ## Background
 
-This is an original whole-program exercise. Build a record processor that maintains count, sum, minimum, and maximum for up to 16 labelled integer streams. Unlike a single-function task, you should decompose parsing, state updates, output, and cleanup into clear helpers.
+Build a record processor that maintains count, sum, minimum, and maximum for up to 16 labelled integer streams. Unlike a single-function task, you should decompose parsing, state updates, output, and cleanup into clear helpers.
 
 ## Requirements
 
@@ -15,8 +15,27 @@ This is an original whole-program exercise. Build a record processor that mainta
 
 ## Examples
 
-`READ zone 4`, `READ zone 8`, `STATS zone`, `END` prints `zone count=2 min=4 max=8 mean=6`. Each mentioned fragment is one input line, and every described output occupies its own newline exactly as shown.
+Command:
+
+```text
+./c1511_adv_035
+```
+
+Input:
+
+```text
+READ zone 4
+READ zone 8
+STATS zone
+END
+```
+
+Output:
+
+```text
+zone count=2 min=4 max=8 mean=6
+```
 
 ## Implementation notes
 
-The starter deliberately contains only the data definitions and a minimal command loop; implement the complete behaviour rather than printing sample-specific answers. Use bounded `scanf` conversions for names, check allocation where applicable, and release every owned allocation before normal exit. Submit `c1511_adv_035.c`, compiled using the supplied shell-free `dcc -Werror` argument array.
+The starter deliberately contains only the data definitions and a minimal command loop; implement the complete behaviour. Use bounded `scanf` conversions for names, check allocation where applicable, and release every owned allocation before normal exit. Submit `c1511_adv_035.c`.

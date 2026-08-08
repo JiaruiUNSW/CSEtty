@@ -21,8 +21,6 @@ Use masks and unsigned shifts to implement count active relay bits without strin
 
 ## Worked example
 
-Command arguments: `(no command-line arguments)`
-
 Input:
 
 ```text

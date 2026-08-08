@@ -1,7 +1,5 @@
 # Strictly Rising Columns
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A column in a measurement table is rising when every value below the first is strictly greater than the value directly above it.
@@ -42,4 +40,3 @@ Only the first column increases strictly at each step.
 ## Implementation notes
 
 The first non-increasing adjacent pair is enough to reject a column. Your output must match the specified spelling, spacing, and newlines exactly.
-

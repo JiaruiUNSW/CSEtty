@@ -21,13 +21,7 @@ Traverse the chain in order and maintain the minimal state for longest identical
 
 ## Worked example
 
-Command arguments: `3 -1 -1 4 0 -2`
-
-Input:
-
-```text
-(empty)
-```
+Command-line arguments: `3 -1 -1 4 0 -2`
 
 Output:
 

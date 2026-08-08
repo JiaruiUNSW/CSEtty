@@ -6,11 +6,29 @@ After `fork`, `exec` replaces the child image while preserving selected file des
 
 ## Requirements
 
-Write `c1521_conc_008.c`. Normal mode accepts one to six integers from -10000 to 10000. For each value create a dedicated pipe and child. In the child, redirect the pipe writer to standard output with `dup2`, close unrelated descriptors, and `execl` the same executable named by `argv[0]` with arguments `--worker VALUE`. Worker mode parses one value and prints only its signed square followed by newline. The parent reads and validates one integer line from every pipe, waits for each exact PID, and prints `INDEX square=VALUE` in input order. Failures return 1.
+- Write `c1521_conc_008.c`.
+- Normal mode accepts one to six integers from -10000 to 10000.
+- For each value create a dedicated pipe and child.
+- In the child, redirect the pipe writer to standard output with `dup2`, close unrelated descriptors, and `execl` the same executable named by `argv[0]` with arguments `--worker VALUE`.
+- Worker mode parses one value and prints only its signed square followed by newline.
+- The parent reads and validates one integer line from every pipe, waits for each exact PID, and prints `INDEX square=VALUE` in input order.
+- Failures return 1.
 
 ## Examples
 
-Arguments `2 -3 10` produce squares 4, 9, and 100 in those positions even if workers finish in another order.
+Command:
+
+```text
+./c1521_conc_008 2 -3 10
+```
+
+Output:
+
+```text
+0 square=4
+1 square=9
+2 square=100
+```
 
 ## Implementation notes
 

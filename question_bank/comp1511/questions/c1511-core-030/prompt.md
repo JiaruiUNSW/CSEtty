@@ -1,7 +1,5 @@
 # Line Initials
 
-This is an original C programming task for the local CSEExamTTY simulator.
-
 ## Background
 
 A short title contains words separated by one or more spaces or tabs. Its initials are the uppercase form of the first character of each word.
@@ -40,4 +38,3 @@ The three words begin with h, w, and w.
 ## Implementation notes
 
 A character begins a word when it is not a separator and either has index zero or follows a separator. Match every required label, space, punctuation mark, and newline exactly.
-

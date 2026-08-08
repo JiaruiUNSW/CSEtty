@@ -21,14 +21,15 @@ Read the file as bytes and scan once to compute byte sum modulo 65536. Keep the 
 
 ## Worked example
 
-Command arguments: `input.bin`
-Fixture files: input.bin
+Command-line arguments: `input.bin`
 
-Input:
+Files provided for this example:
 
-```text
-(empty)
-```
+- `input.bin` contains:
+
+  ```text
+  A1b2C3
+  ```
 
 Output:
 
