@@ -709,6 +709,7 @@ def build_exam_pack(
         f"author = {_toml_string(bank.author)}",
         f"license = {_toml_string(bank.license)}",
         'paper = "paper/index.md"',
+        'default_mode = "exam"',
         "reading_time_seconds = 600",
         "working_time_seconds = 10800",
         "",

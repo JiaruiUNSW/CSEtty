@@ -46,15 +46,17 @@ the normal exam workflow:
 
 ```sh
 csetty bank build comp1511 ./my-comp1511-paper --seed 1511
-csetty start ./my-comp1511-paper --mode exam
+csetty start ./my-comp1511-paper
 ```
 
-The second command shows the Welcome screen and simulated zID entry before the
-read-only reading period. The starter workspace is created only when working
-time begins. Generated filenames are based on exam position (`q1.c`, `q2.c`,
-and so on; MIPS questions use `qN.s`), so the normal `autotest q1` and
-`submit q1` workflow applies. Using the same bank version and seed reproduces
-the same paper; changing the seed requests a different selection.
+Generated papers default to exam mode, so the second command shows the Welcome
+screen and simulated zID entry before the read-only reading period without an
+extra flag. The starter workspace is created only when working time begins. Use
+`--mode practice` only to opt out explicitly. Generated filenames are based on
+exam position (`q1.c`, `q2.c`, and so on; MIPS questions use `qN.s`), so the
+normal `autotest q1` and `submit q1` workflow applies. Using the same bank
+version and seed reproduces the same paper; changing the seed requests a
+different selection.
 
 ## Commands
 

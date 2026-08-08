@@ -75,14 +75,15 @@ def test_start_records_an_attempt_owned_pack_snapshot(
     assert (frozen_root / "starter" / "q1.c").read_text(encoding="utf-8") != "changed\n"
 
 
-def test_exam_start_opens_read_only_page_before_reading_and_reuses_it_for_working(
+def test_pack_default_exam_runs_entry_gate_then_reuses_reading_page_for_working(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     source_root = make_pack(tmp_path / "source-pack")
     manifest = source_root / "pack.toml"
     manifest.write_text(
         manifest.read_text(encoding="utf-8").replace(
-            "reading_time_seconds = 0", "reading_time_seconds = 600"
+            "reading_time_seconds = 0",
+            'default_mode = "exam"\nreading_time_seconds = 600',
         ),
         encoding="utf-8",
     )
@@ -91,10 +92,17 @@ def test_exam_start_opens_read_only_page_before_reading_and_reuses_it_for_workin
     store = Store(paths)
     runtime = RuntimeStub()
     events: list[tuple[object, ...]] = []
+    gate_courses: list[str] = []
 
     monkeypatch.setattr(cli.PackRepository, "get", lambda _self, _selector: source_pack)
     monkeypatch.setattr(cli, "_components", lambda: (paths, store, runtime, object()))
-    monkeypatch.setattr(cli, "run_exam_entry_gate", lambda _course: "z1234567")
+
+    def run_entry_gate(course: str) -> str:
+        gate_courses.append(course)
+        return "z1234567"
+
+    monkeypatch.setattr(cli, "run_exam_entry_gate", run_entry_gate)
+
     def launch_reading_page(
         _paths: object, attempt: object, **kwargs: object
     ) -> SimpleNamespace:
@@ -127,10 +135,13 @@ def test_exam_start_opens_read_only_page_before_reading_and_reuses_it_for_workin
 
     monkeypatch.setattr(cli, "_launch_working", launch_working)
 
-    args = cli._parser().parse_args(
-        ["start", source_pack.id, "--mode", "exam", "--editor", "terminal"]
-    )
+    args = cli._parser().parse_args(["start", source_pack.id, "--editor", "terminal"])
     assert cli._start(args) == 0
+    assert gate_courses == ["COMP1511"]
+    (attempt,) = store.list_attempts()
+    assert attempt.mode is AttemptMode.EXAM
+    assert attempt.timed is True
+    assert attempt.candidate_id == "z1234567"
     assert events == [
         ("page-ready", AttemptState.CREATED),
         ("page-open", AttemptState.CREATED, True),

@@ -146,6 +146,7 @@ class Pack:
     author: str
     license: str
     paper: str
+    default_mode: str
     reading_time_seconds: int
     working_time_seconds: int
     environment: EnvironmentSpec
@@ -658,6 +659,21 @@ def load_pack(path: Path | str) -> Pack:
         raise ValidationError("pack.license may not be blank")
     paper = _required(raw, "paper", str, "pack")
     resolve_under(root, paper)
+    default_mode_raw = raw.get("default_mode")
+    if default_mode_raw is None:
+        # Generated packs built before default_mode was added must still enter the
+        # normal exam workflow without requiring the student to rebuild them.
+        is_legacy_generated_pack = (
+            pack_id.startswith(f"{profile}-generated-")
+            and title == f"{course} Generated Exam Paper"
+        )
+        default_mode = "exam" if is_legacy_generated_pack else "practice"
+    else:
+        if not isinstance(default_mode_raw, str):
+            raise ValidationError("pack.default_mode must be a string")
+        default_mode = default_mode_raw
+        if default_mode not in {"practice", "exam"}:
+            raise ValidationError("pack.default_mode must be 'practice' or 'exam'")
     reading_time = _required(raw, "reading_time_seconds", int, "pack")
     working_time = _required(raw, "working_time_seconds", int, "pack")
     if reading_time < 0 or working_time <= 0:
@@ -774,6 +790,7 @@ def load_pack(path: Path | str) -> Pack:
         author=author,
         license=license_name,
         paper=paper,
+        default_mode=default_mode,
         reading_time_seconds=reading_time,
         working_time_seconds=working_time,
         environment=environment,

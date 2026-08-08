@@ -189,8 +189,8 @@ page before its disposable container is stopped.
 
 | Mode | What happens | Example |
 | --- | --- | --- |
-| Practice (default) | No timer and no simulated sign-in | `csetty start comp1511-original-a` |
-| Exam | 10 minutes reading, 180 minutes working, timed and offline | `csetty start comp1511-original-a --mode exam` |
+| Practice (default for fixed/custom packs) | No timer and no simulated sign-in | `csetty start comp1511-original-a` |
+| Exam (default for generated papers) | 10 minutes reading, 180 minutes working, timed and offline | `csetty start ./my-generated-paper` |
 
 Add `--editor terminal` if you prefer a terminal instead of VS Code.
 
@@ -276,24 +276,25 @@ COMP1511 questions or 10 COMP1521 questions; it does not place all 150 bank
 questions into one exam.
 
 Choose an integer seed and a new destination directory, then start the generated
-directory in exam mode:
+directory. Generated papers default to the normal exam workflow:
 
 ```sh
 csetty bank build comp1511 ./comp1511-paper-1511 --seed 1511
-csetty start ./comp1511-paper-1511 --mode exam
+csetty start ./comp1511-paper-1511
 ```
 
 For COMP1521:
 
 ```sh
 csetty bank build comp1521 ./comp1521-paper-1521 --seed 1521
-csetty start ./comp1521-paper-1521 --mode exam
+csetty start ./comp1521-paper-1521
 ```
 
-Do not omit `--mode exam` when you want the normal exam workflow. CSEExamTTY
-shows the Welcome screen, asks for the simulated zID and password, displays the
-exam-condition acknowledgement, opens the complete paper for the read-only
-reading period, and only then creates the starter workspace for working time.
+No `--mode` flag is needed here. CSEExamTTY shows the Welcome screen, asks for
+the simulated zID and password, displays the exam-condition acknowledgement,
+opens the complete paper for the read-only reading period, and only then creates
+the starter workspace for working time. Use `--mode practice` only when you
+deliberately want to practise a generated paper without that workflow.
 
 Generated starter and submission filenames follow their position in the paper:
 `q1.c`, `q2.c`, and so on. A COMP1521 MIPS question uses the corresponding

@@ -5,6 +5,7 @@ import pytest
 import csetty.container_bridge as container_bridge
 from csetty.cli import _check_start_options, _parser
 from csetty.errors import UsageError
+from csetty.models import AttemptMode
 
 
 def test_exam_mode_rejects_network_and_skip_reading() -> None:
@@ -17,6 +18,19 @@ def test_exam_mode_rejects_network_and_skip_reading() -> None:
         _check_start_options(
             parser.parse_args(["start", "pack", "--mode", "exam", "--skip-reading"])
         )
+
+
+def test_start_uses_pack_default_mode_unless_explicitly_overridden() -> None:
+    parser = _parser()
+    generated = parser.parse_args(["start", "generated-pack"])
+    mode, timed, network = _check_start_options(generated, default_mode="exam")
+    assert (mode, timed, network) == (AttemptMode.EXAM, True, "none")
+
+    practice = parser.parse_args(
+        ["start", "generated-pack", "--mode", "practice"]
+    )
+    mode, timed, network = _check_start_options(practice, default_mode="exam")
+    assert (mode, timed, network) == (AttemptMode.PRACTICE, False, "none")
 
 
 def test_1511_fetch_force_and_autotest_selector(monkeypatch: pytest.MonkeyPatch) -> None:

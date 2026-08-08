@@ -93,10 +93,51 @@ expected_exit = 0
 def test_load_pack_and_digest(tmp_path: Path) -> None:
     pack = load_pack(make_pack(tmp_path / "pack"))
     assert pack.id == "test-pack"
+    assert pack.default_mode == "practice"
     assert pack.total_points == 10
     assert pack.question("q1").automatic_points == 10
     assert len(pack.digest) == 64
     assert pack.starter_target("starter/q1.c").as_posix() == "q1.c"
+
+
+def test_pack_can_declare_exam_as_its_default_mode(tmp_path: Path) -> None:
+    root = make_pack(tmp_path / "pack")
+    manifest = root / "pack.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            'paper = "paper/index.md"',
+            'paper = "paper/index.md"\ndefault_mode = "exam"',
+        ),
+        encoding="utf-8",
+    )
+    assert load_pack(root).default_mode == "exam"
+
+
+@pytest.mark.parametrize("declaration", ('default_mode = "timed"', "default_mode = true"))
+def test_pack_rejects_invalid_default_mode(tmp_path: Path, declaration: str) -> None:
+    root = make_pack(tmp_path / "pack")
+    manifest = root / "pack.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            'paper = "paper/index.md"',
+            f'paper = "paper/index.md"\n{declaration}',
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValidationError, match="default_mode"):
+        load_pack(root)
+
+
+def test_legacy_generated_pack_defaults_to_exam_mode(tmp_path: Path) -> None:
+    root = make_pack(tmp_path / "pack")
+    manifest = root / "pack.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8")
+        .replace('id = "test-pack"', 'id = "comp1511-generated-1511"')
+        .replace('title = "Test pack"', 'title = "COMP1511 Generated Exam Paper"'),
+        encoding="utf-8",
+    )
+    assert load_pack(root).default_mode == "exam"
 
 
 def test_digest_ignores_reference_solutions(tmp_path: Path) -> None:

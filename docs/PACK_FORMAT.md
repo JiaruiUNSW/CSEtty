@@ -48,6 +48,7 @@ profile = "comp1511"
 author = "Example author"
 license = "CC BY-NC-ND 4.0"
 paper = "paper/index.md"
+default_mode = "practice"
 reading_time_seconds = 600
 working_time_seconds = 10800
 
@@ -128,11 +129,18 @@ min_passed_questions = 1
 | `author` | Content author/organisation |
 | `license` | Non-empty license label; bundled original packs use `CC BY-NC-ND 4.0` |
 | `paper` | Existing UTF-8 Markdown path under the pack root |
+| `default_mode` | Optional `practice` or `exam`; defaults to `practice` for ordinary packs |
 | `reading_time_seconds` | Non-negative integer |
 | `working_time_seconds` | Positive integer |
 
 Pack identity is `(id, version, SHA-256 digest)`. Attempts persist the path and
 digest and refuse resume when assessed pack content changes.
+
+Papers emitted by `csetty bank build` declare `default_mode = "exam"`, so a
+plain `csetty start PATH` runs the Welcome, candidate sign-in, acknowledgement,
+reading, and working sequence. `--mode practice` remains an explicit override.
+Generated packs created by older CSEExamTTY versions are recognised by their
+generated pack identity and receive the same default for compatibility.
 
 ## 4. Environment ceilings
 

@@ -63,7 +63,12 @@ def _parser() -> argparse.ArgumentParser:
 
     start = subcommands.add_parser("start", help="create and start an attempt")
     start.add_argument("pack")
-    start.add_argument("--mode", choices=("practice", "exam"), default="practice")
+    start.add_argument(
+        "--mode",
+        choices=("practice", "exam"),
+        default=None,
+        help="override the pack's default attempt mode",
+    )
     start.add_argument("--editor", choices=("code", "terminal"), default="code")
     start.add_argument("--workspace", type=Path)
     start.add_argument("--network", choices=("none", "on"), default="none")
@@ -311,8 +316,10 @@ def _verify_pack(path: Path, reference: Path) -> int:
     return 0
 
 
-def _check_start_options(args: argparse.Namespace) -> tuple[AttemptMode, bool, str]:
-    mode = AttemptMode(args.mode)
+def _check_start_options(
+    args: argparse.Namespace, *, default_mode: str = "practice"
+) -> tuple[AttemptMode, bool, str]:
+    mode = AttemptMode(args.mode or default_mode)
     timed = mode is AttemptMode.EXAM or bool(args.timed)
     if mode is AttemptMode.EXAM and args.network == "on":
         raise UsageError("exam mode requires --network none")
@@ -422,8 +429,8 @@ def _enter_working(
 
 
 def _start(args: argparse.Namespace) -> int:
-    mode, timed, network = _check_start_options(args)
     pack = PackRepository().get(args.pack)
+    mode, timed, network = _check_start_options(args, default_mode=pack.default_mode)
     paths, store, runtime, vscode = _components()
     image = runtime.image_for_profile(pack.profile)
     runtime.ensure_profile_ready(pack.profile)

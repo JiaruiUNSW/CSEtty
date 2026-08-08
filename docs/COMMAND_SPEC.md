@@ -28,9 +28,12 @@ csetty bank verify PATH
 csetty bank build PATH DESTINATION --seed INTEGER [--version X.Y.Z]
 ```
 
-Defaults are practice mode, the isolated VS Code editor, a Docker volume
-workspace, no network, and no practice timer. `--timed` uses the pack's working
-time. There is no pause operation in schema/profile version 1.
+Attempt mode defaults to the pack policy: papers emitted by `csetty bank build`
+default to exam mode, while fixed, custom, and legacy ordinary packs default to
+practice mode. `--mode practice|exam` explicitly overrides that policy. Other
+defaults are the isolated VS Code editor, a Docker volume workspace, no network,
+and no practice timer. `--timed` uses the pack's working time. There is no pause
+operation in schema/profile version 1.
 
 Exam mode is always timed. It rejects `--network on` and `--skip-reading`.
 Practice mode remains offline unless networking is explicitly enabled. Start
@@ -68,11 +71,13 @@ blueprints.
 
 ## 2. Exam entry gate
 
-Only `csetty start ... --mode exam` runs the entry gate. It occurs in the host
-terminal before an attempt record, reading view, workspace, container, or VS
-Code window is created. After startup prerequisites pass, CSEExamTTY clears the
-interactive terminal's visible screen and scrollback before drawing the gate;
-redirected non-TTY output is left unchanged.
+Every start whose resolved mode is exam runs the entry gate. This includes a
+plain `csetty start GENERATED_PATH`, because generated papers default to exam
+mode, as well as an explicit `--mode exam`. The gate occurs in the host terminal
+before an attempt record, reading view, workspace, container, or VS Code window
+is created. After startup prerequisites pass, CSEExamTTY clears the interactive
+terminal's visible screen and scrollback before drawing the gate; redirected
+non-TTY output is left unchanged.
 
 The visible sequence after that clear is:
 

@@ -138,6 +138,7 @@ def test_build_deterministic_exam_pack(tmp_path: Path) -> None:
     bank = load_question_bank(_make_comp1511_bank(tmp_path / "bank"))
     pack = build_exam_pack(bank, destination=tmp_path / "pack", seed=1511)
     assert pack.title == "COMP1511 Generated Exam Paper"
+    assert pack.default_mode == "exam"
     assert pack.paper_text().startswith("# COMP1511 Generated Exam Paper")
     assert pack.total_points == 100
     assert [question.id for question in pack.questions] == [f"q{index}" for index in range(1, 12)]
@@ -168,6 +169,7 @@ def test_build_deterministic_exam_pack(tmp_path: Path) -> None:
 def test_build_verification_pack_contains_every_bank_question(tmp_path: Path) -> None:
     bank = load_question_bank(_make_comp1511_bank(tmp_path / "bank"))
     pack = build_verification_pack(bank, destination=tmp_path / "verification")
+    assert pack.default_mode == "practice"
     assert [question.id for question in pack.questions] == [
         item.question.id for item in bank.questions
     ]
