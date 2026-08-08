@@ -29,7 +29,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static int solve(const struct node *head) {
+static int alternating_position_total(const struct node *head) {
     int sum = 0;
         int index = 0;
         for (const struct node *p = head; p != NULL; p = p->next) {
@@ -41,7 +41,7 @@ static int solve(const struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    printf("%d\n", solve(head));
+    printf("%d\n", alternating_position_total(head));
     free_list(head);
     return 0;
 }

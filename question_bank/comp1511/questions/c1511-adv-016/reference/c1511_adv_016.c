@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int *solve(const int *left, size_t left_length, const int *right, size_t right_length, size_t *result_length) {
+static int *merge_unique(const int *left, size_t left_length, const int *right, size_t right_length, size_t *result_length) {
     size_t capacity = left_length + right_length;
     int *result = capacity == 0 ? NULL : malloc(capacity * sizeof *result);
     if (capacity != 0 && result == NULL) exit(1);
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     for (size_t i = 0; i < left_length; i++) left[i] = atoi(argv[i + 1]);
     for (size_t i = 0; i < right_length; i++) right[i] = atoi(argv[divider + 1 + (int)i]);
     size_t result_length = 0;
-    int *result = solve(left, left_length, right, right_length, &result_length);
+    int *result = merge_unique(left, left_length, right, right_length, &result_length);
     print_array(result, result_length);
     free(result);
     free(left);

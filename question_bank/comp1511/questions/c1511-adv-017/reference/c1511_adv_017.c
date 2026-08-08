@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void solve(int *first, int *last) {
+static void order_endpoints(int *first, int *last) {
     if (*first > *last) {
         int temporary = *first;
         *first = *last;
@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     int *values = length == 0 ? NULL : malloc(length * sizeof *values);
     if (length != 0 && values == NULL) return 1;
     for (size_t i = 0; i < length; i++) values[i] = atoi(argv[i + 1]);
-    if (length >= 2) solve(&values[0], &values[length - 1]);
+    if (length >= 2) order_endpoints(&values[0], &values[length - 1]);
     print_array(values, length);
     free(values);
     return 0;

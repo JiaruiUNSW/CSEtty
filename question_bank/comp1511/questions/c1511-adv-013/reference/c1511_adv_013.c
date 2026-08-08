@@ -9,7 +9,7 @@ static void reverse(int *values, size_t left, size_t right) {
     }
 }
 
-static void solve(int *values, size_t length, size_t amount) {
+static void rotate_left(int *values, size_t length, size_t amount) {
     if (length == 0) return;
     amount %= length;
     if (amount == 0) return;
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     int *values = length == 0 ? NULL : malloc(length * sizeof *values);
     if (length != 0 && values == NULL) return 1;
     for (size_t i = 0; i < length; i++) values[i] = atoi(argv[i + 2]);
-    solve(values, length, (size_t)strtoul(argv[1], NULL, 10));
+    rotate_left(values, length, (size_t)strtoul(argv[1], NULL, 10));
     print_array(values, length);
     free(values);
     return 0;

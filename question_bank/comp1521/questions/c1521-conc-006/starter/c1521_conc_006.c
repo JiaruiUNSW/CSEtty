@@ -9,4 +9,3 @@ int main(int argc, char **argv) {
     // TODO: shard lines across child processes and combine their records.
     return 0;
 }
-

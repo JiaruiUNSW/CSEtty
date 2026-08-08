@@ -45,13 +45,13 @@ static struct node *copy_from(const struct node *head, struct node *accumulator)
     return copy_from(head->next, fresh);
 }
 
-static struct node *solve(const struct node *head) {
+static struct node *reverse_copy(const struct node *head) {
     return copy_from(head, NULL);
 }
 
 int main(int argc, char **argv) {
     struct node *input = build_list(argv, 1, argc);
-    struct node *result = solve(input);
+    struct node *result = reverse_copy(input);
     print_list(result);
     free_list(result);
     free_list(input);

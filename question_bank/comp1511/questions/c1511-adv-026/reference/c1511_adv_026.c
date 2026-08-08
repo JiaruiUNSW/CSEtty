@@ -36,9 +36,9 @@ static void free_list(struct node *head) {
     }
 }
 
-static struct node *solve(struct node *head, int threshold) {
+static struct node *prune_below(struct node *head, int threshold) {
     if (head == NULL) return NULL;
-        struct node *suffix = solve(head->next, threshold);
+        struct node *suffix = prune_below(head->next, threshold);
         if (head->data < threshold) {
             free(head);
             return suffix;
@@ -50,7 +50,7 @@ static struct node *solve(struct node *head, int threshold) {
 int main(int argc, char **argv) {
     if (argc < 2) return 2;
     struct node *head = build_list(argv, 2, argc);
-    head = solve(head, atoi(argv[1]));
+    head = prune_below(head, atoi(argv[1]));
     print_list(head);
     free_list(head);
     return 0;

@@ -29,7 +29,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static int solve(const struct node *head) {
+static int longest_nondecreasing_run(const struct node *head) {
     int current = 0;
         int best = 0;
         const struct node *previous = NULL;
@@ -43,7 +43,7 @@ static int solve(const struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    printf("%d\n", solve(head));
+    printf("%d\n", longest_nondecreasing_run(head));
     free_list(head);
     return 0;
 }

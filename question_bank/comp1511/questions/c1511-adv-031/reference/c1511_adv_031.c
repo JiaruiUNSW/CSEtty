@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static size_t *solve(const int *values, size_t length, size_t maximum) {
+static size_t *make_frequencies(const int *values, size_t length, size_t maximum) {
     size_t *counts = calloc(maximum + 1, sizeof *counts);
     if (counts == NULL) exit(1);
     for (size_t i = 0; i < length; i++) counts[(size_t)values[i]]++;
@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     int *values = length == 0 ? NULL : malloc(length * sizeof *values);
     if (length != 0 && values == NULL) return 1;
     for (size_t i = 0; i < length; i++) values[i] = atoi(argv[i + 2]);
-    size_t *counts = solve(values, length, maximum);
+    size_t *counts = make_frequencies(values, length, maximum);
     int printed = 0;
     for (size_t i = 0; i <= maximum; i++) {
         if (counts[i] != 0) {

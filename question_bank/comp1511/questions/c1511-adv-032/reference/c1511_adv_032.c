@@ -36,11 +36,11 @@ static void free_list(struct node *head) {
     }
 }
 
-static struct node *solve(struct node *head, int *running_sum) {
+static struct node *keep_even_prefixes(struct node *head, int *running_sum) {
     if (head == NULL) return NULL;
     *running_sum += head->data;
     int keep = *running_sum % 2 == 0;
-    struct node *suffix = solve(head->next, running_sum);
+    struct node *suffix = keep_even_prefixes(head->next, running_sum);
     if (keep) {
         head->next = suffix;
         return head;
@@ -52,7 +52,7 @@ static struct node *solve(struct node *head, int *running_sum) {
 int main(int argc, char **argv) {
     struct node *head = build_list(argv, 1, argc);
     int running_sum = 0;
-    head = solve(head, &running_sum);
+    head = keep_even_prefixes(head, &running_sum);
     print_list(head);
     free_list(head);
     return 0;

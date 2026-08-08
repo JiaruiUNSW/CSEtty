@@ -40,7 +40,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static struct node *solve(struct node *head) {
+static struct node *keep_first_occurrences(struct node *head) {
     for (struct node *p = head; p != NULL; p = p->next) {
             struct node **link = &p->next;
             while (*link != NULL) {
@@ -58,7 +58,7 @@ static struct node *solve(struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    head = solve(head);
+    head = keep_first_occurrences(head);
     print_list(head);
     free_list(head);
     return 0;

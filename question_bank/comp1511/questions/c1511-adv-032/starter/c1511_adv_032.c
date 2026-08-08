@@ -11,7 +11,8 @@ static struct node *build_list(char **argv, int start, int end) {
     struct node **tail = &head;
     for (int i = start; i < end; i++) {
         struct node *fresh = malloc(sizeof *fresh);
-        if (fresh == NULL) exit(1);
+        if (fresh == NULL)
+            exit(1);
         fresh->data = atoi(argv[i]);
         fresh->next = NULL;
         *tail = fresh;
@@ -21,7 +22,10 @@ static struct node *build_list(char **argv, int start, int end) {
 }
 
 static void print_list(const struct node *head) {
-    if (head == NULL) { puts("EMPTY"); return; }
+    if (head == NULL) {
+        puts("EMPTY");
+        return;
+    }
     for (const struct node *p = head; p != NULL; p = p->next) {
         printf("%s%d", p == head ? "" : " ", p->data);
     }
@@ -36,8 +40,8 @@ static void free_list(struct node *head) {
     }
 }
 
-static struct node *solve(struct node *head, int *running_sum) {
-    /* TODO: recursively retain nodes at even inclusive prefix sums. */
+static struct node *keep_even_prefixes(struct node *head, int *running_sum) {
+    // TODO: recursively retain nodes at even inclusive prefix sums.
     (void)running_sum;
     return head;
 }
@@ -45,7 +49,7 @@ static struct node *solve(struct node *head, int *running_sum) {
 int main(int argc, char **argv) {
     struct node *head = build_list(argv, 1, argc);
     int running_sum = 0;
-    head = solve(head, &running_sum);
+    head = keep_even_prefixes(head, &running_sum);
     print_list(head);
     free_list(head);
     return 0;

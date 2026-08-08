@@ -11,7 +11,8 @@ static struct node *build_list(char **argv, int start, int end) {
     struct node **tail = &head;
     for (int i = start; i < end; i++) {
         struct node *fresh = malloc(sizeof *fresh);
-        if (fresh == NULL) exit(1);
+        if (fresh == NULL)
+            exit(1);
         fresh->data = atoi(argv[i]);
         fresh->next = NULL;
         *tail = fresh;
@@ -28,15 +29,15 @@ static void free_list(struct node *head) {
     }
 }
 
-static int solve(const struct node *head) {
-    /* TODO: recursively compare mirrored positions. */
+static int is_mirror_sequence(const struct node *head) {
+    // TODO: recursively compare mirrored positions.
     (void)head;
     return 0;
 }
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argv, 1, argc);
-    puts(solve(head) ? "YES" : "NO");
+    puts(is_mirror_sequence(head) ? "YES" : "NO");
     free_list(head);
     return 0;
 }

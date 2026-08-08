@@ -1,3 +1,28 @@
 #include <stdio.h>
-static long long solve(const int*a,int r,int c){(void)a;(void)r;(void)c;return 0;}
-int main(void){int r,c,a[64];if(scanf("%d%d",&r,&c)!=2||r<0||c<0||r>8||c>8)return 1;for(int i=0;i<r*c;i++)if(scanf("%d",&a[i])!=1)return 1;printf("result: %lld\n",solve(a,r,c));return 0;}
+
+static long long solve(const int *values, int rows, int columns) {
+    // TODO: Implement this function.
+    (void)values;
+    (void)rows;
+    (void)columns;
+    return 0;
+}
+
+int main(void) {
+    int rows;
+    int columns;
+    int values[64];
+
+    if (scanf("%d %d", &rows, &columns) != 2 || rows < 0 || columns < 0 || rows > 8 ||
+        columns > 8) {
+        return 1;
+    }
+    for (int i = 0; i < rows * columns; i++) {
+        if (scanf("%d", &values[i]) != 1) {
+            return 1;
+        }
+    }
+
+    printf("result: %lld\n", solve(values, rows, columns));
+    return 0;
+}

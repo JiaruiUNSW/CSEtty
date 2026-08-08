@@ -9,4 +9,3 @@ int main(int argc, char **argv) {
     // TODO: partition the file and combine child checksums.
     return 0;
 }
-

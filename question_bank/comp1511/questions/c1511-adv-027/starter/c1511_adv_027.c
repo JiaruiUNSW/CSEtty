@@ -11,7 +11,8 @@ static struct node *build_list(char **argv, int start, int end) {
     struct node **tail = &head;
     for (int i = start; i < end; i++) {
         struct node *fresh = malloc(sizeof *fresh);
-        if (fresh == NULL) exit(1);
+        if (fresh == NULL)
+            exit(1);
         fresh->data = atoi(argv[i]);
         fresh->next = NULL;
         *tail = fresh;
@@ -21,7 +22,10 @@ static struct node *build_list(char **argv, int start, int end) {
 }
 
 static void print_list(const struct node *head) {
-    if (head == NULL) { puts("EMPTY"); return; }
+    if (head == NULL) {
+        puts("EMPTY");
+        return;
+    }
     for (const struct node *p = head; p != NULL; p = p->next) {
         printf("%s%d", p == head ? "" : " ", p->data);
     }
@@ -36,8 +40,9 @@ static void free_list(struct node *head) {
     }
 }
 
-static void solve(struct node *head, struct node **first, struct node **second) {
-    /* TODO: relink alternating nodes into both outputs. */
+static void deal_alternating(struct node *head, struct node **first,
+                             struct node **second) {
+    // TODO: relink alternating nodes into both outputs.
     *first = head;
     *second = NULL;
 }
@@ -50,7 +55,7 @@ static void print_named(const char *name, const struct node *head) {
 int main(int argc, char **argv) {
     struct node *head = build_list(argv, 1, argc);
     struct node *first = NULL, *second = NULL;
-    solve(head, &first, &second);
+    deal_alternating(head, &first, &second);
     print_named("A", first);
     print_named("B", second);
     free_list(first);

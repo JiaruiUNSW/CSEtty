@@ -13,10 +13,11 @@ struct summary {
 };
 
 int main(void) {
-    /* TODO: implement the complete labelled-summary processor. */
+    // TODO: implement the complete labelled-summary processor.
     char command[16];
     while (scanf("%15s", command) == 1) {
-        if (strcmp(command, "END") == 0) break;
+        if (strcmp(command, "END") == 0)
+            break;
     }
     return 0;
 }

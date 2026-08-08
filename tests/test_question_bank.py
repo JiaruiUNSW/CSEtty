@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -205,7 +206,12 @@ def test_bundled_generated_paper_uses_student_facing_filenames(
         student_filename = f"{slot.id}{suffix}"
         assert question.starter_files == (f"starter/{student_filename}",)
         assert question.submission_files == (student_filename,)
-        assert (pack.root / "starter" / student_filename).is_file()
+        starter = pack.root / "starter" / student_filename
+        assert starter.is_file()
+        starter_text = starter.read_text(encoding="utf-8")
+        marker = "# TODO:" if starter.suffix == ".s" else "// TODO:"
+        assert marker in starter_text
+        assert max(map(len, starter_text.splitlines())) <= 120
         assert (pack.root / "solutions" / "reference" / student_filename).is_file()
         assert original_filename not in question.build_argv
         assert all(
@@ -230,6 +236,53 @@ def test_bundled_generated_paper_uses_student_facing_filenames(
             for group in mips_question.test_groups
             for test in group.tests
         )
+
+
+@pytest.mark.parametrize("profile", ("comp1511", "comp1521"))
+def test_bundled_starters_are_readable_and_mark_the_edit_region(profile: str) -> None:
+    repository = Path(__file__).resolve().parents[1]
+    bank = load_question_bank(repository / "question_bank" / profile)
+
+    for item in bank.questions:
+        for relative in item.question.starter_files:
+            starter = item.root / relative
+            source = starter.read_text(encoding="utf-8")
+            lines = source.splitlines()
+            marker = "# TODO:" if starter.suffix == ".s" else "// TODO:"
+
+            assert marker in source, f"{item.question.id} has no source TODO marker"
+            assert max(map(len, lines)) <= 120, item.question.id
+            if starter.suffix == ".c":
+                assert all(line.count(";") < 3 for line in lines), item.question.id
+
+
+def test_comp1511_function_prompts_match_the_student_function_name() -> None:
+    repository = Path(__file__).resolve().parents[1]
+    bank = load_question_bank(repository / "question_bank" / "comp1511")
+
+    for item in bank.questions:
+        if not item.question.id.startswith("c1511-adv-"):
+            continue
+        if item.question.kind != "c_function":
+            continue
+
+        prompt = (item.root / item.question.prompt).read_text(encoding="utf-8")
+        signature = re.search(
+            r"`[^`]*?\b([A-Za-z_][A-Za-z0-9_]*)\s*\(",
+            prompt,
+        )
+        assert signature is not None, item.question.id
+        function_name = signature.group(1)
+
+        source_paths = [item.root / relative for relative in item.question.starter_files]
+        source_paths.extend(
+            item.root / "reference" / filename
+            for filename in item.question.submission_files
+        )
+        for source_path in source_paths:
+            source = source_path.read_text(encoding="utf-8")
+            assert re.search(rf"\b{re.escape(function_name)}\s*\(", source), item.question.id
+            assert re.search(r"\bsolve\s*\(", source) is None, item.question.id
 
 
 def test_rejects_prompt_without_required_sections(tmp_path: Path) -> None:

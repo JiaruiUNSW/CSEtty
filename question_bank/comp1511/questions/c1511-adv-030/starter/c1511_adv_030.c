@@ -12,7 +12,8 @@ static struct node *build_list(char **argv, int start, int end) {
     struct node **tail = &head;
     for (int i = start; i < end; i++) {
         struct node *fresh = malloc(sizeof *fresh);
-        if (fresh == NULL) exit(1);
+        if (fresh == NULL)
+            exit(1);
         fresh->data = atoi(argv[i]);
         fresh->next = NULL;
         *tail = fresh;
@@ -22,7 +23,10 @@ static struct node *build_list(char **argv, int start, int end) {
 }
 
 static void print_list(const struct node *head) {
-    if (head == NULL) { puts("EMPTY"); return; }
+    if (head == NULL) {
+        puts("EMPTY");
+        return;
+    }
     for (const struct node *p = head; p != NULL; p = p->next) {
         printf("%s%d", p == head ? "" : " ", p->data);
     }
@@ -37,19 +41,22 @@ static void free_list(struct node *head) {
     }
 }
 
-static struct node *solve(struct node *left, struct node *right) {
-    /* TODO: weave the two chains without allocation. */
+static struct node *weave(struct node *left, struct node *right) {
+    // TODO: weave the two chains without allocation.
     (void)right;
     return left;
 }
 
 int main(int argc, char **argv) {
     int divider = -1;
-    for (int i = 1; i < argc; i++) if (strcmp(argv[i], "--") == 0) divider = i;
-    if (divider < 0) return 2;
+    for (int i = 1; i < argc; i++)
+        if (strcmp(argv[i], "--") == 0)
+            divider = i;
+    if (divider < 0)
+        return 2;
     struct node *left = build_list(argv, 1, divider);
     struct node *right = build_list(argv, divider + 1, argc);
-    struct node *result = solve(left, right);
+    struct node *result = weave(left, right);
     print_list(result);
     free_list(result);
     return 0;

@@ -11,7 +11,8 @@ static struct node *build_list(int argc, char **argv, int start) {
     struct node **tail = &head;
     for (int i = start; i < argc; i++) {
         struct node *fresh = malloc(sizeof *fresh);
-        if (fresh == NULL) exit(1);
+        if (fresh == NULL)
+            exit(1);
         fresh->data = atoi(argv[i]);
         fresh->next = NULL;
         *tail = fresh;
@@ -39,14 +40,14 @@ static void free_list(struct node *head) {
     }
 }
 
-/* TODO: modify only this function. */
-static struct node *solve(struct node *head) {
+// TODO: modify only this function.
+static struct node *keep_first_occurrences(struct node *head) {
     return head;
 }
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    head = solve(head);
+    head = keep_first_occurrences(head);
     print_list(head);
     free_list(head);
     return 0;

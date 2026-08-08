@@ -40,7 +40,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static struct node *solve(struct node *head) {
+static struct node *outside_in(struct node *head) {
     if (head == NULL || head->next == NULL) return head;
         struct node *slow = head;
         struct node *fast = head->next;
@@ -71,7 +71,7 @@ static struct node *solve(struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    head = solve(head);
+    head = outside_in(head);
     print_list(head);
     free_list(head);
     return 0;

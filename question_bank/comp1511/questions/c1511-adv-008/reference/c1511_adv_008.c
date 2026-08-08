@@ -40,7 +40,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static struct node *solve(struct node *head) {
+static struct node *odd_before_even(struct node *head) {
     struct node *odd_head = NULL, *odd_tail = NULL;
         struct node *even_head = NULL, *even_tail = NULL;
         while (head != NULL) {
@@ -59,7 +59,7 @@ static struct node *solve(struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    head = solve(head);
+    head = odd_before_even(head);
     print_list(head);
     free_list(head);
     return 0;

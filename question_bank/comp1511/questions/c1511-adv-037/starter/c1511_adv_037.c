@@ -10,10 +10,11 @@ struct buffer {
 
 int main(void) {
     struct buffer buffer = {NULL, 0, 0};
-    /* TODO: implement PUSH, DROP, ROLL, UNIQUE, PRINT, and END. */
+    // TODO: implement PUSH, DROP, ROLL, UNIQUE, PRINT, and END.
     char command[16];
     while (scanf("%15s", command) == 1) {
-        if (strcmp(command, "END") == 0) break;
+        if (strcmp(command, "END") == 0)
+            break;
     }
     free(buffer.data);
     return 0;

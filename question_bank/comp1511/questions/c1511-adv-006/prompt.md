@@ -27,4 +27,4 @@ Output:
 
 ## Implementation notes
 
-The supplied `main` owns and frees all nodes still reachable from the returned head. Modify only `solve`. Submit `c1511_adv_006.c`. The supplied `main` validates ownership by freeing all surviving nodes, so do not retain hidden aliases.
+The supplied `main` owns and frees all nodes still reachable from the returned head. Modify only `remove_first_negative`. Submit `c1511_adv_006.c`. The supplied `main` validates ownership by freeing all surviving nodes, so do not retain hidden aliases.

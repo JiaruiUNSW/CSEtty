@@ -37,7 +37,7 @@ static void free_list(struct node *head) {
     }
 }
 
-static struct node *solve(struct node *left, struct node *right) {
+static struct node *weave(struct node *left, struct node *right) {
     struct node *head = NULL;
     struct node **tail = &head;
     while (left != NULL && right != NULL) {
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
     if (divider < 0) return 2;
     struct node *left = build_list(argv, 1, divider);
     struct node *right = build_list(argv, divider + 1, argc);
-    struct node *result = solve(left, right);
+    struct node *result = weave(left, right);
     print_list(result);
     free_list(result);
     return 0;

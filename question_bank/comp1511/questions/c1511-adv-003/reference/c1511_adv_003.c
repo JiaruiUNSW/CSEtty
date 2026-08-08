@@ -29,7 +29,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static int solve(const struct node *head, int target) {
+static int first_prefix_at_least(const struct node *head, int target) {
     long sum = 0;
         int index = 0;
         for (const struct node *p = head; p != NULL; p = p->next) {
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     if (argc < 2) return 2;
     int target = atoi(argv[1]);
     struct node *head = build_list(argc, argv, 2);
-    printf("%d\n", solve(head, target));
+    printf("%d\n", first_prefix_at_least(head, target));
     free_list(head);
     return 0;
 }

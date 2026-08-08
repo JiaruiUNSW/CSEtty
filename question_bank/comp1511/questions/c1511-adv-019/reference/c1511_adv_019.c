@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void solve(int *values, size_t length) {
+static void running_differences(int *values, size_t length) {
     if (length == 0) return;
     int previous = values[0];
     for (size_t i = 1; i < length; i++) {
@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     int *values = length == 0 ? NULL : malloc(length * sizeof *values);
     if (length != 0 && values == NULL) return 1;
     for (size_t i = 0; i < length; i++) values[i] = atoi(argv[i + 1]);
-    solve(values, length);
+    running_differences(values, length);
     print_array(values, length);
     free(values);
     return 0;

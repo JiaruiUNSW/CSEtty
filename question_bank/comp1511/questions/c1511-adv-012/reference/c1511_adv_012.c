@@ -22,7 +22,7 @@ static struct node *build_list(int argc, char **argv, int start) {
 
 
 /* Reference implementation. */
-static int solve(struct node *head) {
+static int consume_checksum(struct node *head) {
     int total = 0;
         int sign = 1;
         while (head != NULL) {
@@ -37,6 +37,6 @@ static int solve(struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    printf("%d\n", solve(head));
+    printf("%d\n", consume_checksum(head));
     return 0;
 }

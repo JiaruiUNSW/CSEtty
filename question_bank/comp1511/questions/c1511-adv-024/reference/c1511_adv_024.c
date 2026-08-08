@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int solve(int **values, size_t *length) {
+static int append_checksum(int **values, size_t *length) {
     int checksum = 0;
     for (size_t i = 0; i < *length; i++) checksum += (*values)[i];
     int *grown = realloc(*values, (*length + 1) * sizeof *grown);
@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     int *values = length == 0 ? NULL : malloc(length * sizeof *values);
     if (length != 0 && values == NULL) return 1;
     for (size_t i = 0; i < length; i++) values[i] = atoi(argv[i + 1]);
-    if (!solve(&values, &length)) { free(values); return 1; }
+    if (!append_checksum(&values, &length)) { free(values); return 1; }
     print_array(values, length);
     free(values);
     return 0;

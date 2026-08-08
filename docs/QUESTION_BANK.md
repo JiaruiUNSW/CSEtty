@@ -25,10 +25,18 @@ fenced input/output blocks and show command arguments or fixture contents only
 when they exist. Author provenance, hidden-marking language, and internal build
 details do not belong in a student prompt.
 
+Every C starter marks the student-editable region with `// TODO:`; MIPS uses
+the assembly-safe `# TODO:` equivalent. C scaffolding follows the repository
+`.clang-format` style, keeps student-facing lines at or below 120 characters,
+and does not compress several statements onto one line. Supplied input,
+allocation, cleanup, process, or thread scaffolding is visually separate from
+the code the student must complete.
+
 The generated half of each bank is reproduced by
-`scripts/generate_question_bank_expansion.py`. The older half is normalised by
-`scripts/polish_legacy_question_prompts.py`; both scripts are idempotent so a
-curator can refresh the committed Markdown without changing tests or scoring.
+`scripts/generate_question_bank_expansion.py`; use `--refresh-starters` to
+rewrite only its 150 committed student skeletons. The older half is normalised
+by `scripts/polish_legacy_question_prompts.py`. The authoring operations are
+idempotent and do not change tests or scoring.
 
 ## Fixed papers, banks, and generated papers
 

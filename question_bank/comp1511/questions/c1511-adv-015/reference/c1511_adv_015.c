@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int *solve(const int *values, size_t length, int low, int high, size_t *result_length) {
+static int *copy_in_range(const int *values, size_t length, int low, int high, size_t *result_length) {
     size_t count = 0;
     for (size_t i = 0; i < length; i++) {
         if (values[i] >= low && values[i] <= high) count++;
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     if (length != 0 && values == NULL) return 1;
     for (size_t i = 0; i < length; i++) values[i] = atoi(argv[i + 3]);
     size_t result_length = 0;
-    int *result = solve(values, length, atoi(argv[1]), atoi(argv[2]), &result_length);
+    int *result = copy_in_range(values, length, atoi(argv[1]), atoi(argv[2]), &result_length);
     print_array(result, result_length);
     free(result);
     free(values);

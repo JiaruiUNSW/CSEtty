@@ -98,8 +98,8 @@
           "argv": [
             "./c1521_low_019"
           ],
-          "stdin": "ffffffff 32\n",
-          "expected_stdout": "ffffffff\n",
+          "stdin": "00000001 31\n",
+          "expected_stdout": "80000000\n",
           "expected_stderr": "",
           "expected_exit": 0,
           "timeout_ms": 3000,

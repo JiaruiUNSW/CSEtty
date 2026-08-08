@@ -9,4 +9,3 @@ int main(int argc, char **argv) {
     // TODO: fork the scanner and collect line offsets.
     return 0;
 }
-

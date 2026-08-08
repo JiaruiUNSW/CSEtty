@@ -2,7 +2,7 @@
 
 ## Background
 
-`int *merge_unique(...)` creates a sorted union of two nondecreasing arrays and reports its length. The supplied executable converts command-line text into heap arrays so the function is self-contained and repeatable.
+`int *merge_unique(const int *left, size_t left_length, const int *right, size_t right_length, size_t *result_length)` creates a sorted union of two nondecreasing arrays and reports its length. The supplied executable converts command-line text into heap arrays so the function is self-contained and repeatable.
 
 ## Requirements
 

@@ -36,7 +36,7 @@ static void free_list(struct node *head) {
     }
 }
 
-static struct node *solve(const struct node *head) {
+static struct node *pair_totals(const struct node *head) {
     if (head == NULL) return NULL;
         struct node *fresh = malloc(sizeof *fresh);
         if (fresh == NULL) exit(1);
@@ -45,14 +45,14 @@ static struct node *solve(const struct node *head) {
             fresh->next = NULL;
         } else {
             fresh->data = head->data + head->next->data;
-            fresh->next = solve(head->next->next);
+            fresh->next = pair_totals(head->next->next);
         }
         return fresh;
 }
 
 int main(int argc, char **argv) {
     struct node *input = build_list(argv, 1, argc);
-    struct node *result = solve(input);
+    struct node *result = pair_totals(input);
     print_list(result);
     free_list(result);
     free_list(input);

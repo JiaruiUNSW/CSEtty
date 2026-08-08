@@ -40,7 +40,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static struct node *solve(struct node *head) {
+static struct node *insert_pair_sums(struct node *head) {
     for (struct node *left = head; left != NULL && left->next != NULL; ) {
             struct node *right = left->next;
             struct node *bridge = malloc(sizeof *bridge);
@@ -55,7 +55,7 @@ static struct node *solve(struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    head = solve(head);
+    head = insert_pair_sums(head);
     print_list(head);
     free_list(head);
     return 0;

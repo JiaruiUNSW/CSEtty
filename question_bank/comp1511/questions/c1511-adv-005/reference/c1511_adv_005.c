@@ -40,7 +40,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static struct node *solve(struct node *head, int value) {
+static struct node *insert_after_last_even(struct node *head, int value) {
     struct node *last_even = NULL;
         for (struct node *p = head; p != NULL; p = p->next) {
             if (p->data % 2 == 0) last_even = p;
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     if (argc < 2) return 2;
     int value = atoi(argv[1]);
     struct node *head = build_list(argc, argv, 2);
-    head = solve(head, value);
+    head = insert_after_last_even(head, value);
     print_list(head);
     free_list(head);
     return 0;

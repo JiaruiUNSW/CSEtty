@@ -36,14 +36,14 @@ static int compare_from_ends(const struct node *right, const struct node **left)
     return equal;
 }
 
-static int solve(const struct node *head) {
+static int is_mirror_sequence(const struct node *head) {
     const struct node *left = head;
     return compare_from_ends(head, &left);
 }
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argv, 1, argc);
-    puts(solve(head) ? "YES" : "NO");
+    puts(is_mirror_sequence(head) ? "YES" : "NO");
     free_list(head);
     return 0;
 }

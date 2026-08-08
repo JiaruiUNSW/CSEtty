@@ -9,4 +9,3 @@ int main(int argc, char **argv) {
     // TODO: fork one fingerprint worker per file.
     return 0;
 }
-

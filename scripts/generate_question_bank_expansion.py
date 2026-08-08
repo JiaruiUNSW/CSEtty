@@ -5,6 +5,7 @@
 The generated artifacts are committed so installations never need this script
 at runtime.  Keeping the source catalogue here makes the 150-question expansion
 reviewable and reproducible instead of relying on opaque copied directories.
+Use --refresh-starters when only the student-facing skeletons changed.
 """
 
 from __future__ import annotations
@@ -203,6 +204,18 @@ Trace the state after every input item. The final state is printed only after th
 
 The reference file follows the same three-part layout as the steps above: input validation in `main`, the core invariant in a small helper, and one exact output statement. Read the helper first, then check how `main` constructs its arguments and handles the smallest legal input.
 """
+
+
+def _refresh_starter(question: AuthoredQuestion) -> bool:
+    directory = BANK_ROOT / question.course.lower() / "questions" / question.id
+    if not directory.is_dir():
+        raise FileNotFoundError(f"question directory does not exist: {directory}")
+    filename = _slug_source(question.id, question.extension)
+    target = directory / "starter" / filename
+    if not target.is_file():
+        raise FileNotFoundError(f"starter file does not exist: {target}")
+    target.write_text(question.starter, encoding="utf-8")
+    return True
 
 
 def _emit(question: AuthoredQuestion, *, refresh: bool = False) -> bool:
@@ -519,18 +532,33 @@ def _prefixes(values: Sequence[int]) -> list[int]:
 
 def _sequence_source(body: str, *, starter: bool) -> str:
     solve = (
-        "static long long solve(const int *a,int n){(void)a;(void)n;return 0;}"
+        """static long long solve(const int *a, int n) {
+    // TODO: Implement this function.
+    (void)a;
+    (void)n;
+    return 0;
+}"""
         if starter
-        else f"static long long solve(const int *a,int n){{{body}}}"
+        else f"static long long solve(const int *a, int n) {{{body}}}"
     )
     return f"""#include <stdio.h>
+
 {solve}
-int main(void){{
+
+int main(void) {{
     int n;
     int values[100];
-    if(scanf("%d",&n)!=1||n<0||n>100)return 1;
-    for(int i=0;i<n;i++)if(scanf("%d",&values[i])!=1)return 1;
-    printf("result: %lld\\n",solve(values,n));
+
+    if (scanf("%d", &n) != 1 || n < 0 || n > 100) {{
+        return 1;
+    }}
+    for (int i = 0; i < n; i++) {{
+        if (scanf("%d", &values[i]) != 1) {{
+            return 1;
+        }}
+    }}
+
+    printf("result: %lld\\n", solve(values, n));
     return 0;
 }}
 """
@@ -697,24 +725,52 @@ LIST_DEFINITIONS = {
 
 def _list_source(body: str, *, recursive: bool, starter: bool) -> str:
     helpers = ""
-    if recursive:
-        helpers = """static long long recursive_total(const struct node*h){return h?h->value+recursive_total(h->next):0;}
-static long long recursive_negative(const struct node*h){return h?(h->value<0)+recursive_negative(h->next):0;}
+    if recursive and not starter:
+        helpers = """static long long recursive_total(const struct node *head) { return head ? head->value + recursive_total(head->next) : 0; }
+static long long recursive_negative(const struct node *head) { return head ? (head->value < 0) + recursive_negative(head->next) : 0; }
 """
+    todo = "Implement this function recursively." if recursive else "Implement this function."
     solve = (
-        "static long long solve(const struct node*h){(void)h;return 0;}"
+        f"""static long long solve(const struct node *head) {{
+    // TODO: {todo}
+    (void)head;
+    return 0;
+}}"""
         if starter
         else f"static long long solve(const struct node*h){{{body}}}"
     )
     return f"""#include <stdio.h>
 #include <stdlib.h>
-struct node{{int value;struct node*next;}};
+
+struct node {{
+    int value;
+    struct node *next;
+}};
+
 {helpers}{solve}
-int main(int argc,char**argv){{
-    struct node*head=NULL;struct node**tail=&head;
-    for(int i=1;i<argc;i++){{struct node*n=malloc(sizeof*n);if(!n)return 1;n->value=atoi(argv[i]);n->next=NULL;*tail=n;tail=&n->next;}}
-    printf("result: %lld\\n",solve(head));
-    while(head){{struct node*next=head->next;free(head);head=next;}}
+
+int main(int argc, char **argv) {{
+    struct node *head = NULL;
+    struct node **tail = &head;
+
+    for (int i = 1; i < argc; i++) {{
+        struct node *node = malloc(sizeof *node);
+        if (node == NULL) {{
+            return 1;
+        }}
+        node->value = atoi(argv[i]);
+        node->next = NULL;
+        *tail = node;
+        tail = &node->next;
+    }}
+
+    printf("result: %lld\\n", solve(head));
+
+    while (head != NULL) {{
+        struct node *next = head->next;
+        free(head);
+        head = next;
+    }}
     return 0;
 }}
 """
@@ -925,15 +981,31 @@ def _space_groups(text: str) -> int:
 
 def _string_source(body: str, *, starter: bool) -> str:
     solve = (
-        "static long long solve(const char*s){(void)s;return 0;}"
+        """static long long solve(const char *text) {
+    // TODO: Implement this function.
+    (void)text;
+    return 0;
+}"""
         if starter
         else f"static long long solve(const char*s){{{body}}}"
     )
     return f"""#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+
 {solve}
-int main(void){{char line[256];if(!fgets(line,sizeof line,stdin))return 1;line[strcspn(line,"\\n")]='\\0';printf("result: %lld\\n",solve(line));return 0;}}
+
+int main(void) {{
+    char line[256];
+
+    if (fgets(line, sizeof line, stdin) == NULL) {{
+        return 1;
+    }}
+    line[strcspn(line, "\\n")] = '\\0';
+
+    printf("result: %lld\\n", solve(line));
+    return 0;
+}}
 """
 
 
@@ -1084,11 +1156,33 @@ NUMERIC_DEFINITIONS = {
 
 def _numeric_source(body: str, *, starter: bool) -> str:
     solve = (
-        "static long long solve(int a,int b,int c){(void)a;(void)b;(void)c;return 0;}"
+        """static long long solve(int a, int b, int c) {
+    // TODO: Implement this function.
+    (void)a;
+    (void)b;
+    (void)c;
+    return 0;
+}"""
         if starter
-        else f"static long long solve(int a,int b,int c){{{body}}}"
+        else f"static long long solve(int a, int b, int c) {{{body}}}"
     )
-    return f'#include <stdio.h>\n{solve}\nint main(void){{int a,b,c;if(scanf("%d%d%d",&a,&b,&c)!=3)return 1;printf("result: %lld\\n",solve(a,b,c));return 0;}}\n'
+    return f"""#include <stdio.h>
+
+{solve}
+
+int main(void) {{
+    int a;
+    int b;
+    int c;
+
+    if (scanf("%d %d %d", &a, &b, &c) != 3) {{
+        return 1;
+    }}
+
+    printf("result: %lld\\n", solve(a, b, c));
+    return 0;
+}}
+"""
 
 
 def _numeric_questions() -> Iterable[AuthoredQuestion]:
@@ -1272,11 +1366,39 @@ GRID_DEFINITIONS = {
 
 def _grid_source(body: str, *, starter: bool) -> str:
     solve = (
-        "static long long solve(const int*a,int r,int c){(void)a;(void)r;(void)c;return 0;}"
+        """static long long solve(const int *values, int rows, int columns) {
+    // TODO: Implement this function.
+    (void)values;
+    (void)rows;
+    (void)columns;
+    return 0;
+}"""
         if starter
         else f"static long long solve(const int*a,int r,int c){{{body}}}"
     )
-    return f'#include <stdio.h>\n{solve}\nint main(void){{int r,c,a[64];if(scanf("%d%d",&r,&c)!=2||r<0||c<0||r>8||c>8)return 1;for(int i=0;i<r*c;i++)if(scanf("%d",&a[i])!=1)return 1;printf("result: %lld\\n",solve(a,r,c));return 0;}}\n'
+    return f"""#include <stdio.h>
+
+{solve}
+
+int main(void) {{
+    int rows;
+    int columns;
+    int values[64];
+
+    if (scanf("%d %d", &rows, &columns) != 2 || rows < 0 || columns < 0 || rows > 8 ||
+        columns > 8) {{
+        return 1;
+    }}
+    for (int i = 0; i < rows * columns; i++) {{
+        if (scanf("%d", &values[i]) != 1) {{
+            return 1;
+        }}
+    }}
+
+    printf("result: %lld\\n", solve(values, rows, columns));
+    return 0;
+}}
+"""
 
 
 def _grid_questions() -> Iterable[AuthoredQuestion]:
@@ -1379,11 +1501,41 @@ RECORD_DEFINITIONS = {
 
 def _record_source(body: str, *, starter: bool) -> str:
     solve = (
-        "static long long solve(const struct record*a,int n){(void)a;(void)n;return 0;}"
+        """static long long solve(const struct record *records, int n) {
+    // TODO: Implement this function.
+    (void)records;
+    (void)n;
+    return 0;
+}"""
         if starter
         else f"static long long solve(const struct record*a,int n){{{body}}}"
     )
-    return f'#include <stdio.h>\nstruct record{{char name[32];int value;}};\n{solve}\nint main(void){{int n;struct record a[50];if(scanf("%d",&n)!=1||n<0||n>50)return 1;for(int i=0;i<n;i++)if(scanf("%31s%d",a[i].name,&a[i].value)!=2)return 1;printf("result: %lld\\n",solve(a,n));return 0;}}\n'
+    return f"""#include <stdio.h>
+
+struct record {{
+    char name[32];
+    int value;
+}};
+
+{solve}
+
+int main(void) {{
+    int n;
+    struct record records[50];
+
+    if (scanf("%d", &n) != 1 || n < 0 || n > 50) {{
+        return 1;
+    }}
+    for (int i = 0; i < n; i++) {{
+        if (scanf("%31s %d", records[i].name, &records[i].value) != 2) {{
+            return 1;
+        }}
+    }}
+
+    printf("result: %lld\\n", solve(records, n));
+    return 0;
+}}
+"""
 
 
 def _record_questions() -> Iterable[AuthoredQuestion]:
@@ -1459,7 +1611,10 @@ def _ledger_oracle(case: Case) -> tuple[str, str, int]:
 
 def _ledger_source(*, starter: bool) -> str:
     if starter:
-        core = "/* TODO: implement the command loop and dynamic record table. */\n    (void)argc;(void)argv;return 0;"
+        core = """    // TODO: Implement the command loop and dynamic record table.
+    (void)argc;
+    (void)argv;
+    return 0;"""
     else:
         core = """(void)argc;(void)argv;struct record*a=NULL;int n=0,cap=0;char cmd[16],name[32];
     while(scanf("%15s",cmd)==1&&strcmp(cmd,"END")!=0){
@@ -1473,8 +1628,15 @@ def _ledger_source(*, starter: bool) -> str:
     return f"""#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-struct record{{char name[32];int value;}};
-int main(int argc,char**argv){{{core}}}
+
+struct record {{
+    char name[32];
+    int value;
+}};
+
+int main(int argc, char **argv) {{
+{core}
+}}
 """
 
 
@@ -1777,14 +1939,33 @@ BIT_DEFINITIONS = {
 
 def _bit_source(body: str, *, starter: bool) -> str:
     solve = (
-        "static uint32_t solve(uint32_t x,uint32_t y,unsigned k){(void)x;(void)y;(void)k;return 0;}"
+        """static uint32_t solve(uint32_t x, uint32_t y, unsigned k) {
+    // TODO: Implement this function.
+    (void)x;
+    (void)y;
+    (void)k;
+    return 0;
+}"""
         if starter
-        else f"static uint32_t solve(uint32_t x,uint32_t y,unsigned k){{(void)x;(void)y;(void)k;{body}}}"
+        else f"static uint32_t solve(uint32_t x, uint32_t y, unsigned k) {{(void)x;(void)y;(void)k;{body}}}"
     )
     return f"""#include <stdint.h>
 #include <stdio.h>
+
 {solve}
-int main(void){{unsigned x,y,k;if(scanf("%x%x%u",&x,&y,&k)!=3)return 1;printf("result: %08x\\n",solve(x,y,k));return 0;}}
+
+int main(void) {{
+    unsigned x;
+    unsigned y;
+    unsigned k;
+
+    if (scanf("%x %x %u", &x, &y, &k) != 3) {{
+        return 1;
+    }}
+
+    printf("result: %08x\\n", solve(x, y, k));
+    return 0;
+}}
 """
 
 
@@ -1956,38 +2137,51 @@ def _xor_values(values: Sequence[int]) -> int:
 
 
 def _mips_source(body: str, *, starter: bool) -> str:
-    solve = "solve:\n    li $v0,0\n    jr $ra" if starter else f"solve:\n{_indent_asm(body)}"
+    solve = (
+        """solve:
+    # TODO: Implement solve. Inputs: $a0 = values, $a1 = length; result: $v0.
+    li $v0, 0
+    jr $ra"""
+        if starter
+        else f"solve:\n{_indent_asm(body)}"
+    )
     return f""".data
-values: .space 400
+values:
+    .space 400
+
 .text
 .globl main
 main:
-    li $v0,5
+    li $v0, 5
     syscall
-    move $s0,$v0
-    la $s1,values
-    li $t0,0
+    move $s0, $v0
+    la $s1, values
+    li $t0, 0
+
 read_loop:
-    beq $t0,$s0,read_done
-    li $v0,5
+    beq $t0, $s0, read_done
+    li $v0, 5
     syscall
-    sll $t1,$t0,2
-    addu $t2,$s1,$t1
-    sw $v0,0($t2)
-    addiu $t0,$t0,1
+    sll $t1, $t0, 2
+    addu $t2, $s1, $t1
+    sw $v0, 0($t2)
+    addiu $t0, $t0, 1
     b read_loop
+
 read_done:
-    move $a0,$s1
-    move $a1,$s0
+    move $a0, $s1
+    move $a1, $s0
     jal solve
-    move $a0,$v0
-    li $v0,1
+
+    move $a0, $v0
+    li $v0, 1
     syscall
-    li $a0,10
-    li $v0,11
+    li $a0, 10
+    li $v0, 11
     syscall
-    li $v0,10
+    li $v0, 10
     syscall
+
 {solve}
 """
 
@@ -2180,17 +2374,71 @@ def _xor_bytes(data: bytes) -> int:
 
 def _file_source(body: str, *, starter: bool) -> str:
     solve = (
-        "static long long solve(const unsigned char*a,size_t n){(void)a;(void)n;return 0;}"
+        """static long long solve(const unsigned char *data, size_t n) {
+    // TODO: Implement this function.
+    (void)data;
+    (void)n;
+    return 0;
+}"""
         if starter
         else f"static long long solve(const unsigned char*a,size_t n){{(void)a;(void)n;{body}}}"
     )
     return f"""#define _POSIX_C_SOURCE 200809L
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 {solve}
-int main(int argc,char**argv){{if(argc!=2)return 1;int fd=open(argv[1],O_RDONLY);if(fd<0)return 1;size_t n=0,cap=256;unsigned char*a=malloc(cap);if(!a){{close(fd);return 1;}}for(;;){{if(n==cap){{cap*=2;void*p=realloc(a,cap);if(!p){{free(a);close(fd);return 1;}}a=p;}}ssize_t got=read(fd,a+n,cap-n);if(got<0){{free(a);close(fd);return 1;}}if(got==0)break;n+=(size_t)got;}}close(fd);printf("result: %lld\\n",solve(a,n));free(a);return 0;}}
+
+int main(int argc, char **argv) {{
+    if (argc != 2) {{
+        return 1;
+    }}
+
+    int fd = open(argv[1], O_RDONLY);
+    if (fd < 0) {{
+        return 1;
+    }}
+
+    size_t n = 0;
+    size_t capacity = 256;
+    unsigned char *data = malloc(capacity);
+    if (data == NULL) {{
+        close(fd);
+        return 1;
+    }}
+
+    for (;;) {{
+        if (n == capacity) {{
+            capacity *= 2;
+            void *resized = realloc(data, capacity);
+            if (resized == NULL) {{
+                free(data);
+                close(fd);
+                return 1;
+            }}
+            data = resized;
+        }}
+
+        ssize_t bytes_read = read(fd, data + n, capacity - n);
+        if (bytes_read < 0) {{
+            free(data);
+            close(fd);
+            return 1;
+        }}
+        if (bytes_read == 0) {{
+            break;
+        }}
+        n += (size_t)bytes_read;
+    }}
+
+    close(fd);
+    printf("result: %lld\\n", solve(data, n));
+    free(data);
+    return 0;
+}}
 """
 
 
@@ -2333,11 +2581,30 @@ UNICODE_DEFINITIONS = {
 
 def _unicode_source(body: str, *, starter: bool) -> str:
     solve = (
-        "static long long solve(uint32_t cp){(void)cp;return 0;}"
+        """static long long solve(uint32_t cp) {
+    // TODO: Implement this function.
+    (void)cp;
+    return 0;
+}"""
         if starter
-        else f"static long long solve(uint32_t cp){{{body}}}"
+        else f"static long long solve(uint32_t cp) {{{body}}}"
     )
-    return f'#include <stdint.h>\n#include <stdio.h>\n{solve}\nint main(void){{unsigned cp;if(scanf("%x",&cp)!=1)return 1;printf("result: %lld\\n",solve(cp));return 0;}}\n'
+    return f"""#include <stdint.h>
+#include <stdio.h>
+
+{solve}
+
+int main(void) {{
+    unsigned cp;
+
+    if (scanf("%x", &cp) != 1) {{
+        return 1;
+    }}
+
+    printf("result: %lld\\n", solve(cp));
+    return 0;
+}}
+"""
 
 
 def _unicode_questions() -> Iterable[AuthoredQuestion]:
@@ -2494,17 +2761,47 @@ TREE_DEFINITIONS = {
 
 def _tree_source(result_body: str, *, starter: bool) -> str:
     if starter:
-        walk = "static int walk(const char*path,int depth,struct summary*s){(void)path;(void)depth;(void)s;return -1;}"
+        walk = """static int walk(const char *path, int depth, struct summary *summary) {
+    // TODO: Recursively walk this directory and update summary.
+    (void)path;
+    (void)depth;
+    (void)summary;
+    return -1;
+}"""
     else:
         walk = """static int walk(const char*path,int depth,struct summary*s){DIR*d=opendir(path);if(!d)return -1;s->dirs++;struct dirent*e;while((e=readdir(d))){if(strcmp(e->d_name,".")==0||strcmp(e->d_name,"..")==0||strcmp(e->d_name,".keep")==0)continue;char child[1024];if(snprintf(child,sizeof child,"%s/%s",path,e->d_name)>=(int)sizeof child){closedir(d);return -1;}struct stat st;if(lstat(child,&st)!=0){closedir(d);return -1;}if(S_ISDIR(st.st_mode)){if(walk(child,depth+1,s)!=0){closedir(d);return -1;}}else if(S_ISREG(st.st_mode)){s->files++;s->bytes+=st.st_size;if(depth>s->depth)s->depth=depth;if(st.st_size>s->largest)s->largest=st.st_size;size_t n=strlen(e->d_name);if(n>=4&&strcmp(e->d_name+n-4,".txt")==0)s->text++;if(n>=2&&strcmp(e->d_name+n-2,".c")==0)s->sources++;}}closedir(d);return 0;}"""
     return f"""#define _POSIX_C_SOURCE 200809L
+
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-struct summary{{long long files,bytes,depth,text,dirs,largest,sources;}};
+
+struct summary {{
+    long long files;
+    long long bytes;
+    long long depth;
+    long long text;
+    long long dirs;
+    long long largest;
+    long long sources;
+}};
+
 {walk}
-int main(int argc,char**argv){{if(argc!=2)return 1;struct summary s={{0}};if(walk(argv[1],0,&s)!=0)return 1;printf("result: %lld\\n",(long long)({result_body}));return 0;}}
+
+int main(int argc, char **argv) {{
+    if (argc != 2) {{
+        return 1;
+    }}
+
+    struct summary s = {{0}};
+    if (walk(argv[1], 0, &s) != 0) {{
+        return 1;
+    }}
+
+    printf("result: %lld\\n", (long long)({result_body}));
+    return 0;
+}}
 """
 
 
@@ -2575,17 +2872,58 @@ REDUCTION_DEFINITIONS = {
 
 def _thread_source(mode: int, *, starter: bool) -> str:
     worker_body = (
-        "(void)arg;(void)lock;return NULL;"
+        """    // TODO: Process this worker's indices and merge its local result.
+    (void)arg;
+    return NULL;"""
         if starter
         else """struct job*j=arg;long long local=0;for(int i=j->start;i<n;i+=3){int x=values[i];if(MODE==0)local+=x;else if(MODE==1)local+=x>0;else if(MODE==2)local+=(x&1)==0;else if(MODE==3)local+=x<0?-(long long)x:x;else local+=(long long)(i+1)*x;}pthread_mutex_lock(&lock);total+=local;pthread_mutex_unlock(&lock);return NULL;"""
     )
     return f"""#include <pthread.h>
 #include <stdio.h>
+
 #define MODE {mode}
-static int values[100],n;static long long total;static pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
-struct job{{int start;}};
-static void*worker(void*arg){{{worker_body}}}
-int main(void){{if(scanf("%d",&n)!=1||n<0||n>100)return 1;for(int i=0;i<n;i++)if(scanf("%d",&values[i])!=1)return 1;pthread_t t[3];struct job j[3];for(int i=0;i<3;i++){{j[i].start=i;if(pthread_create(&t[i],NULL,worker,&j[i])!=0)return 1;}}for(int i=0;i<3;i++)if(pthread_join(t[i],NULL)!=0)return 1;pthread_mutex_destroy(&lock);printf("result: %lld\\n",total);return 0;}}
+
+static int values[100];
+static int n;
+static long long total;
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
+struct job {{
+    int start;
+}};
+
+static void *worker(void *arg) {{
+{worker_body}
+}}
+
+int main(void) {{
+    if (scanf("%d", &n) != 1 || n < 0 || n > 100) {{
+        return 1;
+    }}
+    for (int i = 0; i < n; i++) {{
+        if (scanf("%d", &values[i]) != 1) {{
+            return 1;
+        }}
+    }}
+
+    pthread_t threads[3];
+    struct job jobs[3];
+    for (int i = 0; i < 3; i++) {{
+        jobs[i].start = i;
+        if (pthread_create(&threads[i], NULL, worker, &jobs[i]) != 0) {{
+            return 1;
+        }}
+    }}
+    for (int i = 0; i < 3; i++) {{
+        if (pthread_join(threads[i], NULL) != 0) {{
+            return 1;
+        }}
+    }}
+
+    pthread_mutex_destroy(&lock);
+    printf("result: %lld\\n", total);
+    return 0;
+}}
 """
 
 
@@ -2644,16 +2982,63 @@ PROCESS_OPERATIONS = (
 
 def _process_source(mode: int, *, starter: bool) -> str:
     child = (
-        "/* TODO: compute and write one complete result record. */(void)values;return 1;"
+        """        // TODO: Compute and write one complete result record.
+        (void)values;
+        return 1;"""
         if starter
-        else """long long result=0;for(int i=0;i<n;i++){int x=values[i];if(MODE==0)result+=x;else if(MODE==1)result+=x>0;else if(MODE==2)result+=(x&1)==0;else if(MODE==3)result+=x<0?-(long long)x:x;else result+=(long long)(i+1)*x;}if(write(p[1],&result,sizeof result)!=(ssize_t)sizeof result)_exit(2);close(p[1]);_exit(0);"""
+        else """long long result=0;for(int i=0;i<n;i++){int x=values[i];if(MODE==0)result+=x;else if(MODE==1)result+=x>0;else if(MODE==2)result+=(x&1)==0;else if(MODE==3)result+=x<0?-(long long)x:x;else result+=(long long)(i+1)*x;}if(write(pipe_fds[1],&result,sizeof result)!=(ssize_t)sizeof result)_exit(2);close(pipe_fds[1]);_exit(0);"""
     )
     return f"""#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
 #define MODE {mode}
-int main(void){{int n,values[100];if(scanf("%d",&n)!=1||n<0||n>100)return 1;for(int i=0;i<n;i++)if(scanf("%d",&values[i])!=1)return 1;int p[2];if(pipe(p)!=0)return 1;pid_t pid=fork();if(pid<0)return 1;if(pid==0){{close(p[0]);{child}}}close(p[1]);long long result;if(read(p[0],&result,sizeof result)!=(ssize_t)sizeof result)return 1;close(p[0]);int status;if(waitpid(pid,&status,0)<0||!WIFEXITED(status)||WEXITSTATUS(status)!=0)return 1;printf("result: %lld\\n",result);return 0;}}
+
+int main(void) {{
+    int n;
+    int values[100];
+
+    if (scanf("%d", &n) != 1 || n < 0 || n > 100) {{
+        return 1;
+    }}
+    for (int i = 0; i < n; i++) {{
+        if (scanf("%d", &values[i]) != 1) {{
+            return 1;
+        }}
+    }}
+
+    int pipe_fds[2];
+    if (pipe(pipe_fds) != 0) {{
+        return 1;
+    }}
+
+    pid_t pid = fork();
+    if (pid < 0) {{
+        return 1;
+    }}
+    if (pid == 0) {{
+        close(pipe_fds[0]);
+{child}
+    }}
+
+    close(pipe_fds[1]);
+    long long result;
+    if (read(pipe_fds[0], &result, sizeof result) != (ssize_t)sizeof result) {{
+        return 1;
+    }}
+    close(pipe_fds[0]);
+
+    int status;
+    if (waitpid(pid, &status, 0) < 0 || !WIFEXITED(status) ||
+        WEXITSTATUS(status) != 0) {{
+        return 1;
+    }}
+
+    printf("result: %lld\\n", result);
+    return 0;
+}}
 """
 
 
@@ -2715,7 +3100,9 @@ def comp1521_questions() -> tuple[AuthoredQuestion, ...]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--course", choices=("comp1511", "comp1521", "all"), default="all")
-    parser.add_argument("--refresh", action="store_true")
+    refresh = parser.add_mutually_exclusive_group()
+    refresh.add_argument("--refresh", action="store_true")
+    refresh.add_argument("--refresh-starters", action="store_true")
     args = parser.parse_args()
     questions = (
         (*comp1511_questions(), *comp1521_questions())
@@ -2724,7 +3111,11 @@ def main() -> int:
         if args.course == "comp1511"
         else comp1521_questions()
     )
-    written = sum(_emit(question, refresh=args.refresh) for question in questions)
+    written = (
+        sum(_refresh_starter(question) for question in questions)
+        if args.refresh_starters
+        else sum(_emit(question, refresh=args.refresh) for question in questions)
+    )
     print(f"wrote {written} questions; catalogue contains {len(questions)}")
     return 0
 

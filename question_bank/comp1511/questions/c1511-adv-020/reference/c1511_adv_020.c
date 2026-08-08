@@ -6,7 +6,7 @@ static int is_vowel(char c) {
         || c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
 }
 
-static char *solve(const char *text) {
+static char *vowel_trace(const char *text) {
     size_t count = 0;
     for (const char *p = text; *p != '\0'; p++) if (is_vowel(*p)) count++;
     char *result = malloc(count + 1);
@@ -19,7 +19,7 @@ static char *solve(const char *text) {
 
 int main(int argc, char **argv) {
     if (argc != 2) return 2;
-    char *result = solve(argv[1]);
+    char *result = vowel_trace(argv[1]);
     puts(result);
     free(result);
     return 0;

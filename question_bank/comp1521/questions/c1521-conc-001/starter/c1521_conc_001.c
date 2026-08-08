@@ -9,4 +9,3 @@ int main(int argc, char **argv) {
     // TODO: create two children, scan the files, and collect pipe results.
     return 0;
 }
-

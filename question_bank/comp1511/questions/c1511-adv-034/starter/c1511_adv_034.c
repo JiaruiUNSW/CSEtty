@@ -11,10 +11,11 @@ struct counter {
 };
 
 int main(void) {
-    /* TODO: implement LOG, UNDO, COUNT, TOTAL, and END. */
+    // TODO: implement LOG, UNDO, COUNT, TOTAL, and END.
     char command[16];
     while (scanf("%15s", command) == 1) {
-        if (strcmp(command, "END") == 0) break;
+        if (strcmp(command, "END") == 0)
+            break;
     }
     return 0;
 }

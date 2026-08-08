@@ -11,7 +11,8 @@ static struct node *build_list(int argc, char **argv, int start) {
     struct node **tail = &head;
     for (int i = start; i < argc; i++) {
         struct node *fresh = malloc(sizeof *fresh);
-        if (fresh == NULL) exit(1);
+        if (fresh == NULL)
+            exit(1);
         fresh->data = atoi(argv[i]);
         fresh->next = NULL;
         *tail = fresh;
@@ -28,15 +29,15 @@ static void free_list(struct node *head) {
     }
 }
 
-/* TODO: modify only this function. */
-static int solve(const struct node *head) {
+// TODO: modify only this function.
+static int alternating_position_total(const struct node *head) {
     (void)head;
-        return 0;
+    return 0;
 }
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    printf("%d\n", solve(head));
+    printf("%d\n", alternating_position_total(head));
     free_list(head);
     return 0;
 }

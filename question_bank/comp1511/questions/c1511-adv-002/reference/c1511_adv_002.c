@@ -29,7 +29,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static int solve(const struct node *head) {
+static int count_record_highs(const struct node *head) {
     if (head == NULL) return 0;
         int best = head->data;
         int count = 1;
@@ -44,7 +44,7 @@ static int solve(const struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    printf("%d\n", solve(head));
+    printf("%d\n", count_record_highs(head));
     free_list(head);
     return 0;
 }

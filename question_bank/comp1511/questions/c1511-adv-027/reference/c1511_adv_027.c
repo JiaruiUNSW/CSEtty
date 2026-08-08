@@ -36,7 +36,7 @@ static void free_list(struct node *head) {
     }
 }
 
-static void solve(struct node *head, struct node **first, struct node **second) {
+static void deal_alternating(struct node *head, struct node **first, struct node **second) {
     *first = NULL;
     *second = NULL;
     struct node **first_tail = first;
@@ -61,7 +61,7 @@ static void print_named(const char *name, const struct node *head) {
 int main(int argc, char **argv) {
     struct node *head = build_list(argv, 1, argc);
     struct node *first = NULL, *second = NULL;
-    solve(head, &first, &second);
+    deal_alternating(head, &first, &second);
     print_named("A", first);
     print_named("B", second);
     free_list(first);

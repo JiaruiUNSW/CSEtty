@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static size_t solve(int *values, size_t length, int low, int high) {
+static size_t clamp_values(int *values, size_t length, int low, int high) {
     size_t changed = 0;
     for (size_t i = 0; i < length; i++) {
         if (values[i] < low) {
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     int *values = length == 0 ? NULL : malloc(length * sizeof *values);
     if (length != 0 && values == NULL) return 1;
     for (size_t i = 0; i < length; i++) values[i] = atoi(argv[i + 3]);
-    printf("changes=%zu\n", solve(values, length, atoi(argv[1]), atoi(argv[2])));
+    printf("changes=%zu\n", clamp_values(values, length, atoi(argv[1]), atoi(argv[2])));
     print_array(values, length);
     free(values);
     return 0;

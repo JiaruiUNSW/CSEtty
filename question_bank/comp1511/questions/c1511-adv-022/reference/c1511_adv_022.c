@@ -1,7 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 
-static int solve(const char *text, int *value) {
+static int first_decimal(const char *text, int *value) {
     const char *p = text;
     while (*p != '\0') {
         int sign = 1;
@@ -27,7 +27,7 @@ static int solve(const char *text, int *value) {
 int main(int argc, char **argv) {
     if (argc != 2) return 2;
     int value = 0;
-    if (solve(argv[1], &value)) printf("%d\n", value);
+    if (first_decimal(argv[1], &value)) printf("%d\n", value);
     else puts("NONE");
     return 0;
 }

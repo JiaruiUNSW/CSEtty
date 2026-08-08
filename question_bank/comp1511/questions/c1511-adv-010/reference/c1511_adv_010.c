@@ -40,7 +40,7 @@ static void free_list(struct node *head) {
 }
 
 /* Reference implementation. */
-static struct node *solve(struct node *head) {
+static struct node *collapse_sign_regions(struct node *head) {
     for (struct node *p = head; p != NULL; p = p->next) {
             int total = p->data;
             while (p->next != NULL && (p->next->data < 0) == (p->data < 0)) {
@@ -56,7 +56,7 @@ static struct node *solve(struct node *head) {
 
 int main(int argc, char **argv) {
     struct node *head = build_list(argc, argv, 1);
-    head = solve(head);
+    head = collapse_sign_regions(head);
     print_list(head);
     free_list(head);
     return 0;

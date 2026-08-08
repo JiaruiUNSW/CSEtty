@@ -9,12 +9,13 @@ struct node {
     struct node *next;
 };
 
-/* TODO: add helper functions and implement all commands safely. */
+// TODO: add helper functions and implement all commands safely.
 int main(void) {
     struct node *head = NULL;
     char command[16];
     while (scanf("%15s", command) == 1) {
-        if (strcmp(command, "END") == 0) break;
+        if (strcmp(command, "END") == 0)
+            break;
     }
     free(head);
     return 0;

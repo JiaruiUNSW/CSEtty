@@ -10,10 +10,11 @@ struct record {
 };
 
 int main(void) {
-    /* TODO: implement the complete ADD, TAKE, SHOW, END interpreter. */
+    // TODO: implement the complete ADD, TAKE, SHOW, END interpreter.
     char command[16];
     while (scanf("%15s", command) == 1) {
-        if (strcmp(command, "END") == 0) break;
+        if (strcmp(command, "END") == 0)
+            break;
     }
     return 0;
 }

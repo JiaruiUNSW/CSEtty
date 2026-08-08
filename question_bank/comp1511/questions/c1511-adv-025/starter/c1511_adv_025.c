@@ -11,7 +11,8 @@ static struct node *build_list(char **argv, int start, int end) {
     struct node **tail = &head;
     for (int i = start; i < end; i++) {
         struct node *fresh = malloc(sizeof *fresh);
-        if (fresh == NULL) exit(1);
+        if (fresh == NULL)
+            exit(1);
         fresh->data = atoi(argv[i]);
         fresh->next = NULL;
         *tail = fresh;
@@ -21,7 +22,10 @@ static struct node *build_list(char **argv, int start, int end) {
 }
 
 static void print_list(const struct node *head) {
-    if (head == NULL) { puts("EMPTY"); return; }
+    if (head == NULL) {
+        puts("EMPTY");
+        return;
+    }
     for (const struct node *p = head; p != NULL; p = p->next) {
         printf("%s%d", p == head ? "" : " ", p->data);
     }
@@ -36,14 +40,15 @@ static void free_list(struct node *head) {
     }
 }
 
-static struct node *solve(const struct node *head) {
+static struct node *pair_totals(const struct node *head) {
+    // TODO: Recursively build and return the neighbouring-totals list.
     (void)head;
-        return NULL;
+    return NULL;
 }
 
 int main(int argc, char **argv) {
     struct node *input = build_list(argv, 1, argc);
-    struct node *result = solve(input);
+    struct node *result = pair_totals(input);
     print_list(result);
     free_list(result);
     free_list(input);

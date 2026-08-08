@@ -1,2 +1,8 @@
 #include <stdio.h>
-int main(int argc, char **argv) { (void)argc; (void)argv; fputs("TODO: implement c1521_fs_014\n", stderr); return 1; }
+int main(int argc, char **argv) {
+    // TODO: Implement the program described in the question.
+    (void)argc;
+    (void)argv;
+    fputs("TODO: implement c1521_fs_014\n", stderr);
+    return 1;
+}

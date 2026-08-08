@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static size_t solve(int *values, size_t length) {
-    /* TODO: compact adjacent equal runs and return the logical length. */
+static size_t compact_runs(int *values, size_t length) {
+    // TODO: compact adjacent equal runs and return the logical length.
     (void)values;
     return length;
 }
@@ -12,16 +12,19 @@ static void print_array(const int *values, size_t length) {
         puts("EMPTY");
         return;
     }
-    for (size_t i = 0; i < length; i++) printf("%s%d", i == 0 ? "" : " ", values[i]);
+    for (size_t i = 0; i < length; i++)
+        printf("%s%d", i == 0 ? "" : " ", values[i]);
     putchar('\n');
 }
 
 int main(int argc, char **argv) {
     size_t length = (size_t)(argc - 1);
     int *values = length == 0 ? NULL : malloc(length * sizeof *values);
-    if (length != 0 && values == NULL) return 1;
-    for (size_t i = 0; i < length; i++) values[i] = atoi(argv[i + 1]);
-    size_t kept = solve(values, length);
+    if (length != 0 && values == NULL)
+        return 1;
+    for (size_t i = 0; i < length; i++)
+        values[i] = atoi(argv[i + 1]);
+    size_t kept = compact_runs(values, length);
     print_array(values, kept);
     free(values);
     return 0;

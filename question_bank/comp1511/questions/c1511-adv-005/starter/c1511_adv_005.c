@@ -11,7 +11,8 @@ static struct node *build_list(int argc, char **argv, int start) {
     struct node **tail = &head;
     for (int i = start; i < argc; i++) {
         struct node *fresh = malloc(sizeof *fresh);
-        if (fresh == NULL) exit(1);
+        if (fresh == NULL)
+            exit(1);
         fresh->data = atoi(argv[i]);
         fresh->next = NULL;
         *tail = fresh;
@@ -39,17 +40,18 @@ static void free_list(struct node *head) {
     }
 }
 
-/* TODO: modify only this function. */
-static struct node *solve(struct node *head, int value) {
+// TODO: modify only this function.
+static struct node *insert_after_last_even(struct node *head, int value) {
     (void)value;
-        return head;
+    return head;
 }
 
 int main(int argc, char **argv) {
-    if (argc < 2) return 2;
+    if (argc < 2)
+        return 2;
     int value = atoi(argv[1]);
     struct node *head = build_list(argc, argv, 2);
-    head = solve(head, value);
+    head = insert_after_last_even(head, value);
     print_list(head);
     free_list(head);
     return 0;
