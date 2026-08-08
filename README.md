@@ -25,14 +25,14 @@ is included in its course image. The alpha includes:
   lists, debugging, functions, and whole programs;
 - COMP1521: 10 original questions, 100 points, C, MIPS, POSIX file I/O,
   Unicode, processes, pipes, and threads;
-- two original 75-question banks (150 questions total), with normal/challenge
+- two original 150-question banks (300 questions total), with normal/challenge
   tracks, difficulty 1–5, topic/week tags, worked solutions, reference programs,
-  public tests, and post-finish tests; all 150 reference programs pass every
-  declared test in the real isolated judge;
+  public tests, and post-finish tests; every question has at least five distinct
+  test points;
 - a 10-minute read-only reading period and 180-minute working period;
 - Docker volume workspaces by default, with an opt-in empty bind directory;
-- public autotests and post-finish test groups with weighted all-or-nothing
-  group scoring and cross-question hurdles;
+- public autotests and post-finish test groups with proportional per-test-point
+  scoring, full-group status, and cross-question hurdles;
 - repeated, SHA-256-addressed local submissions and JSON/HTML/text reports;
 - non-root, read-only-rootfs interactive and judge containers with no Docker
   socket, dropped capabilities, resource limits, and no network by default; and
@@ -290,7 +290,7 @@ the ready loopback URL is printed so the timed workspace can still open.
 
 ## Original question banks
 
-The source checkout contains 75 original questions for each course:
+The source checkout contains 150 original questions for each course (300 total):
 
 ```sh
 .venv/bin/csetty bank validate comp1511
@@ -304,10 +304,12 @@ Generation is deterministic for a given bank, seed, and version. COMP1511
 builds an 11-question, 100-mark paper with array and linked-list hurdles.
 COMP1521 builds a 10-question, 100-mark paper: Q1–4 foundations, Q5 Unicode,
 Q6–8 advanced systems/MIPS/files, Q9 processes or threads, and Q10 a required
-challenge combination. `bank verify` builds an author-only temporary pack and
-runs every one of the selected course bank's 75 reference solutions against all
-public and after-finish tests in the real isolated judge. See [question-bank
-format and blueprints](docs/QUESTION_BANK.md).
+challenge combination. Every generated paper covers every declared course tag,
+and its fixed difficulty pattern is non-decreasing from the first question to
+the last. `bank verify` builds an author-only temporary pack and runs all 150
+reference solutions in the selected course bank against all public and
+after-finish tests in the real isolated judge. See [question-bank format and
+blueprints](docs/QUESTION_BANK.md).
 
 ## Important limitations
 

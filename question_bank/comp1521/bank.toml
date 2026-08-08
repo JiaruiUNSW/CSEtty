@@ -5,6 +5,8 @@ course = "COMP1521"
 profile = "comp1521"
 author = "CSEExamTTY project"
 license = "CC BY-NC-ND 4.0"
+minimum_test_points = 5
+difficulty_pattern = [1, 1, 2, 2, 3, 3, 4, 4, 4, 5]
 
 allowed_slots = [
   "foundation",
@@ -15,6 +17,28 @@ allowed_slots = [
 ]
 
 allowed_tags = [
+  "c-revision",
+  "mips-basics",
+  "mips-control",
+  "mips-data",
+  "mips-functions",
+  "integer-representation",
+  "bitwise",
+  "floating-point",
+  "file-io",
+  "binary-data",
+  "file-metadata",
+  "directories",
+  "recursive-traversal",
+  "unicode",
+  "processes",
+  "pipes",
+  "threads",
+  "synchronisation",
+  "make",
+]
+
+required_coverage_tags = [
   "c-revision",
   "mips-basics",
   "mips-control",

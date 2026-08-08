@@ -125,6 +125,25 @@
               "path": "data.bin"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_004",
+            "data.bin",
+            "7"
+          ],
+          "expected_stdout": "bytes=11 sum=535 weighted=3080\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/digits.bin",
+              "path": "data.bin"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }

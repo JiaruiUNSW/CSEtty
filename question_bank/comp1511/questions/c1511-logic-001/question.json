@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "id": "c1511-logic-001",
+  "title": "Median Calibration Reading",
+  "kind": "c_program",
+  "difficulty": 1,
+  "track": "normal",
+  "tags": [
+    "conditionals",
+    "io"
+  ],
+  "weeks": [
+    1,
+    2,
+    3
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 12,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_logic_001.c"
+  ],
+  "submission_files": [
+    "c1511_logic_001.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_logic_001.c",
+      "-o",
+      "c1511_logic_001"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_logic_001"
+          ],
+          "stdin": "-4 9 2\n",
+          "expected_stdout": "result: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ascending",
+          "argv": [
+            "./c1511_logic_001"
+          ],
+          "stdin": "1 2 3\n",
+          "expected_stdout": "result: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "equal",
+          "argv": [
+            "./c1511_logic_001"
+          ],
+          "stdin": "5 5 5\n",
+          "expected_stdout": "result: 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "boundary",
+          "argv": [
+            "./c1511_logic_001"
+          ],
+          "stdin": "0 -1 1\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "reverse",
+          "argv": [
+            "./c1511_logic_001"
+          ],
+          "stdin": "12 7 -3\n",
+          "expected_stdout": "result: 7\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

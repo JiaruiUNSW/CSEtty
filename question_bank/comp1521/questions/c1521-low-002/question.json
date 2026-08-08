@@ -91,6 +91,19 @@
           "expected_stderr": "",
           "expected_exit": 0,
           "timeout_ms": 3000
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "mipsy",
+            "c1521_low_002.s"
+          ],
+          "stdin": "-10\n7\n",
+          "expected_stdout": "17\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "comparison": "exact"
         }
       ]
     }

@@ -5,25 +5,136 @@
   "kind": "c_program",
   "difficulty": 1,
   "track": "normal",
-  "tags": ["file-io", "binary-data"],
-  "weeks": [7],
-  "slots": ["foundation"],
+  "tags": [
+    "file-io",
+    "binary-data"
+  ],
+  "weeks": [
+    7
+  ],
+  "slots": [
+    "foundation"
+  ],
   "estimated_minutes": 15,
   "points": 10,
   "pass_points": 4,
   "prompt": "prompt.md",
   "solution": "solution.md",
-  "starter_files": ["starter/c1521_fs_001.c"],
-  "submission_files": ["c1521_fs_001.c"],
-  "build": {"argv": ["dcc", "-Werror", "c1521_fs_001.c", "-o", "c1521_fs_001"]},
+  "starter_files": [
+    "starter/c1521_fs_001.c"
+  ],
+  "submission_files": [
+    "c1521_fs_001.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1521_fs_001.c",
+      "-o",
+      "c1521_fs_001"
+    ]
+  },
   "test_groups": [
-    {"id": "public", "visibility": "public", "points": 4, "tests": [
-      {"id": "repeated-byte", "argv": ["./c1521_fs_001", "input.dat", "97"], "expected_stdout": "3\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/banana.txt", "path": "input.dat"}]},
-      {"id": "single-byte", "argv": ["./c1521_fs_001", "input.dat", "122"], "expected_stdout": "1\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/zero.txt", "path": "input.dat"}]}
-    ]},
-    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
-      {"id": "dense-byte", "argv": ["./c1521_fs_001", "input.dat", "115"], "expected_stdout": "4\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/mississippi.txt", "path": "input.dat"}]},
-      {"id": "absent-byte", "argv": ["./c1521_fs_001", "input.dat", "88"], "expected_stdout": "0\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/digits.txt", "path": "input.dat"}]}
-    ]}
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "repeated-byte",
+          "argv": [
+            "./c1521_fs_001",
+            "input.dat",
+            "97"
+          ],
+          "expected_stdout": "3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/banana.txt",
+              "path": "input.dat"
+            }
+          ]
+        },
+        {
+          "id": "single-byte",
+          "argv": [
+            "./c1521_fs_001",
+            "input.dat",
+            "122"
+          ],
+          "expected_stdout": "1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/zero.txt",
+              "path": "input.dat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "dense-byte",
+          "argv": [
+            "./c1521_fs_001",
+            "input.dat",
+            "115"
+          ],
+          "expected_stdout": "4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/mississippi.txt",
+              "path": "input.dat"
+            }
+          ]
+        },
+        {
+          "id": "absent-byte",
+          "argv": [
+            "./c1521_fs_001",
+            "input.dat",
+            "88"
+          ],
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/digits.txt",
+              "path": "input.dat"
+            }
+          ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_fs_001",
+            "input.dat",
+            "89"
+          ],
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/digits.txt",
+              "path": "input.dat"
+            }
+          ],
+          "comparison": "exact"
+        }
+      ]
+    }
   ]
 }

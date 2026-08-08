@@ -88,9 +88,19 @@
           "expected_stdout": "valid: no\nmax depth: 2\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_017"
+          ],
+          "stdin": "plain texu\n",
+          "expected_stdout": "valid: yes\nmax depth: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

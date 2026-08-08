@@ -89,9 +89,19 @@
           "expected_stdout": "55: 10\ntotal needed: 10\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_029"
+          ],
+          "stdin": "1\n55 0 11\n",
+          "expected_stdout": "55: 11\ntotal needed: 11\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

@@ -120,9 +120,26 @@
               "path": "input.txt"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_005",
+            "input.txt"
+          ],
+          "expected_stdout": "lines=3\n1:0\n2:1\n3:2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/extended-edge-1-1.txt",
+              "path": "input.txt"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

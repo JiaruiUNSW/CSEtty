@@ -90,9 +90,19 @@
           "expected_stdout": "anomalies: 0\nmaximum range: 2\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_037"
+          ],
+          "stdin": "3 3 5\n2 3 5\n",
+          "expected_stdout": "anomalies: 0\nmaximum range: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

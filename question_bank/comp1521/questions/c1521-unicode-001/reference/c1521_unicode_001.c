@@ -1,0 +1,4 @@
+#include <stdint.h>
+#include <stdio.h>
+static long long solve(uint32_t cp){return cp<=0x10ffffu&&!(cp>=0xd800u&&cp<=0xdfffu);}
+int main(void){unsigned cp;if(scanf("%x",&cp)!=1)return 1;printf("result: %lld\n",solve(cp));return 0;}

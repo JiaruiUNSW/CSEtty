@@ -88,9 +88,19 @@
           "expected_stdout": "top: 0 0\nsum: -10\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_034"
+          ],
+          "stdin": "2 2\n-1 -2\n-3 -3\n",
+          "expected_stdout": "top: 0 0\nsum: -9\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

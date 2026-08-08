@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "id": "c1521-file-005",
+  "title": "Byte Sum Modulo 65536",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "file-io",
+    "binary-data",
+    "c-revision"
+  ],
+  "weeks": [
+    7,
+    8
+  ],
+  "slots": [
+    "foundation"
+  ],
+  "estimated_minutes": 24,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_file_005.c"
+  ],
+  "submission_files": [
+    "c1521_file_005.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_file_005.c",
+      "-o",
+      "c1521_file_005"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "ascii",
+          "argv": [
+            "./c1521_file_005",
+            "input.bin"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 390\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/ascii.bin",
+              "path": "input.bin"
+            }
+          ]
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1521_file_005",
+            "input.bin"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/empty.bin",
+              "path": "input.bin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "binary",
+          "argv": [
+            "./c1521_file_005",
+            "input.bin"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 386\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/binary.bin",
+              "path": "input.bin"
+            }
+          ]
+        },
+        {
+          "id": "lines",
+          "argv": [
+            "./c1521_file_005",
+            "input.bin"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 698\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/lines.bin",
+              "path": "input.bin"
+            }
+          ]
+        },
+        {
+          "id": "runs",
+          "argv": [
+            "./c1521_file_005",
+            "input.bin"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 884\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/runs.bin",
+              "path": "input.bin"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

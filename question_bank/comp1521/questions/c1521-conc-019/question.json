@@ -121,6 +121,24 @@
               "path": "input.bin"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_019",
+            "input.bin"
+          ],
+          "expected_stdout": "31 4\n30 3\n31 1\n0A 1\nruns=4 bytes=9\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/extended-edge-1-1.bin",
+              "path": "input.bin"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }

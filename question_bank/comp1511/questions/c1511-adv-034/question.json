@@ -91,6 +91,17 @@
           "expected_stdout": "z 0\nz 1\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_adv_034"
+          ],
+          "stdin": "COUNT z\nLOG z\nCOUNT z\nENE\n",
+          "expected_stdout": "z 0\nz 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }

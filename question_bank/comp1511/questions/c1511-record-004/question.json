@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "id": "c1511-record-004",
+  "title": "Equal-Reading Record Pairs",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "structs",
+    "arrays-1d",
+    "io",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    4,
+    5
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 30,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_record_004.c"
+  ],
+  "submission_files": [
+    "c1511_record_004.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_record_004.c",
+      "-o",
+      "c1511_record_004"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_record_004"
+          ],
+          "stdin": "4\na 3\nb -1\nc 3\nd 8\n",
+          "expected_stdout": "result: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1511_record_004"
+          ],
+          "stdin": "0\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_record_004"
+          ],
+          "stdin": "1\na 5\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ordered",
+          "argv": [
+            "./c1511_record_004"
+          ],
+          "stdin": "5\na 1\nb 2\nc 3\nd 4\ne 5\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ties",
+          "argv": [
+            "./c1511_record_004"
+          ],
+          "stdin": "4\na 7\nb 7\nc 2\nd 2\n",
+          "expected_stdout": "result: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

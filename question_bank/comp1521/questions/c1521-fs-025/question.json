@@ -1,17 +1,157 @@
 {
-  "schema_version": 1, "id": "c1521-fs-025", "title": "Recursive per-directory usage", "kind": "c_program",
-  "difficulty": 5, "track": "challenge", "tags": ["directories", "recursive-traversal", "file-metadata"], "weeks": [8, 9], "slots": ["advanced_systems"],
-  "estimated_minutes": 50, "points": 10, "pass_points": 4, "prompt": "prompt.md", "solution": "solution.md",
-  "starter_files": ["starter/c1521_fs_025.c"], "submission_files": ["c1521_fs_025.c"],
-  "build": {"argv": ["dcc", "-Werror", "c1521_fs_025.c", "-o", "c1521_fs_025"]},
+  "schema_version": 1,
+  "id": "c1521-fs-025",
+  "title": "Recursive per-directory usage",
+  "kind": "c_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "directories",
+    "recursive-traversal",
+    "file-metadata"
+  ],
+  "weeks": [
+    8,
+    9
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 50,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_fs_025.c"
+  ],
+  "submission_files": [
+    "c1521_fs_025.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1521_fs_025.c",
+      "-o",
+      "c1521_fs_025"
+    ]
+  },
   "test_groups": [
-    {"id": "public", "visibility": "public", "points": 4, "tests": [
-      {"id": "root-and-child", "argv": ["./c1521_fs_025", "tree"], "expected_stdout": ". 3\nsub 4\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/aa.txt", "path": "tree/a"}, {"source": "tests/bbb.txt", "path": "tree/sub/b"}]},
-      {"id": "zero-intermediate", "argv": ["./c1521_fs_025", "tree"], "expected_stdout": ". 0\na 0\na/b 2\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/z.txt", "path": "tree/a/b/file"}]}
-    ]},
-    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
-      {"id": "global-sort", "argv": ["./c1521_fs_025", "tree"], "expected_stdout": ". 2\nb 0\nb/c 4\nd 3\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/z.txt", "path": "tree/root"}, {"source": "tests/bbb.txt", "path": "tree/b/c/file"}, {"source": "tests/aa.txt", "path": "tree/d/file"}]},
-      {"id": "dot-directory", "argv": ["./c1521_fs_025", "tree"], "expected_stdout": ". 0\n.hidden 3\nvisible 2\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/aa.txt", "path": "tree/.hidden/a"}, {"source": "tests/z.txt", "path": "tree/visible/b"}]}
-    ]}
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "root-and-child",
+          "argv": [
+            "./c1521_fs_025",
+            "tree"
+          ],
+          "expected_stdout": ". 3\nsub 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/aa.txt",
+              "path": "tree/a"
+            },
+            {
+              "source": "tests/bbb.txt",
+              "path": "tree/sub/b"
+            }
+          ]
+        },
+        {
+          "id": "zero-intermediate",
+          "argv": [
+            "./c1521_fs_025",
+            "tree"
+          ],
+          "expected_stdout": ". 0\na 0\na/b 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/z.txt",
+              "path": "tree/a/b/file"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "global-sort",
+          "argv": [
+            "./c1521_fs_025",
+            "tree"
+          ],
+          "expected_stdout": ". 2\nb 0\nb/c 4\nd 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/z.txt",
+              "path": "tree/root"
+            },
+            {
+              "source": "tests/bbb.txt",
+              "path": "tree/b/c/file"
+            },
+            {
+              "source": "tests/aa.txt",
+              "path": "tree/d/file"
+            }
+          ]
+        },
+        {
+          "id": "dot-directory",
+          "argv": [
+            "./c1521_fs_025",
+            "tree"
+          ],
+          "expected_stdout": ". 0\n.hidden 3\nvisible 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/aa.txt",
+              "path": "tree/.hidden/a"
+            },
+            {
+              "source": "tests/z.txt",
+              "path": "tree/visible/b"
+            }
+          ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_fs_025",
+            "tree"
+          ],
+          "expected_stdout": ". 0\n.hidden 3\nvisible 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/extended-edge-1-1.txt",
+              "path": "tree/.hidden/a"
+            },
+            {
+              "source": "tests/z.txt",
+              "path": "tree/visible/b"
+            }
+          ],
+          "comparison": "exact"
+        }
+      ]
+    }
   ]
 }

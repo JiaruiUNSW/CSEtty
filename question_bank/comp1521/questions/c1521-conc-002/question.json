@@ -136,6 +136,24 @@
               "path": "lines.bin"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_002",
+            "lines.bin"
+          ],
+          "expected_stdout": "0 bytes=5 checksum=226\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/extended-edge-1-1.bin",
+              "path": "lines.bin"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }

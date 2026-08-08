@@ -137,6 +137,24 @@
               "path": "a.txt"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_018",
+            "a.txt"
+          ],
+          "expected_stdout": "values=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/extended-edge-1-1.txt",
+              "path": "a.txt"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }

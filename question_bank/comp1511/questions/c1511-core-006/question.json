@@ -88,9 +88,19 @@
           "expected_stdout": "unique beacons: 1\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_006"
+          ],
+          "stdin": "3 2\n-1 -5\n-2 -4\n-3 -3\n",
+          "expected_stdout": "unique beacons: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

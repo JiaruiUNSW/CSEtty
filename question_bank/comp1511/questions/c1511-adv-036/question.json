@@ -91,6 +91,17 @@
           "expected_stdout": "REMOVED x\nx\nMISSING z\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_adv_036"
+          ],
+          "stdin": "APPEND x\nAPPEND x\nREMOVE x\nPRINT\nREMOVE z\nENE\n",
+          "expected_stdout": "REMOVED x\nx\nMISSING z\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }

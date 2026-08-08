@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "id": "c1511-system-003",
+  "title": "Museum Crate Journal",
+  "kind": "c_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "whole-program",
+    "structs",
+    "strings",
+    "io",
+    "conditionals",
+    "dynamic-memory",
+    "arrays-1d",
+    "testing"
+  ],
+  "weeks": [
+    1,
+    2,
+    4,
+    5,
+    7
+  ],
+  "slots": [
+    "whole_program"
+  ],
+  "estimated_minutes": 62,
+  "points": 10,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_system_003.c"
+  ],
+  "submission_files": [
+    "c1511_system_003.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_system_003.c",
+      "-o",
+      "c1511_system_003"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "updates",
+          "argv": [
+            "./c1511_system_003"
+          ],
+          "stdin": "ADD alpha 5\nADD beta -2\nSET beta 8\nTOTAL\nEND\n",
+          "expected_stdout": "TOTAL 13\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1511_system_003"
+          ],
+          "stdin": "END\n",
+          "expected_stdout": "",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 5,
+      "tests": [
+        {
+          "id": "add-query",
+          "argv": [
+            "./c1511_system_003"
+          ],
+          "stdin": "ADD alpha 5\nQUERY alpha\nEND\n",
+          "expected_stdout": "alpha 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "remove",
+          "argv": [
+            "./c1511_system_003"
+          ],
+          "stdin": "ADD a 3\nADD b 4\nREMOVE a\nQUERY a\nTOTAL\nEND\n",
+          "expected_stdout": "a 0\nTOTAL 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "repeated",
+          "argv": [
+            "./c1511_system_003"
+          ],
+          "stdin": "ADD x 2\nADD x 5\nQUERY x\nSET y -1\nTOTAL\nEND\n",
+          "expected_stdout": "x 7\nTOTAL 6\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

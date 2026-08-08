@@ -90,9 +90,19 @@
           "expected_stdout": "components: 1\nlargest: 7\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_038"
+          ],
+          "stdin": "4 6\n###..\n..#..\n..###\n.....\n",
+          "expected_stdout": "components: 1\nlargest: 7\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

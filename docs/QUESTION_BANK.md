@@ -1,21 +1,21 @@
 # Original question banks
 
-Status: schema v1 implemented; 150 original questions included in the source
-checkout, with all 150 reference implementations passing every declared test in
-the real isolated judge on 2026-08-06.
+Status: schema v1 implemented; 300 original questions included in the source
+checkout. Every question has at least five distinct public/after-finish test
+points and a worked, step-by-step solution.
 
 ## Inventory
 
 | Bank | Questions | Tracks | Difficulty | Generated paper |
 |---|---:|---|---|---|
-| `question_bank/comp1511` | 75 | normal/challenge | 1–5 | 11 questions, 100 marks |
-| `question_bank/comp1521` | 75 | normal/challenge | 1–5 | 10 questions, 100 marks |
+| `question_bank/comp1511` | 150 | normal/challenge | 1–5 | 11 questions, 100 marks |
+| `question_bank/comp1521` | 150 | normal/challenge | 1–5 | 10 questions, 100 marks |
 
 Each question directory contains `question.json`, `prompt.md`, `solution.md`,
 one or more starter files, matching author reference files, and public and
 `after_finish` tests. Prompts must include Background, Requirements, Examples,
-and Implementation notes. Solutions must include Approach, Correctness,
-Complexity, and Common pitfalls.
+and Implementation notes. Solutions must include Approach, Step-by-step, Worked
+example, Correctness, Complexity, and Common pitfalls.
 
 ## Commands
 
@@ -33,6 +33,12 @@ Validation checks the manifest, topic and slot vocabularies, IDs, paths, prompt
 and solution structure, starter/reference coverage, build commands, tests,
 weights, and all ordinary exam-pack invariants. A build is deterministic for a
 given bank, seed, and version. `DESTINATION` must be absent or empty.
+
+The bundled manifests additionally require five or more test points per
+question, full coverage of every allowed topic tag in each generated paper, and
+an exact non-decreasing difficulty pattern. Selection uses deterministic
+backtracking rather than independent per-slot choices, so all three constraints
+hold together for every valid seed.
 
 `bank verify` creates a temporary author-only pack containing every question,
 then runs every reference implementation against every public and
@@ -93,8 +99,19 @@ whole-program work.
 | Q10 | challenge combination | 10 |
 
 Q10 is always selected from the challenge track. The bank includes one
-floating-point question but does not guarantee that every generated paper will
-contain it.
+or more floating-point questions, and every generated paper covers the
+`floating-point` tag together with all other declared COMP1521 tags.
+
+## Difficulty progression
+
+| Bank | Difficulty by position |
+|---|---|
+| COMP1511 | 1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 5 |
+| COMP1521 | 1, 1, 2, 2, 3, 3, 4, 4, 4, 5 |
+
+Repeated levels are intentional where a paper has more positions than the five
+difficulty levels. A later question is never easier than an earlier one, and
+each paper spans at least three levels.
 
 ## Generated-pack isolation
 

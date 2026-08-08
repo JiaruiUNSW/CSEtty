@@ -5,25 +5,137 @@
   "kind": "c_program",
   "difficulty": 1,
   "track": "normal",
-  "tags": ["binary-data", "file-metadata"],
-  "weeks": [7, 8],
-  "slots": ["foundation"],
+  "tags": [
+    "binary-data",
+    "file-metadata"
+  ],
+  "weeks": [
+    7,
+    8
+  ],
+  "slots": [
+    "foundation"
+  ],
   "estimated_minutes": 12,
   "points": 10,
   "pass_points": 4,
   "prompt": "prompt.md",
   "solution": "solution.md",
-  "starter_files": ["starter/c1521_fs_006.c"],
-  "submission_files": ["c1521_fs_006.c"],
-  "build": {"argv": ["dcc", "-Werror", "c1521_fs_006.c", "-o", "c1521_fs_006"]},
+  "starter_files": [
+    "starter/c1521_fs_006.c"
+  ],
+  "submission_files": [
+    "c1521_fs_006.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1521_fs_006.c",
+      "-o",
+      "c1521_fs_006"
+    ]
+  },
   "test_groups": [
-    {"id": "public", "visibility": "public", "points": 4, "tests": [
-      {"id": "exact-records", "argv": ["./c1521_fs_006", "data", "4"], "expected_stdout": "records=2 trailing=0\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/seven.txt", "path": "data"}]},
-      {"id": "one-trailing", "argv": ["./c1521_fs_006", "data", "3"], "expected_stdout": "records=2 trailing=2\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/seven.txt", "path": "data"}]}
-    ]},
-    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
-      {"id": "record-larger-than-file", "argv": ["./c1521_fs_006", "data", "20"], "expected_stdout": "records=0 trailing=8\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/seven.txt", "path": "data"}]},
-      {"id": "single-byte-records", "argv": ["./c1521_fs_006", "data", "1"], "expected_stdout": "records=5 trailing=0\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/four.txt", "path": "data"}]}
-    ]}
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "exact-records",
+          "argv": [
+            "./c1521_fs_006",
+            "data",
+            "4"
+          ],
+          "expected_stdout": "records=2 trailing=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/seven.txt",
+              "path": "data"
+            }
+          ]
+        },
+        {
+          "id": "one-trailing",
+          "argv": [
+            "./c1521_fs_006",
+            "data",
+            "3"
+          ],
+          "expected_stdout": "records=2 trailing=2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/seven.txt",
+              "path": "data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "record-larger-than-file",
+          "argv": [
+            "./c1521_fs_006",
+            "data",
+            "20"
+          ],
+          "expected_stdout": "records=0 trailing=8\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/seven.txt",
+              "path": "data"
+            }
+          ]
+        },
+        {
+          "id": "single-byte-records",
+          "argv": [
+            "./c1521_fs_006",
+            "data",
+            "1"
+          ],
+          "expected_stdout": "records=5 trailing=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/four.txt",
+              "path": "data"
+            }
+          ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_fs_006",
+            "data",
+            "2"
+          ],
+          "expected_stdout": "records=2 trailing=1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/four.txt",
+              "path": "data"
+            }
+          ],
+          "comparison": "exact"
+        }
+      ]
+    }
   ]
 }

@@ -88,9 +88,7 @@ def _add_question(root: Path, *, question_id: str, slot: str, points: int) -> No
             },
         ],
     }
-    (directory / "question.json").write_text(
-        json.dumps(raw, indent=2) + "\n", encoding="utf-8"
-    )
+    (directory / "question.json").write_text(json.dumps(raw, indent=2) + "\n", encoding="utf-8")
 
 
 def _make_comp1511_bank(root: Path) -> Path:
@@ -157,9 +155,7 @@ def test_build_verification_pack_contains_every_bank_question(tmp_path: Path) ->
 
 def test_rejects_prompt_without_required_sections(tmp_path: Path) -> None:
     root = _make_comp1511_bank(tmp_path / "bank")
-    (root / "questions" / "list-a" / "prompt.md").write_text(
-        "# Too short\n", encoding="utf-8"
-    )
+    (root / "questions" / "list-a" / "prompt.md").write_text("# Too short\n", encoding="utf-8")
     with pytest.raises(ValidationError, match="too short|missing headings"):
         load_question_bank(root)
 
@@ -183,3 +179,90 @@ def test_bundled_comp1521_blueprint_guarantees_foundation_mix() -> None:
 def test_short_profile_selector_loads_bundled_bank() -> None:
     assert load_question_bank("comp1511").id == "comp1511-original-bank"
     assert load_question_bank("comp1521").id == "comp1521-original-bank"
+
+
+@pytest.mark.parametrize("profile", ("comp1511", "comp1521"))
+def test_bundled_bank_has_150_questions_and_five_distinct_test_points(
+    profile: str,
+) -> None:
+    repository = Path(__file__).resolve().parents[1]
+    bank = load_question_bank(repository / "question_bank" / profile)
+    expansion_prefixes = (
+        (
+            "c1511-array-",
+            "c1511-list-",
+            "c1511-text-",
+            "c1511-logic-",
+            "c1511-grid-",
+            "c1511-record-",
+            "c1511-system-",
+        )
+        if profile == "comp1511"
+        else (
+            "c1521-bits-",
+            "c1521-mips-",
+            "c1521-file-",
+            "c1521-unicode-",
+            "c1521-tree-",
+            "c1521-thread-",
+            "c1521-pipeline-",
+        )
+    )
+    exact_rule_count = 0
+    assert len(bank.questions) == 150
+    assert bank.minimum_test_points == 5
+    assert set(bank.required_coverage_tags) == set(bank.allowed_tags)
+
+    for item in bank.questions:
+        tests = [test for group in item.question.test_groups for test in group.tests]
+        assert len(tests) >= 5
+        signatures = {
+            (
+                test.argv,
+                test.stdin,
+                tuple((fixture.source, fixture.path) for fixture in test.fixtures),
+            )
+            for test in tests
+        }
+        assert len(signatures) == len(tests), item.question.id
+        solution = item.solution_text()
+        assert "## Step-by-step" in solution
+        assert "## Worked example" in solution
+        if item.question.id.startswith(expansion_prefixes):
+            assert item.question.prompt is not None
+            prompt = (item.root / item.question.prompt).read_text(encoding="utf-8")
+            assert "**Exact rule.**" in prompt
+            assert "## Exact rule" in solution
+            exact_rule_count += 1
+
+    assert exact_rule_count == 75
+
+
+@pytest.mark.parametrize("profile", ("comp1511", "comp1521"))
+def test_random_papers_cover_every_tag_and_follow_difficulty_pattern(profile: str) -> None:
+    repository = Path(__file__).resolve().parents[1]
+    bank = load_question_bank(repository / "question_bank" / profile)
+    papers: set[tuple[str, ...]] = set()
+
+    for seed in range(250):
+        selection = select_exam(bank, seed=seed)
+        papers.add(tuple(item.question.id for _slot, item in selection))
+        covered = {tag for _slot, item in selection for tag in item.question.tags}
+        difficulties = tuple(item.question.difficulty for _slot, item in selection)
+        assert covered.issuperset(bank.required_coverage_tags)
+        assert difficulties == bank.difficulty_pattern
+        assert difficulties == tuple(sorted(difficulties))
+        assert len(set(difficulties)) >= 3
+
+    assert len(papers) >= 200
+
+
+def test_bank_can_require_a_minimum_number_of_test_points(tmp_path: Path) -> None:
+    root = _make_comp1511_bank(tmp_path / "bank")
+    manifest = root / "bank.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8") + "\nminimum_test_points = 5\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValidationError, match="at least 5 test points"):
+        load_question_bank(root)

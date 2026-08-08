@@ -88,9 +88,19 @@
           "expected_stdout": "vowels: 2\nbookended: no\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_018"
+          ],
+          "stdin": "uniu\n",
+          "expected_stdout": "vowels: 3\nbookended: yes\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

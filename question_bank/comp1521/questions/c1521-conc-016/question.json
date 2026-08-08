@@ -127,6 +127,25 @@
               "path": "input.bin"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_016",
+            "input.bin",
+            "7"
+          ],
+          "expected_stdout": "09=1\n0A=1\n20=1\ntotal=3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 4000,
+          "fixtures": [
+            {
+              "source": "tests/space.bin",
+              "path": "input.bin"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }

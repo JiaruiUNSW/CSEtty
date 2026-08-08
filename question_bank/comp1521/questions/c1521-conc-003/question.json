@@ -119,9 +119,26 @@
               "path": "deps.txt"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_003",
+            "deps.txt"
+          ],
+          "expected_stdout": "cycle\n",
+          "expected_stderr": "",
+          "expected_exit": 2,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/extended-edge-1-1.txt",
+              "path": "deps.txt"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

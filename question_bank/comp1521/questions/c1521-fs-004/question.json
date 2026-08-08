@@ -5,25 +5,136 @@
   "kind": "c_program",
   "difficulty": 1,
   "track": "normal",
-  "tags": ["file-io", "c-revision"],
-  "weeks": [7],
-  "slots": ["foundation"],
+  "tags": [
+    "file-io",
+    "c-revision"
+  ],
+  "weeks": [
+    7
+  ],
+  "slots": [
+    "foundation"
+  ],
   "estimated_minutes": 15,
   "points": 10,
   "pass_points": 4,
   "prompt": "prompt.md",
   "solution": "solution.md",
-  "starter_files": ["starter/c1521_fs_004.c"],
-  "submission_files": ["c1521_fs_004.c"],
-  "build": {"argv": ["dcc", "-Werror", "c1521_fs_004.c", "-o", "c1521_fs_004"]},
+  "starter_files": [
+    "starter/c1521_fs_004.c"
+  ],
+  "submission_files": [
+    "c1521_fs_004.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1521_fs_004.c",
+      "-o",
+      "c1521_fs_004"
+    ]
+  },
   "test_groups": [
-    {"id": "public", "visibility": "public", "points": 4, "tests": [
-      {"id": "middle-line", "argv": ["./c1521_fs_004", "input.txt", "2"], "expected_stdout": "green\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/colours.txt", "path": "input.txt"}]},
-      {"id": "first-line", "argv": ["./c1521_fs_004", "input.txt", "1"], "expected_stdout": "red\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/colours.txt", "path": "input.txt"}]}
-    ]},
-    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
-      {"id": "missing-line", "argv": ["./c1521_fs_004", "input.txt", "8"], "expected_stdout": "NOT FOUND\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/colours.txt", "path": "input.txt"}]},
-      {"id": "long-final-line", "argv": ["./c1521_fs_004", "input.txt", "3"], "expected_stdout": "this line is deliberately longer than a tiny fixed buffer\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/lines.txt", "path": "input.txt"}]}
-    ]}
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "middle-line",
+          "argv": [
+            "./c1521_fs_004",
+            "input.txt",
+            "2"
+          ],
+          "expected_stdout": "green\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/colours.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "first-line",
+          "argv": [
+            "./c1521_fs_004",
+            "input.txt",
+            "1"
+          ],
+          "expected_stdout": "red\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/colours.txt",
+              "path": "input.txt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "missing-line",
+          "argv": [
+            "./c1521_fs_004",
+            "input.txt",
+            "8"
+          ],
+          "expected_stdout": "NOT FOUND\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/colours.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "long-final-line",
+          "argv": [
+            "./c1521_fs_004",
+            "input.txt",
+            "3"
+          ],
+          "expected_stdout": "this line is deliberately longer than a tiny fixed buffer\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/lines.txt",
+              "path": "input.txt"
+            }
+          ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_fs_004",
+            "input.txt",
+            "4"
+          ],
+          "expected_stdout": "NOT FOUND\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/lines.txt",
+              "path": "input.txt"
+            }
+          ],
+          "comparison": "exact"
+        }
+      ]
+    }
   ]
 }

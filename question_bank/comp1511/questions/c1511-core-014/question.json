@@ -87,9 +87,19 @@
           "expected_stdout": "2>1\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_014"
+          ],
+          "stdin": "3\n",
+          "expected_stdout": "3>2>1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

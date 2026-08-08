@@ -5,6 +5,8 @@ course = "COMP1511"
 profile = "comp1511"
 author = "CSEExamTTY project"
 license = "CC BY-NC-ND 4.0"
+minimum_test_points = 5
+difficulty_pattern = [1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 5]
 
 allowed_slots = [
   "list_hurdle",
@@ -15,6 +17,26 @@ allowed_slots = [
 ]
 
 allowed_tags = [
+  "io",
+  "conditionals",
+  "loops",
+  "enums",
+  "structs",
+  "functions",
+  "arrays-1d",
+  "arrays-2d",
+  "strings",
+  "char-streams",
+  "debugging",
+  "pointers",
+  "dynamic-memory",
+  "linked-lists",
+  "recursion",
+  "whole-program",
+  "testing",
+]
+
+required_coverage_tags = [
   "io",
   "conditionals",
   "loops",

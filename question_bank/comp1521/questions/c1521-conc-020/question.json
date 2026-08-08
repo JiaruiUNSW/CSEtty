@@ -124,6 +124,24 @@
               "path": "input.txt"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_020",
+            "input.txt"
+          ],
+          "expected_stdout": "count=5 even=2 even_sum=20 odd=3 odd_sum=-3 min=-3 max=10\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "fixtures": [
+            {
+              "source": "tests/extended-edge-1-1.txt",
+              "path": "input.txt"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }

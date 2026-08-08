@@ -113,6 +113,23 @@
           "expected_stderr": "",
           "expected_exit": 0,
           "timeout_ms": 5000
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_017",
+            "8",
+            "4",
+            "10",
+            "-10",
+            "7",
+            "2"
+          ],
+          "expected_stdout": "0 square=100\n1 square=100\n2 square=49\n3 square=4\ntotal=253\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 5000,
+          "comparison": "exact"
         }
       ]
     }

@@ -102,6 +102,20 @@
           "expected_stderr": "",
           "expected_exit": 0,
           "timeout_ms": 3000
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_009",
+            "5",
+            "0",
+            "2"
+          ],
+          "expected_stdout": "count=2 sum=10 min=5 max=5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "comparison": "exact"
         }
       ]
     }

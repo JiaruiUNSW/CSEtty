@@ -5,9 +5,9 @@ UNSW examination questions, copied lab text, UNSW branding, or confidential
 assessment material. Public course pages are used only to identify the taught
 topic taxonomy and the broad shape of normal and challenge exercises.
 
-The current inventory is 75 COMP1511 questions and 75 COMP1521 questions (150
+The current inventory is 150 COMP1511 questions and 150 COMP1521 questions (300
 total). Every difficulty level 1–5 and both tracks are represented in each
-course bank.
+course bank. Every question declares at least five distinct test points.
 
 ## Per-course layout
 
@@ -57,7 +57,8 @@ self-contained and use unique submission filenames.
 `test_groups` uses the pack schema-v1 test representation. Every question must
 have at least one `public` group and one `after_finish` group. All group points
 must sum to the question points, and passing the reference program must be
-sufficient to earn every point.
+sufficient to earn every point. The bundled manifests set
+`minimum_test_points = 5`; validation rejects a question below that floor.
 
 Difficulty is an integer from 1 to 5. `track` is either `normal` or
 `challenge`. Tags and slot values must be declared by the course's `bank.toml`.
@@ -72,6 +73,8 @@ Every `prompt.md` must contain these exact headings:
 Every `solution.md` must contain:
 
 - `## Approach`
+- `## Step-by-step`
+- `## Worked example`
 - `## Correctness`
 - `## Complexity`
 - `## Common pitfalls`
@@ -99,4 +102,9 @@ The COMP1521 generator fills 10 ten-mark slots:
   synchronisation.
 
 `csetty bank build` chooses deterministically from these slots when given a
-seed. Generated papers remain local estimates and never imply UNSW endorsement.
+seed. It solves the whole blueprint jointly: the selected questions must cover
+every `required_coverage_tags` entry, remain unique, and match the manifest's
+non-decreasing `difficulty_pattern`. The current patterns are
+`1,1,2,2,2,2,3,3,4,4,5` for COMP1511 and
+`1,1,2,2,3,3,4,4,4,5` for COMP1521. Generated papers remain local estimates
+and never imply UNSW endorsement.

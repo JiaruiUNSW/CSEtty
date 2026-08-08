@@ -92,6 +92,18 @@
           "expected_stderr": "",
           "expected_exit": 0,
           "timeout_ms": 3000
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_low_022"
+          ],
+          "stdin": "-2000000000 1000000001\n",
+          "expected_stdout": "-999999999\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "comparison": "exact"
         }
       ]
     }

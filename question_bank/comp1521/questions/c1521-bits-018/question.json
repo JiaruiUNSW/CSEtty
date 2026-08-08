@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "id": "c1521-bits-018",
+  "title": "Classify a Binary32 Telemetry Word",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "floating-point",
+    "bitwise",
+    "integer-representation"
+  ],
+  "weeks": [
+    2,
+    3,
+    4
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 28,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_bits_018.c"
+  ],
+  "submission_files": [
+    "c1521_bits_018.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_bits_018.c",
+      "-o",
+      "c1521_bits_018"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "patterns",
+          "argv": [
+            "./c1521_bits_018"
+          ],
+          "stdin": "12345678 00ff00ff 8\n",
+          "expected_stdout": "result: 00000002\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "zero",
+          "argv": [
+            "./c1521_bits_018"
+          ],
+          "stdin": "00000000 00000000 0\n",
+          "expected_stdout": "result: 00000000\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "high-bit",
+          "argv": [
+            "./c1521_bits_018"
+          ],
+          "stdin": "80000001 0f0f0f0f 31\n",
+          "expected_stdout": "result: 00000001\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "all-bits",
+          "argv": [
+            "./c1521_bits_018"
+          ],
+          "stdin": "ffffffff aaaaaaaa 16\n",
+          "expected_stdout": "result: 00000004\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "boundary",
+          "argv": [
+            "./c1521_bits_018"
+          ],
+          "stdin": "000000ff 0000ff00 4\n",
+          "expected_stdout": "result: 00000001\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

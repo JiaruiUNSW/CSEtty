@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "id": "c1511-array-020",
+  "title": "Out-of-Order Seed Pairs",
+  "kind": "c_program",
+  "difficulty": 5,
+  "track": "challenge",
+  "tags": [
+    "arrays-1d",
+    "loops",
+    "functions",
+    "testing"
+  ],
+  "weeks": [
+    4,
+    5
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 32,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_array_020.c"
+  ],
+  "submission_files": [
+    "c1511_array_020.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_array_020.c",
+      "-o",
+      "c1511_array_020"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_array_020"
+          ],
+          "stdin": "6\n3 -1 -1 4 0 -2\n",
+          "expected_stdout": "result: 9\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1511_array_020"
+          ],
+          "stdin": "0\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_array_020"
+          ],
+          "stdin": "1\n5\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "boundary",
+          "argv": [
+            "./c1511_array_020"
+          ],
+          "stdin": "6\n0 0 1 -1 2 -2\n",
+          "expected_stdout": "result: 8\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "trend",
+          "argv": [
+            "./c1511_array_020"
+          ],
+          "stdin": "7\n1 2 3 2 2 5 4\n",
+          "expected_stdout": "result: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

@@ -125,9 +125,27 @@
               "path": "manifest.txt"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_006",
+            "manifest.txt",
+            "5"
+          ],
+          "expected_stdout": "worker 0 lines=1 bytes=2 words=1\nworker 1 lines=1 bytes=3 words=2\nworker 2 lines=1 bytes=5 words=1\nworker 3 lines=0 bytes=0 words=0\nworker 4 lines=0 bytes=0 words=0\ntotal lines=3 bytes=10 words=4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/three_lines.txt",
+              "path": "manifest.txt"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

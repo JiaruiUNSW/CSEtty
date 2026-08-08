@@ -88,9 +88,19 @@
           "expected_stdout": "warm centres: 4\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_007"
+          ],
+          "stdin": "5 5\n2 2 2 2 2\n2 2 2 2 2\n2 2 1 2 2\n2 2 2 2 2\n2 2 2 2 3\n",
+          "expected_stdout": "warm centres: 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

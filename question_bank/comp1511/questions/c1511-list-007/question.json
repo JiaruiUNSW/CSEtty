@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "id": "c1511-list-007",
+  "title": "Recursive Reef Chain Total",
+  "kind": "c_function",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "linked-lists",
+    "pointers",
+    "dynamic-memory",
+    "functions",
+    "loops",
+    "recursion"
+  ],
+  "weeks": [
+    6,
+    7
+  ],
+  "slots": [
+    "list_hurdle"
+  ],
+  "estimated_minutes": 22,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_list_007.c"
+  ],
+  "submission_files": [
+    "c1511_list_007.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_list_007.c",
+      "-o",
+      "c1511_list_007"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_list_007",
+            "3",
+            "-1",
+            "-1",
+            "4",
+            "0",
+            "-2"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1511_list_007"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_list_007",
+            "5"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ordered",
+          "argv": [
+            "./c1511_list_007",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 15\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ties",
+          "argv": [
+            "./c1511_list_007",
+            "7",
+            "7",
+            "2",
+            "7",
+            "2",
+            "2"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 27\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

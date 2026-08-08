@@ -99,6 +99,19 @@
           "expected_stderr": "",
           "expected_exit": 0,
           "timeout_ms": 3000
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_011",
+            "queue",
+            "rhythn"
+          ],
+          "expected_stdout": "0 vowels=4\n1 vowels=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "comparison": "exact"
         }
       ]
     }

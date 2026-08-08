@@ -88,9 +88,19 @@
           "expected_stdout": "distance: 20\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_003"
+          ],
+          "stdin": "2\n-3 8\n",
+          "expected_stdout": "distance: 22\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

@@ -91,6 +91,17 @@
           "expected_stdout": "REJECTED x\nx 1\n--\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_adv_033"
+          ],
+          "stdin": "ADD x 1\nTAKE x 3\nSHOW\nEND\n",
+          "expected_stdout": "REJECTED x\nx 1\n--\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }

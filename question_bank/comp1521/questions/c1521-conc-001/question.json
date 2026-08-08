@@ -140,9 +140,31 @@
               "path": "y.txt"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_001",
+            "y.txt",
+            "y.txt"
+          ],
+          "expected_stdout": "0 count=1 sum=-17\n1 count=1 sum=-17\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 2000,
+          "fixtures": [
+            {
+              "source": "tests/hidden_x.txt",
+              "path": "x.txt"
+            },
+            {
+              "source": "tests/hidden_y.txt",
+              "path": "y.txt"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

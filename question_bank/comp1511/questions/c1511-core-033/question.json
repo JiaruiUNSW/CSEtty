@@ -89,9 +89,19 @@
           "expected_stdout": "i: 4\nm: 1\np: 2\ns: 4\ndistinct: 4\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_033"
+          ],
+          "stdin": "mississippj\n",
+          "expected_stdout": "i: 3\nj: 1\nm: 1\np: 2\ns: 4\ndistinct: 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

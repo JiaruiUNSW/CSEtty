@@ -90,6 +90,17 @@
           "expected_stdout": "AEiou\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_adv_020",
+            "AEiov!"
+          ],
+          "expected_stdout": "AEio\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }

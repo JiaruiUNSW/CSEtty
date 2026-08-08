@@ -90,6 +90,18 @@
           "expected_stdout": "EMPTY\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_adv_009",
+            "-2",
+            "6"
+          ],
+          "expected_stdout": "-2 4 6\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }

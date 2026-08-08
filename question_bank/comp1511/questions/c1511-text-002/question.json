@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "id": "c1511-text-002",
+  "title": "Digits in a Sample Label",
+  "kind": "c_program",
+  "difficulty": 1,
+  "track": "normal",
+  "tags": [
+    "strings",
+    "char-streams",
+    "loops",
+    "functions",
+    "conditionals"
+  ],
+  "weeks": [
+    3,
+    5
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 14,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_text_002.c"
+  ],
+  "submission_files": [
+    "c1511_text_002.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_text_002.c",
+      "-o",
+      "c1511_text_002"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_text_002"
+          ],
+          "stdin": "A1 beta\n",
+          "expected_stdout": "result: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty-line",
+          "argv": [
+            "./c1511_text_002"
+          ],
+          "stdin": "\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "repeats",
+          "argv": [
+            "./c1511_text_002"
+          ],
+          "stdin": "bookkeeper\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "brackets",
+          "argv": [
+            "./c1511_text_002"
+          ],
+          "stdin": "((a)b)\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "spaces",
+          "argv": [
+            "./c1511_text_002"
+          ],
+          "stdin": "  mixed CASE 42  \n",
+          "expected_stdout": "result: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "id": "c1521-mips-010",
+  "title": "MIPS Position-Weighted Checksum",
+  "kind": "mips_program",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "mips-basics",
+    "mips-control",
+    "mips-data",
+    "mips-functions",
+    "integer-representation"
+  ],
+  "weeks": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "slots": [
+    "foundation"
+  ],
+  "estimated_minutes": 29,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_mips_010.s"
+  ],
+  "submission_files": [
+    "c1521_mips_010.s"
+  ],
+  "build": {
+    "argv": []
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "mipsy",
+            "c1521_mips_010.s"
+          ],
+          "stdin": "6\n3 -1 -1 4 0 -2\n",
+          "expected_stdout": "2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "mipsy",
+            "c1521_mips_010.s"
+          ],
+          "stdin": "0\n",
+          "expected_stdout": "0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "single",
+          "argv": [
+            "mipsy",
+            "c1521_mips_010.s"
+          ],
+          "stdin": "1\n5\n",
+          "expected_stdout": "5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "boundary",
+          "argv": [
+            "mipsy",
+            "c1521_mips_010.s"
+          ],
+          "stdin": "6\n0 0 1 -1 2 -2\n",
+          "expected_stdout": "-3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "trend",
+          "argv": [
+            "mipsy",
+            "c1521_mips_010.s"
+          ],
+          "stdin": "7\n1 2 3 2 2 5 4\n",
+          "expected_stdout": "90\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

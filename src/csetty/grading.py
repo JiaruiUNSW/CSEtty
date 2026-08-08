@@ -28,12 +28,29 @@ def calculate_grade(
         supplied_groups = group_results.get(question.id, {})
         for group in question.test_groups:
             supplied = tuple(ResultClass(item) for item in supplied_groups.get(group.id, ()))
+            test_count = len(group.tests)
+            supplied_for_tests = supplied[:test_count]
+            passed_test_count = sum(result is ResultClass.PASS for result in supplied_for_tests)
             passed = len(supplied) == len(group.tests) and all(
                 result is ResultClass.PASS for result in supplied
             )
-            earned = group.points if passed else Decimal(0)
+            points_per_test = group.points / Decimal(test_count)
+            earned = group.points * Decimal(passed_test_count) / Decimal(test_count)
             question_earned += earned
             total_available += group.points
+            test_reports = []
+            for index, test in enumerate(group.tests):
+                result = supplied[index] if index < len(supplied) else None
+                test_passed = result is ResultClass.PASS
+                test_reports.append(
+                    {
+                        "id": test.id,
+                        "result": None if result is None else result.value,
+                        "passed": test_passed,
+                        "points_earned": _number(points_per_test if test_passed else Decimal(0)),
+                        "points_available": _number(points_per_test),
+                    }
+                )
             group_reports.append(
                 {
                     "id": group.id,
@@ -41,7 +58,10 @@ def calculate_grade(
                     "points_earned": _number(earned),
                     "points_available": _number(group.points),
                     "passed": passed,
+                    "tests_passed": passed_test_count,
+                    "tests_available": test_count,
                     "results": [result.value for result in supplied],
+                    "tests": test_reports,
                 }
             )
         passed_question = question_earned >= question.pass_points
@@ -110,9 +130,12 @@ def render_grade_text(report: Mapping[str, Any]) -> str:
         )
         for group in question["groups"]:
             group_state = "PASS" if group["passed"] else "FAIL"
+            test_progress = ""
+            if "tests_passed" in group and "tests_available" in group:
+                test_progress = f"; {group['tests_passed']}/{group['tests_available']} test points"
             lines.append(
                 f"  {group['id']} [{group['visibility']}]: {group_state} "
-                f"({group['points_earned']}/{group['points_available']})"
+                f"({group['points_earned']}/{group['points_available']}{test_progress})"
             )
     if report["hurdles"]:
         lines.extend(("", "Hurdles:"))

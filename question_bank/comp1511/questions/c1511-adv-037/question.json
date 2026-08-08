@@ -91,6 +91,17 @@
           "expected_stdout": "4 -1\nDROPPED -1\n4\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_adv_037"
+          ],
+          "stdin": "PUSH -1\nPUSH 4\nROLL 6\nPRINT\nDROP\nPRINT\nEND\n",
+          "expected_stdout": "-1 4\nDROPPED 4\n-1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }

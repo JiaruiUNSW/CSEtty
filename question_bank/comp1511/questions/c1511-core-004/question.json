@@ -88,9 +88,19 @@
           "expected_stdout": "balanced cuts: 1\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_004"
+          ],
+          "stdin": "3\n2 2 5\n",
+          "expected_stdout": "balanced cuts: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

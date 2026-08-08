@@ -88,9 +88,19 @@
           "expected_stdout": "checksum: 0\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_028"
+          ],
+          "stdin": "124\n",
+          "expected_stdout": "checksum: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

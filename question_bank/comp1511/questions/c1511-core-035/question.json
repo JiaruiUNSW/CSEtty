@@ -89,9 +89,19 @@
           "expected_stdout": "fastest: 33 24\nconsistent: 33 2\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_035"
+          ],
+          "stdin": "1\n33 7 8 10\n",
+          "expected_stdout": "fastest: 33 25\nconsistent: 33 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

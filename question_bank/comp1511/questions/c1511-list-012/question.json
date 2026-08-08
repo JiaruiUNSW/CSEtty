@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "id": "c1511-list-012",
+  "title": "Chain Endpoint Difference",
+  "kind": "c_function",
+  "difficulty": 3,
+  "track": "challenge",
+  "tags": [
+    "linked-lists",
+    "pointers",
+    "dynamic-memory",
+    "functions",
+    "loops"
+  ],
+  "weeks": [
+    6,
+    7
+  ],
+  "slots": [
+    "list_hurdle"
+  ],
+  "estimated_minutes": 26,
+  "points": 12,
+  "pass_points": 6,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_list_012.c"
+  ],
+  "submission_files": [
+    "c1511_list_012.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_list_012.c",
+      "-o",
+      "c1511_list_012"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 6,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_list_012",
+            "3",
+            "-1",
+            "-1",
+            "4",
+            "0",
+            "-2"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1511_list_012"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_list_012",
+            "5"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ordered",
+          "argv": [
+            "./c1511_list_012",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ties",
+          "argv": [
+            "./c1511_list_012",
+            "7",
+            "7",
+            "2",
+            "7",
+            "2",
+            "2"
+          ],
+          "stdin": "",
+          "expected_stdout": "result: 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

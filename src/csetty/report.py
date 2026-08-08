@@ -412,9 +412,15 @@ def _test_details(evaluation: Mapping[str, Any] | None) -> str:
                 "</tr>"
             )
         state = "PASS" if group.get("passed") else "FAIL"
+        test_progress = ""
+        if "tests_passed" in group and "tests_available" in group:
+            test_progress = (
+                f"; {group['tests_passed']}/{group['tests_available']} test points"
+            )
         sections.append(
             f"<h4>{html.escape(str(group.get('id')))} — {state} "
-            f"({group.get('points_earned')}/{group.get('points_available')})</h4>"
+            f"({group.get('points_earned')}/{group.get('points_available')}"
+            f"{html.escape(test_progress)})</h4>"
             "<table><thead><tr><th>Test</th><th>Result</th><th>Time</th><th>Details</th></tr></thead>"
             f"<tbody>{''.join(tests)}</tbody></table>"
         )

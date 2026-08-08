@@ -182,9 +182,11 @@ Group points may sum to less than the question total. The difference is shown
 as `not automatically assessed`. They may not exceed the question total, and
 `pass_points` may not exceed automatically assessable points.
 
-Every test in a group must pass for the group to receive its points. A question
-passes when earned automatic points reach `pass_points`. A hurdle names multiple
-questions and a required minimum number of passed questions.
+Group points are divided equally among the group's test points. Each passing
+test earns its share; the group itself is marked passed only when every declared
+test passes. A question passes when earned automatic points reach
+`pass_points`. A hurdle names multiple questions and a required minimum number
+of passed questions.
 
 ## 6. Tests
 

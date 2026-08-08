@@ -126,6 +126,25 @@
               "path": "ledger.txt"
             }
           ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_013",
+            "ledger.txt",
+            "7"
+          ],
+          "expected_stdout": "solo=0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "fixtures": [
+            {
+              "source": "tests/solo.txt",
+              "path": "ledger.txt"
+            }
+          ],
+          "comparison": "exact"
         }
       ]
     }

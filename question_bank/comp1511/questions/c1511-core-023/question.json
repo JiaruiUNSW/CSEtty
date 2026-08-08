@@ -88,9 +88,19 @@
           "expected_stdout": "elapsed: 45 minutes\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_023"
+          ],
+          "stdin": "14 5 14 51\n",
+          "expected_stdout": "elapsed: 46 minutes\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

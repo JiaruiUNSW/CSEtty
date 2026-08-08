@@ -89,9 +89,19 @@
           "expected_stdout": "student: 77\ngain: 0\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_core_032"
+          ],
+          "stdin": "1\n77 40 41\n",
+          "expected_stdout": "student: 77\ngain: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }
   ]
 }
-

@@ -52,6 +52,9 @@ class QuestionBank:
     license: str
     allowed_tags: tuple[str, ...]
     allowed_slots: tuple[str, ...]
+    required_coverage_tags: tuple[str, ...]
+    difficulty_pattern: tuple[int, ...]
+    minimum_test_points: int
     questions: tuple[BankQuestion, ...]
 
     def stats(self) -> dict[str, Any]:
@@ -76,6 +79,9 @@ class QuestionBank:
             "by_difficulty": dict(sorted(by_difficulty.items())),
             "by_tag": dict(sorted(by_tag.items())),
             "by_slot": dict(sorted(by_slot.items())),
+            "required_coverage_tags": list(self.required_coverage_tags),
+            "difficulty_pattern": list(self.difficulty_pattern),
+            "minimum_test_points": self.minimum_test_points,
         }
 
 
@@ -127,9 +133,7 @@ _BLUEPRINTS: dict[str, tuple[BlueprintSlot, ...]] = {
 }
 
 
-def _required(
-    mapping: Mapping[str, Any], key: str, expected: type[Any], *, context: str
-) -> Any:
+def _required(mapping: Mapping[str, Any], key: str, expected: type[Any], *, context: str) -> Any:
     if key not in mapping:
         raise ValidationError(f"{context}: missing required field {key!r}")
     value = mapping[key]
@@ -160,7 +164,12 @@ def _read_structured_markdown(path: Path, headings: Sequence[str], *, context: s
 
 
 def _load_bank_question(
-    path: Path, *, index: int, allowed_tags: set[str], allowed_slots: set[str]
+    path: Path,
+    *,
+    index: int,
+    allowed_tags: set[str],
+    allowed_slots: set[str],
+    minimum_test_points: int,
 ) -> BankQuestion:
     context = f"questions[{index}]"
     try:
@@ -190,10 +199,14 @@ def _load_bank_question(
         raise ValidationError(f"{context}.weeks must not contain duplicates")
     solution = _required(raw, "solution", str, context=context)
     question = _parse_question(raw, root=path.parent, index=index)
-    if question.id != path.parent.name:
+    test_point_count = sum(len(group.tests) for group in question.test_groups)
+    if test_point_count < minimum_test_points:
         raise ValidationError(
-            f"{context}.id must match its directory name {path.parent.name!r}"
+            f"{context} must declare at least {minimum_test_points} test points; "
+            f"found {test_point_count}"
         )
+    if question.id != path.parent.name:
+        raise ValidationError(f"{context}.id must match its directory name {path.parent.name!r}")
     if not question.tags:
         raise ValidationError(f"{context}.tags must contain at least one topic tag")
     unknown_tags = set(question.tags) - allowed_tags
@@ -255,12 +268,51 @@ def load_question_bank(path: Path | str) -> QuestionBank:
         raise ValidationError("bank.allowed_tags must not contain duplicates")
     if len(allowed_slots) != len(set(allowed_slots)):
         raise ValidationError("bank.allowed_slots must not contain duplicates")
+    coverage_value = raw.get("required_coverage_tags", [])
+    required_coverage_tags = _string_tuple(
+        coverage_value,
+        context="bank.required_coverage_tags",
+        nonempty=False,
+    )
+    if len(required_coverage_tags) != len(set(required_coverage_tags)):
+        raise ValidationError("bank.required_coverage_tags must not contain duplicates")
+    unknown_coverage_tags = set(required_coverage_tags) - set(allowed_tags)
+    if unknown_coverage_tags:
+        raise ValidationError(
+            f"bank.required_coverage_tags contains unknown values: {sorted(unknown_coverage_tags)}"
+        )
+
+    minimum_test_points_value = raw.get("minimum_test_points", 1)
+    if (
+        isinstance(minimum_test_points_value, bool)
+        or not isinstance(minimum_test_points_value, int)
+        or not 1 <= minimum_test_points_value <= 100
+    ):
+        raise ValidationError("bank.minimum_test_points must be an integer from 1 to 100")
+    minimum_test_points = minimum_test_points_value
+
+    pattern_value = raw.get("difficulty_pattern", [])
+    if not isinstance(pattern_value, list) or not all(
+        isinstance(level, int) and not isinstance(level, bool) and 1 <= level <= 5
+        for level in pattern_value
+    ):
+        raise ValidationError("bank.difficulty_pattern must contain integers from 1 to 5")
+    difficulty_pattern = tuple(pattern_value)
+    if difficulty_pattern:
+        if len(difficulty_pattern) != len(_BLUEPRINTS[profile]):
+            raise ValidationError(
+                "bank.difficulty_pattern must contain one level for every blueprint position"
+            )
+        if tuple(sorted(difficulty_pattern)) != difficulty_pattern:
+            raise ValidationError("bank.difficulty_pattern must be non-decreasing")
+        if len(set(difficulty_pattern)) < 3:
+            raise ValidationError(
+                "bank.difficulty_pattern must use at least three difficulty levels"
+            )
     required_slots = {slot.bank_slot for slot in _BLUEPRINTS[profile]}
     if not required_slots.issubset(allowed_slots):
         missing_slots = sorted(required_slots - set(allowed_slots))
-        raise ValidationError(
-            f"bank.allowed_slots is missing blueprint slots: {missing_slots}"
-        )
+        raise ValidationError(f"bank.allowed_slots is missing blueprint slots: {missing_slots}")
     question_paths = sorted((root / "questions").glob("*/question.json"))
     if not question_paths:
         raise ValidationError("question bank contains no questions")
@@ -270,6 +322,7 @@ def load_question_bank(path: Path | str) -> QuestionBank:
             index=index,
             allowed_tags=set(allowed_tags),
             allowed_slots=set(allowed_slots),
+            minimum_test_points=minimum_test_points,
         )
         for index, question_path in enumerate(question_paths)
     )
@@ -291,35 +344,102 @@ def load_question_bank(path: Path | str) -> QuestionBank:
         license=_required(raw, "license", str, context="bank"),
         allowed_tags=allowed_tags,
         allowed_slots=allowed_slots,
+        required_coverage_tags=required_coverage_tags,
+        difficulty_pattern=difficulty_pattern,
+        minimum_test_points=minimum_test_points,
         questions=questions,
     )
 
 
 def select_exam(bank: QuestionBank, *, seed: int) -> tuple[tuple[BlueprintSlot, BankQuestion], ...]:
     generator = random.Random(seed)
-    selected_ids: set[str] = set()
-    selected: list[tuple[BlueprintSlot, BankQuestion]] = []
-    for slot in _BLUEPRINTS[bank.profile]:
-        candidates = [
+    blueprint = _BLUEPRINTS[bank.profile]
+    candidate_lists: list[tuple[BankQuestion, ...]] = []
+    for index, slot in enumerate(blueprint):
+        required_difficulty = bank.difficulty_pattern[index] if bank.difficulty_pattern else None
+        candidates = tuple(
             item
             for item in bank.questions
             if slot.bank_slot in item.slots
             and item.question.points == slot.points
-            and item.question.id not in selected_ids
+            and (required_difficulty is None or item.question.difficulty == required_difficulty)
             and (slot.require_track is None or item.question.track == slot.require_track)
             and (
                 not slot.require_any_tags
                 or bool(set(slot.require_any_tags).intersection(item.question.tags))
             )
-        ]
+        )
         if not candidates:
+            detail = (
+                f", difficulty={required_difficulty}" if required_difficulty is not None else ""
+            )
             raise ValidationError(
                 f"question bank cannot fill {slot.id}: slot={slot.bank_slot}, "
-                f"points={slot.points}, tags={list(slot.require_any_tags)}"
+                f"points={slot.points}, tags={list(slot.require_any_tags)}{detail}"
             )
-        chosen = generator.choice(sorted(candidates, key=lambda item: item.question.id))
-        selected_ids.add(chosen.question.id)
-        selected.append((slot, chosen))
+        candidate_lists.append(candidates)
+
+    required_tags = frozenset(bank.required_coverage_tags)
+    suffix_tags: list[frozenset[str]] = [frozenset() for _ in range(len(blueprint) + 1)]
+    for index in range(len(blueprint) - 1, -1, -1):
+        available_here = frozenset(
+            tag for item in candidate_lists[index] for tag in item.question.tags
+        )
+        suffix_tags[index] = suffix_tags[index + 1] | available_here
+    unavailable = required_tags - suffix_tags[0]
+    if unavailable:
+        raise ValidationError(f"question bank cannot cover required tags: {sorted(unavailable)}")
+
+    random_keys = {
+        (index, item.question.id): generator.random()
+        for index, candidates in enumerate(candidate_lists)
+        for item in candidates
+    }
+    selected: list[tuple[BlueprintSlot, BankQuestion]] = []
+    selected_ids: set[str] = set()
+    dead_states: set[tuple[int, frozenset[str], frozenset[str]]] = set()
+
+    def search(index: int, covered: frozenset[str]) -> bool:
+        missing = required_tags - covered
+        if missing - suffix_tags[index]:
+            return False
+        if index == len(blueprint):
+            return not missing
+        future_ids = frozenset(
+            item.question.id
+            for candidates in candidate_lists[index:]
+            for item in candidates
+            if item.question.id in selected_ids
+        )
+        state = (index, covered & required_tags, future_ids)
+        if state in dead_states:
+            return False
+
+        candidates = [
+            item for item in candidate_lists[index] if item.question.id not in selected_ids
+        ]
+        candidates.sort(
+            key=lambda item: (
+                -len(missing.intersection(item.question.tags)),
+                random_keys[(index, item.question.id)],
+                item.question.id,
+            )
+        )
+        slot = blueprint[index]
+        for item in candidates:
+            selected.append((slot, item))
+            selected_ids.add(item.question.id)
+            if search(index + 1, covered | frozenset(item.question.tags)):
+                return True
+            selected_ids.remove(item.question.id)
+            selected.pop()
+        dead_states.add(state)
+        return False
+
+    if not search(0, frozenset()):
+        raise ValidationError(
+            "question bank cannot satisfy its coverage, uniqueness, and difficulty constraints"
+        )
     return tuple(selected)
 
 
@@ -556,8 +676,7 @@ def build_verification_pack(
         "",
     ]
     paper_lines.extend(
-        f"- **{item.question.id} — {item.question.title}**"
-        for item in bank.questions
+        f"- **{item.question.id} — {item.question.title}**" for item in bank.questions
     )
     paper = destination / "paper" / "index.md"
     paper.parent.mkdir(parents=True, exist_ok=True)

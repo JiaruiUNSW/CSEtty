@@ -1,17 +1,168 @@
 {
-  "schema_version": 1, "id": "c1521-fs-018", "title": "Summarise directory extensions", "kind": "c_program",
-  "difficulty": 4, "track": "challenge", "tags": ["directories", "file-metadata"], "weeks": [8, 9], "slots": ["advanced_systems"],
-  "estimated_minutes": 38, "points": 10, "pass_points": 4, "prompt": "prompt.md", "solution": "solution.md",
-  "starter_files": ["starter/c1521_fs_018.c"], "submission_files": ["c1521_fs_018.c"],
-  "build": {"argv": ["dcc", "-Werror", "c1521_fs_018.c", "-o", "c1521_fs_018"]},
+  "schema_version": 1,
+  "id": "c1521-fs-018",
+  "title": "Summarise directory extensions",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "directories",
+    "file-metadata"
+  ],
+  "weeks": [
+    8,
+    9
+  ],
+  "slots": [
+    "advanced_systems"
+  ],
+  "estimated_minutes": 38,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_fs_018.c"
+  ],
+  "submission_files": [
+    "c1521_fs_018.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1521_fs_018.c",
+      "-o",
+      "c1521_fs_018"
+    ]
+  },
   "test_groups": [
-    {"id": "public", "visibility": "public", "points": 4, "tests": [
-      {"id": "two-extensions", "argv": ["./c1521_fs_018", "scan"], "expected_stdout": "c 2 7\ntxt 1 2\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/aa.txt", "path": "scan/a.c"}, {"source": "tests/bbb.txt", "path": "scan/b.c"}, {"source": "tests/z.txt", "path": "scan/note.txt"}]},
-      {"id": "no-extension", "argv": ["./c1521_fs_018", "scan"], "expected_stdout": "[none] 2 5\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/aa.txt", "path": "scan/README"}, {"source": "tests/z.txt", "path": "scan/.env"}]}
-    ]},
-    {"id": "marking", "visibility": "after_finish", "points": 6, "tests": [
-      {"id": "last-dot", "argv": ["./c1521_fs_018", "scan"], "expected_stdout": "gz 2 7\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/aa.txt", "path": "scan/a.tar.gz"}, {"source": "tests/bbb.txt", "path": "scan/b.gz"}]},
-      {"id": "sorted-groups", "argv": ["./c1521_fs_018", "scan"], "expected_stdout": "[none] 1 2\na 1 3\nz 1 4\n", "expected_stderr": "", "expected_exit": 0, "fixtures": [{"source": "tests/z.txt", "path": "scan/plain"}, {"source": "tests/aa.txt", "path": "scan/x.a"}, {"source": "tests/bbb.txt", "path": "scan/x.z"}]}
-    ]}
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "two-extensions",
+          "argv": [
+            "./c1521_fs_018",
+            "scan"
+          ],
+          "expected_stdout": "c 2 7\ntxt 1 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/aa.txt",
+              "path": "scan/a.c"
+            },
+            {
+              "source": "tests/bbb.txt",
+              "path": "scan/b.c"
+            },
+            {
+              "source": "tests/z.txt",
+              "path": "scan/note.txt"
+            }
+          ]
+        },
+        {
+          "id": "no-extension",
+          "argv": [
+            "./c1521_fs_018",
+            "scan"
+          ],
+          "expected_stdout": "[none] 2 5\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/aa.txt",
+              "path": "scan/README"
+            },
+            {
+              "source": "tests/z.txt",
+              "path": "scan/.env"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "last-dot",
+          "argv": [
+            "./c1521_fs_018",
+            "scan"
+          ],
+          "expected_stdout": "gz 2 7\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/aa.txt",
+              "path": "scan/a.tar.gz"
+            },
+            {
+              "source": "tests/bbb.txt",
+              "path": "scan/b.gz"
+            }
+          ]
+        },
+        {
+          "id": "sorted-groups",
+          "argv": [
+            "./c1521_fs_018",
+            "scan"
+          ],
+          "expected_stdout": "[none] 1 2\na 1 3\nz 1 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/z.txt",
+              "path": "scan/plain"
+            },
+            {
+              "source": "tests/aa.txt",
+              "path": "scan/x.a"
+            },
+            {
+              "source": "tests/bbb.txt",
+              "path": "scan/x.z"
+            }
+          ]
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_fs_018",
+            "scan"
+          ],
+          "expected_stdout": "[none] 1 2\na 1 3\nz 1 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "fixtures": [
+            {
+              "source": "tests/extended-edge-1-1.txt",
+              "path": "scan/plain"
+            },
+            {
+              "source": "tests/aa.txt",
+              "path": "scan/x.a"
+            },
+            {
+              "source": "tests/bbb.txt",
+              "path": "scan/x.z"
+            }
+          ],
+          "comparison": "exact"
+        }
+      ]
+    }
   ]
 }

@@ -102,6 +102,20 @@
           "expected_stderr": "",
           "expected_exit": 0,
           "timeout_ms": 3000
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1521_conc_007",
+            "0",
+            "0",
+            "1"
+          ],
+          "expected_stdout": "status 0 count=2\nstatus 1 count=1\nchildren=3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000,
+          "comparison": "exact"
         }
       ]
     }

@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "id": "c1521-unicode-003",
+  "title": "UTF-8 Continuation Byte Count",
+  "kind": "c_program",
+  "difficulty": 3,
+  "track": "normal",
+  "tags": [
+    "unicode",
+    "bitwise",
+    "integer-representation"
+  ],
+  "weeks": [
+    5,
+    6
+  ],
+  "slots": [
+    "unicode"
+  ],
+  "estimated_minutes": 29,
+  "points": 10,
+  "pass_points": 4,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1521_unicode_003.c"
+  ],
+  "submission_files": [
+    "c1521_unicode_003.c"
+  ],
+  "build": {
+    "argv": [
+      "gcc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "c1521_unicode_003.c",
+      "-o",
+      "c1521_unicode_003"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 4,
+      "tests": [
+        {
+          "id": "three-byte",
+          "argv": [
+            "./c1521_unicode_003"
+          ],
+          "stdin": "000020ac\n",
+          "expected_stdout": "result: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "ascii",
+          "argv": [
+            "./c1521_unicode_003"
+          ],
+          "stdin": "00000041\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "two-byte",
+          "argv": [
+            "./c1521_unicode_003"
+          ],
+          "stdin": "000000e9\n",
+          "expected_stdout": "result: 1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "four-byte",
+          "argv": [
+            "./c1521_unicode_003"
+          ],
+          "stdin": "0001f642\n",
+          "expected_stdout": "result: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        },
+        {
+          "id": "invalid",
+          "argv": [
+            "./c1521_unicode_003"
+          ],
+          "stdin": "0000d800\n",
+          "expected_stdout": "result: -1\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "timeout_ms": 3000
+        }
+      ]
+    }
+  ]
+}

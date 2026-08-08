@@ -52,6 +52,15 @@
   pass with Docker Desktop/WSL2 and VS Code, including both full 75-question
   banks, true read-only reading pages, explicit-finish and timed-expiry reports,
   Windows process probes, and zero-delta cleanup.
+- Expands both original question banks from 75 to 150 questions (300 total),
+  with new array, linked-list, text, grid, record, MIPS, bitwise, Unicode,
+  file/directory, thread, and process/pipe scenarios.
+- Requires at least five distinct test points per bundled question and adds
+  step-by-step worked examples to every solution.
+- Makes random paper selection jointly enforce complete topic-tag coverage and
+  a non-decreasing, multi-level difficulty pattern.
+- Awards automatic marks proportionally per passing test point while retaining
+  the all-tests-pass status for each group.
 
 ## 0.1.0a1 — 2026-08-06
 

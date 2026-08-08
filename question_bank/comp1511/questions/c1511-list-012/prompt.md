@@ -1,0 +1,33 @@
+# Chain Endpoint Difference
+
+## Background
+
+A linked chain stores readings in arrival order. The caller owns the nodes; your metric must inspect them without losing the head or leaking memory in the supplied harness.
+
+## Requirements
+
+Complete `solve`. The harness converts every command-line argument to one list node, calls your function, prints `result: X`, and frees the chain. With no arguments the list is empty.
+
+**Exact rule.** Return the absolute difference between the first and last node values, or 0 for an empty list.
+
+Submit `c1511_list_012.c`. Your program must not print prompts or explanatory text.
+
+## Examples
+
+Command arguments: `3 -1 -1 4 0 -2`
+
+Input:
+
+```text
+(empty)
+```
+
+Output:
+
+```text
+result: 5
+```
+
+## Implementation notes
+
+Do not change the harness or print inside `solve`. Preserve every `next` link. Recursive variants should give the empty-list base case before accessing a node.

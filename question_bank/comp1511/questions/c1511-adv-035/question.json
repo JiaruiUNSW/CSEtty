@@ -91,6 +91,17 @@
           "expected_stdout": "RESET x\nMISSING x\nMISSING x\n",
           "expected_stderr": "",
           "expected_exit": 0
+        },
+        {
+          "id": "extended-edge",
+          "argv": [
+            "./c1511_adv_035"
+          ],
+          "stdin": "READ x 10\nRESET x\nSTATS x\nRESET x\nEND\n",
+          "expected_stdout": "RESET x\nMISSING x\nMISSING x\n",
+          "expected_stderr": "",
+          "expected_exit": 0,
+          "comparison": "exact"
         }
       ]
     }

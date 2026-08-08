@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "id": "c1511-grid-004",
+  "title": "Horizontal Mirror Mismatches",
+  "kind": "c_program",
+  "difficulty": 4,
+  "track": "challenge",
+  "tags": [
+    "arrays-2d",
+    "arrays-1d",
+    "loops",
+    "functions",
+    "testing"
+  ],
+  "weeks": [
+    4,
+    5
+  ],
+  "slots": [
+    "medium"
+  ],
+  "estimated_minutes": 38,
+  "points": 11,
+  "pass_points": 5,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_grid_004.c"
+  ],
+  "submission_files": [
+    "c1511_grid_004.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_grid_004.c",
+      "-o",
+      "c1511_grid_004"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 5,
+      "tests": [
+        {
+          "id": "rectangle",
+          "argv": [
+            "./c1511_grid_004"
+          ],
+          "stdin": "2 3\n1 2 3\n4 5 6\n",
+          "expected_stdout": "result: 2\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1511_grid_004"
+          ],
+          "stdin": "0 0\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 6,
+      "tests": [
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_grid_004"
+          ],
+          "stdin": "1 1\n5\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "signed",
+          "argv": [
+            "./c1511_grid_004"
+          ],
+          "stdin": "3 3\n1 -2 3\n4 0 -6\n7 8 9\n",
+          "expected_stdout": "result: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ties",
+          "argv": [
+            "./c1511_grid_004"
+          ],
+          "stdin": "2 2\n2 2\n2 2\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}

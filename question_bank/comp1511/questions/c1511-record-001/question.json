@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "id": "c1511-record-001",
+  "title": "First Highest Lab Batch",
+  "kind": "c_program",
+  "difficulty": 2,
+  "track": "normal",
+  "tags": [
+    "structs",
+    "arrays-1d",
+    "io",
+    "loops",
+    "functions"
+  ],
+  "weeks": [
+    4,
+    5
+  ],
+  "slots": [
+    "short"
+  ],
+  "estimated_minutes": 22,
+  "points": 5,
+  "pass_points": 2,
+  "prompt": "prompt.md",
+  "solution": "solution.md",
+  "starter_files": [
+    "starter/c1511_record_001.c"
+  ],
+  "submission_files": [
+    "c1511_record_001.c"
+  ],
+  "build": {
+    "argv": [
+      "dcc",
+      "-Werror",
+      "c1511_record_001.c",
+      "-o",
+      "c1511_record_001"
+    ]
+  },
+  "test_groups": [
+    {
+      "id": "public",
+      "visibility": "public",
+      "points": 2,
+      "tests": [
+        {
+          "id": "mixed",
+          "argv": [
+            "./c1511_record_001"
+          ],
+          "stdin": "4\na 3\nb -1\nc 3\nd 8\n",
+          "expected_stdout": "result: 3\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "empty",
+          "argv": [
+            "./c1511_record_001"
+          ],
+          "stdin": "0\n",
+          "expected_stdout": "result: -1\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    },
+    {
+      "id": "marking",
+      "visibility": "after_finish",
+      "points": 3,
+      "tests": [
+        {
+          "id": "single",
+          "argv": [
+            "./c1511_record_001"
+          ],
+          "stdin": "1\na 5\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ordered",
+          "argv": [
+            "./c1511_record_001"
+          ],
+          "stdin": "5\na 1\nb 2\nc 3\nd 4\ne 5\n",
+          "expected_stdout": "result: 4\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        },
+        {
+          "id": "ties",
+          "argv": [
+            "./c1511_record_001"
+          ],
+          "stdin": "4\na 7\nb 7\nc 2\nd 2\n",
+          "expected_stdout": "result: 0\n",
+          "expected_stderr": "",
+          "expected_exit": 0
+        }
+      ]
+    }
+  ]
+}
