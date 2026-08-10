@@ -12,9 +12,9 @@ from csetty.docker_runtime import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_VERSION = "0.1.1"
-EXPECTED_COMMIT = "33410078667ad67942c6700d73411fc31be00c8f"
-EXPECTED_PACKAGE_TREE_SHA256 = "2f96c71a9c7384327bd89d9addc055976183ba8b58b5d0597fe3a10d8800fdcb"
+EXPECTED_VERSION = "0.1.2"
+EXPECTED_COMMIT = "dd476ec4613e32da056746345a78d9f2b6dc7dd1"
+EXPECTED_PACKAGE_TREE_SHA256 = "f4b0f5ae9469ae500d39a2308d5bbebd72ff092f9406acc8b539b2892c3c1a46"
 
 
 def test_mips_engine_is_an_external_release_with_pinned_source_provenance() -> None:
@@ -22,11 +22,11 @@ def test_mips_engine_is_an_external_release_with_pinned_source_provenance() -> N
     lock = tomllib.loads((ROOT / "toolchains.lock").read_text(encoding="utf-8"))
     requirements = project["project"]["dependencies"]
 
-    assert "csetty-mips==0.1.1" in requirements
+    assert "csetty-mips==0.1.2" in requirements
     assert lock["csetty_mips"] == {
         "version": EXPECTED_VERSION,
         "source": "https://github.com/JiaruiUNSW/CSEtty-MIPS.git",
-        "tag": "v0.1.1",
+        "tag": "v0.1.2",
         "commit": EXPECTED_COMMIT,
         "package_tree_sha256": EXPECTED_PACKAGE_TREE_SHA256,
         "license": "MPL-2.0",

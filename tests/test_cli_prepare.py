@@ -53,7 +53,7 @@ def test_prepare_comp1521_uses_local_engine_without_upstream_source(
     assert cli._prepare(argparse.Namespace(profile="comp1521", mipsy_source=None)) == 0
     record = json.loads((_paths.cache / "mipsy.json").read_text(encoding="utf-8"))
     assert record == {
-        "course_engine": {"bundled": True, "name": "csetty-mips", "version": "0.1.1"},
+        "course_engine": {"bundled": True, "name": "csetty-mips", "version": "0.1.2"},
         "schema_version": 2,
         "upstream_oracle": None,
     }

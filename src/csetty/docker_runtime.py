@@ -24,8 +24,8 @@ from .util import atomic_write, canonical_json, resolve_under, safe_relative_pat
 
 PINNED_MIPSY_ORACLE_COMMIT = "61f96b38626c30c2ead7925486304f163ec56b2b"
 CSETTY_MIPS_DISTRIBUTION = "csetty-mips"
-CSETTY_MIPS_VERSION = "0.1.1"
-CSETTY_MIPS_PACKAGE_TREE_SHA256 = "2f96c71a9c7384327bd89d9addc055976183ba8b58b5d0597fe3a10d8800fdcb"
+CSETTY_MIPS_VERSION = "0.1.2"
+CSETTY_MIPS_PACKAGE_TREE_SHA256 = "f4b0f5ae9469ae500d39a2308d5bbebd72ff092f9406acc8b539b2892c3c1a46"
 
 
 @dataclass(frozen=True)

@@ -80,7 +80,7 @@ Python SBOM. The local DCC corresponding-source verification copy must not be
 listed in `SHA256SUMS` or attached to the GitHub Release.
 
 The COMP1521 multi-architecture build must identify
-`io.csetty.mips.engine=csetty-mips`, version `0.1.1`, and license `MPL-2.0`.
+`io.csetty.mips.engine=csetty-mips`, version `0.1.2`, and license `MPL-2.0`.
 An upstream comparison executable or checkout is never a release artifact.
 
 ## Public alpha gate

@@ -20,11 +20,11 @@ comp1511_extensions = ["ms-vscode.cpptools"]
 comp1521_extensions = ["ms-vscode.cpptools", "xavc.xavc-mipsy-features"]
 
 [csetty_mips]
-version = "0.1.1"
+version = "0.1.2"
 source = "https://github.com/JiaruiUNSW/CSEtty-MIPS.git"
-tag = "v0.1.1"
-commit = "33410078667ad67942c6700d73411fc31be00c8f"
-package_tree_sha256 = "2f96c71a9c7384327bd89d9addc055976183ba8b58b5d0597fe3a10d8800fdcb"
+tag = "v0.1.2"
+commit = "dd476ec4613e32da056746345a78d9f2b6dc7dd1"
+package_tree_sha256 = "f4b0f5ae9469ae500d39a2308d5bbebd72ff092f9406acc8b539b2892c3c1a46"
 license = "MPL-2.0"
 entrypoint = "python3 -m csetty_mips"
 

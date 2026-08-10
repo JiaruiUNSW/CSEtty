@@ -3,9 +3,9 @@
 CSEExamTTY consumes `csetty-mips` as an independently released dependency:
 
 - source: <https://github.com/JiaruiUNSW/CSEtty-MIPS>
-- PyPI: <https://pypi.org/project/csetty-mips/0.1.1/>
-- package version: `0.1.1`
-- Git commit: `33410078667ad67942c6700d73411fc31be00c8f`
+- PyPI: <https://pypi.org/project/csetty-mips/0.1.2/>
+- package version: `0.1.2`
+- Git commit: `dd476ec4613e32da056746345a78d9f2b6dc7dd1`
 - source license: Mozilla Public License 2.0 (`MPL-2.0`)
 
 `pyproject.toml` pins the exact PyPI version; `toolchains.lock`,

@@ -164,7 +164,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "csetty-mips", specifier = "==0.1.1" },
+    { name = "csetty-mips", specifier = "==0.1.2" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "platformdirs", specifier = ">=4.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
@@ -175,11 +175,11 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "csetty-mips"
-version = "0.1.1"
+version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/73/c6/a35004e4558b547127e3e64456d69559a7a31cb2855fb5b3310356c2a8fe/csetty_mips-0.1.1.tar.gz", hash = "sha256:ed99f6c01b68bf78fc14c78c3ac2bf2d4f673d7b74c486707a51391f5809de3a", size = 63536, upload-time = "2026-08-06T04:30:54.851Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8d/63/9fb3004f83a0f9fbfb41657a192b52ce07a5c1ff80bd27fa868f0e9de717/csetty_mips-0.1.2.tar.gz", hash = "sha256:dd28e38f5eeb41f12b6930b07019638de3a8f2b8e4c380c578b427a1bf15ae9f", size = 65240, upload-time = "2026-08-10T14:30:08.763Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/58/08/79eaff605f794a3ab9b0027a027435ed006847251991ac9a11f1782dda00/csetty_mips-0.1.1-py3-none-any.whl", hash = "sha256:0d813f6fca692f5d0ea4829b7c2f25147bf4c8f4e6c5844fa1eb8aacf10f0d5c", size = 52223, upload-time = "2026-08-06T04:30:53.496Z" },
+    { url = "https://files.pythonhosted.org/packages/27/0e/91a7977566650fdee900d1d5fd226e8b0f3e32eb22a9e03f84c77ad93ae7/csetty_mips-0.1.2-py3-none-any.whl", hash = "sha256:bf0192a74fbd8951a553395c3e4ef2c3328f9e482f038ef9167e87ce7a6ac657", size = 52375, upload-time = "2026-08-10T14:30:07.532Z" },
 ]
 
 [[package]]

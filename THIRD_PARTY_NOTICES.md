@@ -36,9 +36,9 @@ the full GPLv3 license text installed in the image.
 
 - Project: csetty-mips
 - Source: <https://github.com/JiaruiUNSW/CSEtty-MIPS>
-- Distribution: <https://pypi.org/project/csetty-mips/0.1.1/>
-- Version: `0.1.1`
-- Pinned commit: `33410078667ad67942c6700d73411fc31be00c8f`
+- Distribution: <https://pypi.org/project/csetty-mips/0.1.2/>
+- Version: `0.1.2`
+- Pinned commit: `dd476ec4613e32da056746345a78d9f2b6dc7dd1`
 - License: Mozilla Public License 2.0 (`MPL-2.0`)
 
 The COMP1521 image uses this separately released dependency. Its component

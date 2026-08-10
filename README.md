@@ -343,7 +343,7 @@ system, Python version, Docker version, and CSEExamTTY version in a
 ## COMP1521 MIPS support
 
 Installing CSEExamTTY also installs the independently implemented
-[`csetty-mips==0.1.1`](https://pypi.org/project/csetty-mips/0.1.1/) teaching
+[`csetty-mips==0.1.2`](https://pypi.org/project/csetty-mips/0.1.2/) teaching
 engine used by the COMP1521 image. No upstream mipsy source or binary is
 included. See the [integration note](docs/CSETTY_MIPS_INTEGRATION.md) and the
 [CSEtty-MIPS repository](https://github.com/JiaruiUNSW/CSEtty-MIPS) for its CLI,

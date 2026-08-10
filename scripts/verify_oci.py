@@ -136,7 +136,7 @@ def verify(path: Path, *, profile: str, role: str) -> None:
             if profile == "comp1521":
                 if labels.get("io.csetty.mips.engine") != "csetty-mips":
                     raise SystemExit(f"OCI {platform} has the wrong MIPS engine")
-                if labels.get("io.csetty.mips.version") != "0.1.1":
+                if labels.get("io.csetty.mips.version") != "0.1.2":
                     raise SystemExit(f"OCI {platform} has the wrong csetty-mips version")
                 if labels.get("io.csetty.mips.license") != "MPL-2.0":
                     raise SystemExit(f"OCI {platform} has the wrong csetty-mips license")

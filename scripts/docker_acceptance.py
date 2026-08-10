@@ -97,7 +97,7 @@ def _assert_inspect_boundary(container_name: str, profile: str) -> None:
         labels = config.get("Labels") or {}
         expected_labels = {
             "io.csetty.mips.engine": "csetty-mips",
-            "io.csetty.mips.version": "0.1.1",
+            "io.csetty.mips.version": "0.1.2",
             "io.csetty.mips.license": "MPL-2.0",
         }
         for key, value in expected_labels.items():
@@ -161,7 +161,7 @@ print('security boundary and legal payload: PASS')
 from pathlib import Path
 import csetty_mips
 
-assert csetty_mips.__version__ == '0.1.1'
+assert csetty_mips.__version__ == '0.1.2'
 assert str(Path(csetty_mips.__file__).resolve()).startswith('/opt/csetty/csetty_mips/')
 assert Path('/usr/share/doc/csetty-mips/NOTICE').is_file()
 assert Path('/usr/share/doc/csetty-mips/LICENSE').is_file()

@@ -85,6 +85,6 @@ RUN chmod 0755 /usr/local/bin/mipsy \
 USER student
 LABEL io.csetty.profile="comp1521" \
       io.csetty.mips.engine="csetty-mips" \
-      io.csetty.mips.version="0.1.1" \
-      io.csetty.mips.source="https://github.com/JiaruiUNSW/CSEtty-MIPS/tree/33410078667ad67942c6700d73411fc31be00c8f" \
+      io.csetty.mips.version="0.1.2" \
+      io.csetty.mips.source="https://github.com/JiaruiUNSW/CSEtty-MIPS/tree/dd476ec4613e32da056746345a78d9f2b6dc7dd1" \
       io.csetty.mips.license="MPL-2.0"
